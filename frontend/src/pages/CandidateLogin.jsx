@@ -2,17 +2,19 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
+import PublicHeader from '../components/PublicHeader'
 
 const CandidateLogin = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',
     password: '',
     rememberMe: false,
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -29,7 +31,7 @@ const CandidateLogin = () => {
 
     try {
       const response = await authService.login({
-        email: formData.email,
+        identifier: formData.identifier,
         password: formData.password,
       })
       login(response.data.user, response.data.token)
@@ -48,7 +50,8 @@ const CandidateLogin = () => {
 
   return (
     <div className="min-h-screen page-shell">
-      <div className="max-w-md mx-auto pt-20 px-4">
+      <PublicHeader />
+      <div className="max-w-md mx-auto pt-20 px-4 sm:px-6">
         <div className="glass-card p-10">
           <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
             Candidate Login
@@ -58,30 +61,68 @@ const CandidateLogin = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">Email or Phone</label>
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                name="identifier"
+                value={formData.identifier}
                 onChange={handleChange}
                 className="form-input"
+                placeholder="Enter email or phone number"
                 required
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group password-field">
               <label className="form-label">Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 className="form-input"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="password-toggle-button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20.5C7 20.5 2.73 17.28 1 12c.85-2.35 2.46-4.29 4.5-5.56" />
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                    <path d="M1 1l22 22" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <label className="flex items-center">
                 <input
                   type="checkbox"

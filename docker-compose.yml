@@ -7,10 +7,10 @@ services:
     container_name: kaamsekaaam-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: kaamsekaaam
-      MYSQL_USER: kaamuser
-      MYSQL_PASSWORD: kaampassword
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     ports:
       - '3306:3306'
     volumes:
