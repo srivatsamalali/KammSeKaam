@@ -93,20 +93,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen page-shell">
-      {/* Navigation */}
-      <nav className="glass px-4 py-4 mx-4 mt-4 rounded-3xl border border-white/70">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-sky-700">
-            kaamSeKaam - Admin
-          </h1>
-          <div className="space-x-4">
-            <span className="text-slate-700">{user?.email}</span>
-            <button onClick={logout} className="btn-secondary">
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      {/* Main Content */}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">

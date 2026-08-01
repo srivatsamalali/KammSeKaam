@@ -1,52 +1,19 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import PublicHeader from '../components/PublicHeader'
 
 const LandingPage = () => {
   return (
     <div className="min-h-screen page-shell">
-      {/* Navigation */}
-      <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center h-auto md:h-20">
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-3xl bg-gradient-to-br from-sky-500 to-sky-700 shadow-lg shadow-sky-200/50 flex items-center justify-center text-white font-bold">
-                K
-              </div>
-              <h1 className="text-2xl font-bold text-sky-700">kaamSeKaam</h1>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 md:gap-3">
-              <a href="#home" className="nav-link">
-                Home
-              </a>
-              <a href="#about" className="nav-link">
-                About
-              </a>
-              <a href="#services" className="nav-link">
-                Services
-              </a>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 md:gap-3">
-              <Link to="/candidate/login" className="nav-link">
-                Candidate Login
-              </Link>
-              <Link to="/recruiter/login" className="nav-link">
-                Recruiter Login
-              </Link>
-              <Link to="/admin/login" className="nav-link">
-                Admin Login
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PublicHeader />
 
       {/* Hero Section */}
       <section
         id="home"
         className="scroll-mt-28 min-h-[calc(100vh-7rem)] py-20"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="glass-card p-12 overflow-hidden">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="glass-card p-12 overflow-hidden fade-in">
             <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
               <div className="space-y-8">
                 <div className="inline-flex items-center gap-2 rounded-full bg-sky-100/80 px-4 py-2 text-sm text-sky-700 font-semibold">
@@ -58,8 +25,9 @@ const LandingPage = () => {
                     Connecting Talent with Opportunity
                   </h2>
                   <p className="section-subtitle mb-8">
-                    kaamSeKaam is your premier consultancy management portal
-                    connecting talented candidates with leading recruiters.
+                    Aston Recruitment is your premier consultancy management
+                    portal connecting talented candidates with leading
+                    recruiters.
                   </p>
                 </div>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -97,10 +65,10 @@ const LandingPage = () => {
 
       {/* About Section */}
       <section id="about" className="scroll-mt-28 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-slate-900">
-              About kaamSeKaam
+              About Aston Recruitment
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -137,38 +105,98 @@ const LandingPage = () => {
 
       {/* Services Section */}
       <section id="services" className="scroll-mt-28 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 glass-card p-10">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-slate-900">Our Services</h3>
+            <p className="text-slate-500 mt-3 max-w-2xl mx-auto">
+              Smart, polished features for candidates, recruiters, and admins
+              with premium experience across every step.
+            </p>
           </div>
-          <ul className="space-y-4 text-slate-600 max-w-2xl mx-auto">
-            <li className="flex items-center">
-              <span className="text-blue-600 mr-3">✓</span> Resume Management
-            </li>
-            <li className="flex items-center">
-              <span className="text-blue-600 mr-3">✓</span> Interview Scheduling
-            </li>
-            <li className="flex items-center">
-              <span className="text-blue-600 mr-3">✓</span> Video Conferencing
-              Integration
-            </li>
-            <li className="flex items-center">
-              <span className="text-blue-600 mr-3">✓</span> Email Notifications
-            </li>
-            <li className="flex items-center">
-              <span className="text-blue-600 mr-3">✓</span> Application Tracking
-            </li>
-            <li className="flex items-center">
-              <span className="text-blue-600 mr-3">✓</span> Skill Matching
-            </li>
-          </ul>
+          <div className="service-grid">
+            <div className="service-card fade-in">
+              <div className="service-icon">📄</div>
+              <h4 className="text-xl font-semibold text-slate-900 mb-3">
+                Resume Management
+              </h4>
+              <p className="text-slate-600">
+                Upload, store, and organize resumes with AI-ready matching for
+                the right job fit.
+              </p>
+            </div>
+            <div
+              className="service-card fade-in"
+              style={{ animationDelay: '100ms' }}
+            >
+              <div className="service-icon">📅</div>
+              <h4 className="text-xl font-semibold text-slate-900 mb-3">
+                Interview Scheduling
+              </h4>
+              <p className="text-slate-600">
+                Auto-sync interviews and availability so every meeting is booked
+                on time.
+              </p>
+            </div>
+            <div
+              className="service-card fade-in"
+              style={{ animationDelay: '200ms' }}
+            >
+              <div className="service-icon">💬</div>
+              <h4 className="text-xl font-semibold text-slate-900 mb-3">
+                Communication Hub
+              </h4>
+              <p className="text-slate-600">
+                Keep candidate and recruiter messages organized with status
+                updates and notifications.
+              </p>
+            </div>
+            <div
+              className="service-card fade-in"
+              style={{ animationDelay: '300ms' }}
+            >
+              <div className="service-icon">📈</div>
+              <h4 className="text-xl font-semibold text-slate-900 mb-3">
+                Application Tracking
+              </h4>
+              <p className="text-slate-600">
+                Track every application stage with clear progress cards and
+                recruiter insights.
+              </p>
+            </div>
+            <div
+              className="service-card fade-in"
+              style={{ animationDelay: '400ms' }}
+            >
+              <div className="service-icon">🔔</div>
+              <h4 className="text-xl font-semibold text-slate-900 mb-3">
+                Instant Alerts
+              </h4>
+              <p className="text-slate-600">
+                Receive immediate feedback and job match notifications so
+                nothing slips through.
+              </p>
+            </div>
+            <div
+              className="service-card fade-in"
+              style={{ animationDelay: '500ms' }}
+            >
+              <div className="service-icon">🎯</div>
+              <h4 className="text-xl font-semibold text-slate-900 mb-3">
+                Skill Matching
+              </h4>
+              <p className="text-slate-600">
+                Match candidate strengths to recruiter requirements using
+                intelligent skill scoring.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 glass-card p-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8 glass-card p-8">
             <div>
               <h5 className="font-bold mb-4">About</h5>
               <p className="text-gray-400 text-sm">
@@ -177,7 +205,9 @@ const LandingPage = () => {
             </div>
             <div>
               <h5 className="font-bold mb-4">Contact</h5>
-              <p className="text-gray-400 text-sm">support@kaamsekaaam.com</p>
+              <p className="text-gray-400 text-sm">
+                support@astonrecruitment.com
+              </p>
             </div>
             <div>
               <h5 className="font-bold mb-4">Legal</h5>
@@ -196,9 +226,17 @@ const LandingPage = () => {
               <h5 className="font-bold mb-4">Follow</h5>
               <p className="text-gray-400 text-sm">Social Media Links</p>
             </div>
+            <div>
+              <h5 className="font-bold mb-4">Contributors</h5>
+              <p className="text-gray-400 text-sm">
+                <Link to="/contributors" className="hover:text-white">
+                  Meet the team
+                </Link>
+              </p>
+            </div>
           </div>
           <div className="border-t border-slate-200 pt-8 text-center text-slate-500 text-sm">
-            <p>&copy; 2024 kaamSeKaam. All rights reserved.</p>
+            <p>&copy; 2026 Aston Recruitment. All rights reserved.</p>
           </div>
         </div>
       </footer>

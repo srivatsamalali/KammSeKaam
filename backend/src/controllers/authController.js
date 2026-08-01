@@ -1,14 +1,22 @@
 const { User, Candidate } = require('../models')
+const { Op } = require('sequelize')
 const { generateToken, generateResetToken } = require('../utils/tokenService')
 const { validatePassword, validateEmail } = require('../utils/validators')
 const { sendResetPasswordEmail } = require('../utils/emailService')
 
+const normalizePhone = (value) =>
+  value
+    ?.toString()
+    .replace(/\s+/g, '')
+    .replace(/[^0-9+]/g, '')
+
 const register = async (req, res) => {
   try {
-    const { email, password, confirmPassword, name } = req.body
+    const { email, phone, password, confirmPassword, name } = req.body
+    const normalizedPhone = normalizePhone(phone)
 
     // Validation
-    if (!email || !password || !confirmPassword || !name) {
+    if (!email || !normalizedPhone || !password || !confirmPassword || !name) {
       return res.status(400).json({ message: 'All fields are required' })
     }
 
@@ -27,15 +35,26 @@ const register = async (req, res) => {
       })
     }
 
-    // Check if email exists
-    const existingUser = await User.findOne({ where: { email } })
+    // Check if email or phone exists
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [{ email }, { phone: normalizedPhone }],
+      },
+    })
+
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' })
+      return res.status(400).json({
+        message:
+          existingUser.email === email
+            ? 'Email already exists'
+            : 'Phone number already exists',
+      })
     }
 
     // Create user
     const user = await User.create({
       email,
+      phone: normalizedPhone,
       password,
       role: 'CANDIDATE',
     })
@@ -44,6 +63,7 @@ const register = async (req, res) => {
     await Candidate.create({
       userId: user.id,
       name,
+      mobileNumber: normalizedPhone,
     })
 
     const token = generateToken(user)
@@ -63,16 +83,22 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { identifier, password } = req.body
+    const normalizedIdentifier = identifier?.toString().trim()
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' })
+    if (!normalizedIdentifier || !password) {
+      return res
+        .status(400)
+        .json({ message: 'Email/phone and password required' })
     }
 
-    const user = await User.findOne({ where: { email } })
+    const searchField = normalizedIdentifier.includes('@')
+      ? { email: normalizedIdentifier }
+      : { phone: normalizePhone(normalizedIdentifier) }
+    const user = await User.findOne({ where: searchField })
 
     if (!user) {
-      return res.status(401).json({ message: 'Email does not exist' })
+      return res.status(401).json({ message: 'User does not exist' })
     }
 
     const isPasswordValid = await user.comparePassword(password)

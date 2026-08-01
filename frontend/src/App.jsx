@@ -17,6 +17,7 @@ import RecruiterLogin from './pages/RecruiterLogin'
 import RecruiterDashboard from './pages/RecruiterDashboard'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import Contributors from './pages/Contributors'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -30,6 +31,7 @@ function AnimatedRoutes() {
         <Route path="/candidate/login" element={<CandidateLogin />} />
         <Route path="/recruiter/login" element={<RecruiterLogin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/contributors" element={<Contributors />} />
 
         {/* Protected Routes */}
         <Route
@@ -70,8 +72,8 @@ import './styles/index.css'
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-[#e9f4ff] text-slate-900">
-        <div className="max-w-7xl mx-auto p-6">
+      <div className="min-h-screen w-full bg-[#e9f4ff] text-slate-900">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
           <BrowserRouter>
             <AnimatedRoutes />
           </BrowserRouter>
