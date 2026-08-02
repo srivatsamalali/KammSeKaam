@@ -1,9 +1,34 @@
+const sequelize = require('../config/database')
 const { Recruiter, User, Candidate, Application } = require('../models')
 
 const getAllRecruiters = async (req, res) => {
   try {
+    // 1. Fetch all users with role RECRUITER
+    const recruiterUsers = await User.findAll({
+      where: { role: 'RECRUITER' },
+    })
+
+    // 2. Ensure each recruiter user has a matching Recruiter profile entry
+    for (const u of recruiterUsers) {
+      const existingProfile = await Recruiter.findOne({
+        where: { userId: u.id },
+      })
+      if (!existingProfile) {
+        const defaultName = u.email ? u.email.split('@')[0] : 'Recruiter'
+        await Recruiter.create({
+          userId: u.id,
+          name: defaultName,
+          mobileNumber: '',
+          address: '',
+          specialization: [],
+        })
+      }
+    }
+
+    // 3. Return all recruiter profiles with User attributes
     const recruiters = await Recruiter.findAll({
-      include: [{ model: User, attributes: ['email'] }],
+      include: [{ model: User, attributes: ['email', 'phone'] }],
+      order: [['createdAt', 'DESC']],
     })
 
     res.json(recruiters)
@@ -16,44 +41,73 @@ const getAllRecruiters = async (req, res) => {
 }
 
 const createRecruiter = async (req, res) => {
+  const transaction = await sequelize.transaction()
   try {
-    const { email, password, name, specialization } = req.body
+    const { email, password, name, specialization, mobileNumber, address } = req.body
 
     if (!email || !password || !name) {
+      await transaction.rollback()
       return res
         .status(400)
         .json({ message: 'Email, password, and name are required' })
     }
 
     // Check if email exists
-    const existingUser = await User.findOne({ where: { email } })
+    const existingUser = await User.findOne({
+      where: { email: email.trim() },
+      transaction,
+    })
     if (existingUser) {
+      await transaction.rollback()
       return res.status(400).json({ message: 'Email already exists' })
     }
 
     // Create user
-    const user = await User.create({
-      email,
-      password,
-      role: 'RECRUITER',
-    })
+    const user = await User.create(
+      {
+        email: email.trim(),
+        password,
+        role: 'RECRUITER',
+      },
+      { transaction },
+    )
+
+    // Parse specialization if string
+    let parsedSpecialization = []
+    if (Array.isArray(specialization)) {
+      parsedSpecialization = specialization
+    } else if (typeof specialization === 'string' && specialization.trim()) {
+      parsedSpecialization = specialization
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    }
 
     // Create recruiter profile
-    const recruiter = await Recruiter.create({
-      userId: user.id,
-      name,
-      specialization: specialization || [],
-    })
+    const recruiter = await Recruiter.create(
+      {
+        userId: user.id,
+        name: name.trim(),
+        mobileNumber: mobileNumber || '',
+        address: address || '',
+        specialization: parsedSpecialization,
+      },
+      { transaction },
+    )
+
+    await transaction.commit()
 
     res.status(201).json({
       message: 'Recruiter created successfully',
       recruiter,
     })
   } catch (error) {
+    await transaction.rollback()
     console.error('Create recruiter error:', error)
-    res
-      .status(500)
-      .json({ message: 'Error creating recruiter', error: error.message })
+    res.status(500).json({
+      message: error.message || 'Error creating recruiter',
+      error: error.message,
+    })
   }
 }
 

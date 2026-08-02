@@ -32,6 +32,18 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    phoneOtp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    phoneOtpExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    isPhoneVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

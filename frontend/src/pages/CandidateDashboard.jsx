@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import { candidateService } from '../services/api'
 
 const CandidateDashboard = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [editMode, setEditMode] = useState(false)
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout()
+      navigate('/candidate/login')
+    }
+  }
   const [formData, setFormData] = useState({
     name: '',
     dob: '',
@@ -80,6 +89,24 @@ const CandidateDashboard = () => {
 
   return (
     <div className="min-h-screen page-shell">
+      {/* Header with Logout */}
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+        <div className="w-full mx-auto px-4 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Candidate Dashboard
+            </h1>
+            <p className="text-sm text-gray-600">{user?.email}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="w-full mx-auto px-4 py-8">
         <div className="mb-6">

@@ -21,11 +21,13 @@ const Recruiter = sequelize.define('Recruiter', {
   },
   mobileNumber: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: '',
   },
   address: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: '',
   },
   specialization: {
     type: DataTypes.JSON,

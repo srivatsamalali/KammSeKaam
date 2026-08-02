@@ -226,14 +226,6 @@ const LandingPage = () => {
               <h5 className="font-bold mb-4">Follow</h5>
               <p className="text-gray-400 text-sm">Social Media Links</p>
             </div>
-            <div>
-              <h5 className="font-bold mb-4">Contributors</h5>
-              <p className="text-gray-400 text-sm">
-                <Link to="/contributors" className="hover:text-white">
-                  Meet the team
-                </Link>
-              </p>
-            </div>
           </div>
           <div className="border-t border-slate-200 pt-8 text-center text-slate-500 text-sm">
             <p>&copy; 2026 Aston Recruitment. All rights reserved.</p>

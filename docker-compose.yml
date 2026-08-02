@@ -7,10 +7,10 @@ services:
     container_name: kaamsekaaam-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: kaamsekaaam
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_USER: kaamuser
+      MYSQL_PASSWORD: kaampassword
     ports:
       - '3306:3306'
     volumes:
@@ -33,13 +33,18 @@ services:
       DB_USER: kaamuser
       DB_PASSWORD: kaampassword
       DB_NAME: kaamsekaaam
+      # DB_HOST: localhost
+      # DB_USER: root
+      # DB_PASSWORD: password
+      # DB_NAME: kaamsekaaam
+      DB_PORT: 3306
       PORT: 5000
       NODE_ENV: production
       JWT_SECRET: your_super_secret_jwt_key_change_this
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 587
-      SMTP_USER: your_email@gmail.com
-      SMTP_PASSWORD: your_app_password
+      SMTP_USER: astonrecruitment64@gmail.com
+      SMTP_PASSWORD: qwbd layp mrzy srci
       ADMIN_EMAIL: admin@kaamsekaaam.com
       ADMIN_PASSWORD_ENV: Admin@12345
       FRONTEND_URL: http://localhost:5173

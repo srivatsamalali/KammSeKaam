@@ -18,8 +18,13 @@ api.interceptors.request.use((config) => {
 export const authService = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  forgotPassword: (email, role) => api.post('/auth/forgot-password', { email, role }),
   resetPassword: (data) => api.post('/auth/reset-password', data),
+  verifyForgotPasswordOtp: (data) => api.post('/auth/verify-forgot-password-otp', data),
+  resetPasswordWithOtp: (data) => api.post('/auth/reset-password-otp', data),
+  sendOtp: (data) => api.post('/auth/send-otp', data),
+  verifyOtp: (data) => api.post('/auth/verify-otp', data),
+  resendOtp: (data) => api.post('/auth/resend-otp', data),
 }
 
 export const candidateService = {
