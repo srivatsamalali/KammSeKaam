@@ -21,11 +21,13 @@ const Candidate = sequelize.define('Candidate', {
   },
   mobileNumber: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: '',
   },
   address: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
+    defaultValue: '',
   },
   dob: {
     type: DataTypes.DATE,

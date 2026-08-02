@@ -26,7 +26,11 @@ const AdminLogin = () => {
     setLoading(true)
 
     try {
-      const response = await authService.login(formData)
+      const response = await authService.login({
+        identifier: formData.email,
+        email: formData.email,
+        password: formData.password,
+      })
 
       if (response.data.user.role !== 'ADMIN') {
         setErrors({ form: 'Invalid admin credentials' })

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import {
   recruiterService,
   applicationService,
@@ -8,6 +9,14 @@ import {
 
 const RecruiterDashboard = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout()
+      navigate('/recruiter/login')
+    }
+  }
   const [applications, setApplications] = useState([])
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
@@ -47,16 +56,41 @@ const RecruiterDashboard = () => {
     }
   }
 
+  const generateCalMeetLink = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    const gen = (len) =>
+      Array.from({ length: len }, () =>
+        chars[Math.floor(Math.random() * chars.length)],
+      ).join('')
+    const code = `${gen(3)}-${gen(4)}-${gen(3)}`
+    return `https://cal.com/aston-recruitment/interview-${code}`
+  }
+
+  const handleOpenScheduleForm = (app) => {
+    setSelectedApp(app)
+    const initialLink = scheduleData.googleMeetLink || generateCalMeetLink()
+    setScheduleData((prev) => ({
+      ...prev,
+      googleMeetLink: initialLink,
+    }))
+    setShowScheduleForm(true)
+  }
+
   const handleScheduleInterview = async (applicationId) => {
     try {
-      await applicationService.scheduleInterview(applicationId, scheduleData)
+      const finalLink = scheduleData.googleMeetLink?.trim() || generateCalMeetLink()
+      const payload = {
+        ...scheduleData,
+        googleMeetLink: finalLink,
+      }
+      await applicationService.scheduleInterview(applicationId, payload)
       setShowScheduleForm(false)
       setScheduleData({ interviewDate: '', googleMeetLink: '' })
       fetchApplications()
-      alert('Interview scheduled successfully')
+      alert('Interview scheduled successfully!')
     } catch (error) {
       console.error('Error scheduling interview:', error)
-      alert('Error scheduling interview')
+      alert(error.response?.data?.message || 'Error scheduling interview')
     }
   }
   const handleUpdateStatus = async (applicationId, status, rejectionReason) => {
@@ -108,6 +142,24 @@ const RecruiterDashboard = () => {
 
   return (
     <div className="min-h-screen page-shell">
+      {/* Header with Logout */}
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+        <div className="w-full mx-auto px-4 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Recruiter Dashboard
+            </h1>
+            <p className="text-sm text-gray-600">{user?.email}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="w-full mx-auto px-4 py-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
@@ -265,8 +317,11 @@ const RecruiterDashboard = () => {
                       <>
                         <button
                           onClick={() => {
-                            setSelectedApp(app)
-                            setShowScheduleForm(!showScheduleForm)
+                            if (showScheduleForm && selectedApp?.id === app.id) {
+                              setShowScheduleForm(false)
+                            } else {
+                              handleOpenScheduleForm(app)
+                            }
                           }}
                           className="btn-primary"
                         >
@@ -311,50 +366,79 @@ const RecruiterDashboard = () => {
                   </div>
 
                   {showScheduleForm && selectedApp?.id === app.id && (
-                    <div className="mt-4 section-panel p-4">
-                      <div className="form-group">
-                        <label className="form-label">
+                    <div className="mt-4 section-panel p-4 rounded-xl border border-blue-200 bg-blue-50/50">
+                      <div className="form-group mb-4">
+                        <label className="form-label font-semibold text-slate-800">
                           Interview Date & Time
                         </label>
                         <input
                           type="datetime-local"
                           value={scheduleData.interviewDate}
-                          onChange={(e) =>
-                            setScheduleData({
-                              ...scheduleData,
-                              interviewDate: e.target.value,
-                            })
-                          }
+                          onChange={(e) => {
+                            const newDate = e.target.value
+                            setScheduleData((prev) => ({
+                              ...prev,
+                              interviewDate: newDate,
+                              googleMeetLink: prev.googleMeetLink || generateCalMeetLink(),
+                            }))
+                          }}
                           className="form-input"
                         />
                       </div>
-                      <div className="form-group">
-                        <label className="form-label">Google Meet Link</label>
-                        <input
-                          type="url"
-                          value={scheduleData.googleMeetLink}
-                          onChange={(e) =>
-                            setScheduleData({
-                              ...scheduleData,
-                              googleMeetLink: e.target.value,
-                            })
-                          }
-                          className="form-input"
-                          placeholder="https://meet.google.com/..."
-                        />
+                      <div className="form-group mb-4">
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="form-label font-semibold text-slate-800">
+                            Interview Meeting Link
+                          </label>
+                          <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                            📅 Cal.com Auto-Link
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="url"
+                            value={scheduleData.googleMeetLink}
+                            onChange={(e) =>
+                              setScheduleData({
+                                ...scheduleData,
+                                googleMeetLink: e.target.value,
+                              })
+                            }
+                            className="form-input flex-1"
+                            placeholder="https://cal.com/aston-recruitment/interview-..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setScheduleData((prev) => ({
+                                ...prev,
+                                googleMeetLink: generateCalMeetLink(),
+                              }))
+                            }
+                            className="px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors whitespace-nowrap"
+                            title="Generate new random Cal.com link"
+                          >
+                            ⚡ New Cal.com Link
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Auto-generated Cal.com link or paste your custom meeting URL.
+                        </p>
                       </div>
-                      <button
-                        onClick={() => handleScheduleInterview(app.id)}
-                        className="btn-primary mr-2"
-                      >
-                        Confirm Schedule
-                      </button>
-                      <button
-                        onClick={() => setShowScheduleForm(false)}
-                        className="btn-secondary"
-                      >
-                        Cancel
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleScheduleInterview(app.id)}
+                          className="btn-primary"
+                        >
+                          Confirm Schedule
+                        </button>
+                        <button
+                          onClick={() => setShowScheduleForm(false)}
+                          className="btn-secondary"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

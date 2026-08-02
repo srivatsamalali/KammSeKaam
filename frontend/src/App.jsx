@@ -12,12 +12,12 @@ import ProtectedRoute from './components/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
 import CandidateRegister from './pages/CandidateRegister'
 import CandidateLogin from './pages/CandidateLogin'
+import ForgotPassword from './pages/ForgotPassword'
 import CandidateDashboard from './pages/CandidateDashboard'
 import RecruiterLogin from './pages/RecruiterLogin'
 import RecruiterDashboard from './pages/RecruiterDashboard'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
-import Contributors from './pages/Contributors'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -29,9 +29,9 @@ function AnimatedRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/candidate/register" element={<CandidateRegister />} />
         <Route path="/candidate/login" element={<CandidateLogin />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/recruiter/login" element={<RecruiterLogin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/contributors" element={<Contributors />} />
 
         {/* Protected Routes */}
         <Route

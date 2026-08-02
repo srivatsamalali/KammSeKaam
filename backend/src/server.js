@@ -110,8 +110,8 @@ const ensureAdminUser = async () => {
 
 const startServer = async () => {
   try {
-    // Sync database
-    await sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
+    // Sync database - use force: false to prevent recreating tables
+    await sequelize.sync({ force: false })
     console.log('Database synced')
 
     // Ensure default admin exists in development

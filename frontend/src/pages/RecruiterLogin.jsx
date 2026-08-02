@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
@@ -7,6 +7,8 @@ import PublicHeader from '../components/PublicHeader'
 const RecruiterLogin = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
+
+  // Login State
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,6 +16,25 @@ const RecruiterLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  // Reset Password Modal State
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetStep, setResetStep] = useState(1) // 1: Email, 2: OTP, 3: New Password
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetOtp, setResetOtp] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [resetError, setResetError] = useState('')
+  const [resetSuccess, setResetSuccess] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
+  const [otpTimer, setOtpTimer] = useState(0)
+
+  useEffect(() => {
+    if (otpTimer > 0) {
+      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [otpTimer])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -26,7 +47,11 @@ const RecruiterLogin = () => {
     setLoading(true)
 
     try {
-      const response = await authService.login(formData)
+      const response = await authService.login({
+        identifier: formData.email,
+        email: formData.email,
+        password: formData.password,
+      })
 
       if (response.data.user.role !== 'RECRUITER') {
         setErrors({ form: 'Invalid recruiter credentials' })
@@ -40,6 +65,114 @@ const RecruiterLogin = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Handle Request OTP for Recruiter
+  const handleSendResetOtp = async (e) => {
+    e.preventDefault()
+    setResetError('')
+    setResetSuccess('')
+
+    if (!resetEmail.trim()) {
+      setResetError('Recruiter Email is required')
+      return
+    }
+
+    setResetLoading(true)
+    try {
+      // Pass 'RECRUITER' role to verify email in DB specifically for recruiter account
+      await authService.forgotPassword(resetEmail.trim(), 'RECRUITER')
+      setResetSuccess('OTP sent successfully to your email!')
+      setOtpTimer(60)
+      setResetStep(2)
+    } catch (error) {
+      setResetError(
+        error.response?.data?.message || 'No recruiter account found with this email',
+      )
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  // Handle Verify OTP
+  const handleVerifyResetOtp = async (e) => {
+    e.preventDefault()
+    setResetError('')
+    setResetSuccess('')
+
+    if (!resetOtp.trim()) {
+      setResetError('OTP is required')
+      return
+    }
+
+    setResetLoading(true)
+    try {
+      await authService.verifyForgotPasswordOtp({
+        email: resetEmail.trim(),
+        otp: resetOtp.trim(),
+      })
+      setResetSuccess('OTP verified successfully! Set your new password below.')
+      setResetStep(3)
+    } catch (error) {
+      setResetError(error.response?.data?.message || 'Invalid or expired OTP')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  // Handle Submit New Password
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault()
+    setResetError('')
+    setResetSuccess('')
+
+    if (!newPassword || !confirmNewPassword) {
+      setResetError('All fields are required')
+      return
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setResetError('Passwords do not match')
+      return
+    }
+
+    setResetLoading(true)
+    try {
+      await authService.resetPasswordWithOtp({
+        email: resetEmail.trim(),
+        otp: resetOtp.trim(),
+        password: newPassword,
+        confirmPassword: confirmNewPassword,
+      })
+
+      setResetSuccess('Password reset successfully! You can now log in.')
+      setFormData((prev) => ({ ...prev, email: resetEmail.trim() }))
+
+      setTimeout(() => {
+        setShowResetModal(false)
+        setResetStep(1)
+        setResetEmail('')
+        setResetOtp('')
+        setNewPassword('')
+        setConfirmNewPassword('')
+        setResetSuccess('')
+      }, 2000)
+    } catch (error) {
+      setResetError(error.response?.data?.message || 'Failed to reset password')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const closeResetModal = () => {
+    setShowResetModal(false)
+    setResetStep(1)
+    setResetEmail('')
+    setResetOtp('')
+    setNewPassword('')
+    setConfirmNewPassword('')
+    setResetError('')
+    setResetSuccess('')
   }
 
   return (
@@ -67,52 +200,66 @@ const RecruiterLogin = () => {
             </div>
 
             <div className="form-group password-field">
-              <label className="form-label">Password</label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="password-toggle-button"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20.5C7 20.5 2.73 17.28 1 12c.85-2.35 2.46-4.29 4.5-5.56" />
-                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                    <path d="M1 1l22 22" />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )}
-              </button>
+              <div className="flex justify-between items-center mb-1">
+                <label className="form-label mb-0">Password</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetEmail(formData.email)
+                    setShowResetModal(true)
+                  }}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="form-input"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="password-toggle-button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20.5C7 20.5 2.73 17.28 1 12c.85-2.35 2.46-4.29 4.5-5.56" />
+                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                      <path d="M1 1l22 22" />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
@@ -124,11 +271,188 @@ const RecruiterLogin = () => {
             </button>
           </form>
 
-          <p className="text-center text-gray-600 mt-4">
-            Recruiters are created by admin only
-          </p>
+          <div className="mt-6 pt-4 border-t border-slate-200 text-center space-y-3">
+            <button
+              type="button"
+              onClick={() => {
+                setResetEmail(formData.email)
+                setShowResetModal(true)
+              }}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl border border-slate-300 transition-colors"
+            >
+              🔑 Reset Password
+            </button>
+            <p className="text-xs text-gray-500">
+              Recruiter accounts are managed by Administrator
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Recruiter Password Reset Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 relative">
+            <button
+              type="button"
+              onClick={closeResetModal}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">
+              Recruiter Password Reset
+            </h3>
+
+            {/* Step indicator */}
+            <div className="flex items-center justify-between mb-6 border-b pb-3 text-xs font-semibold">
+              <span
+                className={
+                  resetStep >= 1 ? 'text-blue-600 font-bold' : 'text-slate-400'
+                }
+              >
+                1. Email Check
+              </span>
+              <span className="text-slate-300">→</span>
+              <span
+                className={
+                  resetStep >= 2 ? 'text-blue-600 font-bold' : 'text-slate-400'
+                }
+              >
+                2. Verify OTP
+              </span>
+              <span className="text-slate-300">→</span>
+              <span
+                className={
+                  resetStep >= 3 ? 'text-blue-600 font-bold' : 'text-slate-400'
+                }
+              >
+                3. Reset
+              </span>
+            </div>
+
+            {resetError && (
+              <div className="alert-error text-sm mb-4">{resetError}</div>
+            )}
+            {resetSuccess && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-lg text-sm mb-4">
+                {resetSuccess}
+              </div>
+            )}
+
+            {/* STEP 1: Enter & Verify Email in DB */}
+            {resetStep === 1 && (
+              <form onSubmit={handleSendResetOtp} className="space-y-4">
+                <p className="text-sm text-slate-600">
+                  Enter your recruiter email. We will check the database to verify your account and send an OTP.
+                </p>
+                <div className="form-group">
+                  <label className="form-label">Recruiter Email ID</label>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="recruiter@astonrecruitment.com"
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="btn-primary w-full"
+                >
+                  {resetLoading ? 'Verifying DB & Sending OTP...' : 'Send OTP'}
+                </button>
+              </form>
+            )}
+
+            {/* STEP 2: Verify OTP */}
+            {resetStep === 2 && (
+              <form onSubmit={handleVerifyResetOtp} className="space-y-4">
+                <p className="text-sm text-slate-600">
+                  Enter the 6-digit OTP sent to <strong>{resetEmail}</strong>.
+                </p>
+                <div className="form-group">
+                  <label className="form-label">Enter OTP</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={resetOtp}
+                    onChange={(e) => setResetOtp(e.target.value)}
+                    placeholder="123456"
+                    className="form-input text-center text-xl tracking-widest"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="btn-primary w-full"
+                >
+                  {resetLoading ? 'Verifying OTP...' : 'Verify OTP'}
+                </button>
+                <div className="flex justify-between items-center text-xs mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setResetStep(1)}
+                    className="text-slate-500 hover:text-slate-700 underline"
+                  >
+                    Change Email
+                  </button>
+                  <button
+                    type="button"
+                    disabled={otpTimer > 0 || resetLoading}
+                    onClick={handleSendResetOtp}
+                    className="text-blue-600 font-semibold disabled:text-slate-400"
+                  >
+                    {otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend OTP'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 3: Reset Password */}
+            {resetStep === 3 && (
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <p className="text-sm text-slate-600">
+                  Create a new password for your recruiter account.
+                </p>
+                <div className="form-group">
+                  <label className="form-label">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="At least 8 chars (A-Z, a-z, 0-9, special)"
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="btn-primary w-full"
+                >
+                  {resetLoading ? 'Resetting Password...' : 'Reset Password'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

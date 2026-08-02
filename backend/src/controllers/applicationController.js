@@ -17,30 +17,51 @@ const assignCandidate = async (req, res) => {
         .json({ message: 'Candidate ID and Recruiter ID required' })
     }
 
-    // Check if application already exists
-    const existingApp = await Application.findOne({ where: { candidateId } })
-
-    if (existingApp) {
-      return res
-        .status(400)
-        .json({ message: 'Application already exists for this candidate' })
+    const recruiter = await Recruiter.findByPk(recruiterId)
+    if (!recruiter) {
+      return res.status(404).json({ message: 'Recruiter not found' })
     }
 
-    const application = await Application.create({
-      candidateId,
-      recruiterId,
-      status: 'APPLICATION_RECEIVED',
-    })
-
-    // Create notification for candidate
     const candidate = await Candidate.findByPk(candidateId)
-    await Notification.create({
-      userId: candidate.userId,
-      type: 'APPLICATION_RECEIVED',
-      message: 'Your application has been received successfully',
-    })
+    if (!candidate) {
+      return res.status(404).json({ message: 'Candidate not found' })
+    }
 
-    res.status(201).json({
+    // Check if application already exists for candidate
+    let application = await Application.findOne({ where: { candidateId } })
+
+    if (application) {
+      // Update existing application with assigned recruiter
+      application.recruiterId = recruiterId
+      await application.save()
+    } else {
+      // Create new application record
+      application = await Application.create({
+        candidateId,
+        recruiterId,
+        status: 'APPLICATION_RECEIVED',
+      })
+    }
+
+    // Update recruiter assigned candidates count
+    const assignedCount = await Application.count({ where: { recruiterId } })
+    recruiter.assignedCandidates = assignedCount
+    await recruiter.save()
+
+    // Create notification for candidate if userId exists
+    if (candidate && candidate.userId) {
+      try {
+        await Notification.create({
+          userId: candidate.userId,
+          type: 'APPLICATION_RECEIVED',
+          message: 'Your application has been assigned to a recruiter',
+        })
+      } catch (notifErr) {
+        console.error('Notification error:', notifErr.message)
+      }
+    }
+
+    res.status(200).json({
       message: 'Candidate assigned successfully',
       application,
     })
@@ -48,7 +69,7 @@ const assignCandidate = async (req, res) => {
     console.error('Assign candidate error:', error)
     res
       .status(500)
-      .json({ message: 'Error assigning candidate', error: error.message })
+      .json({ message: error.message || 'Error assigning candidate', error: error.message })
   }
 }
 
@@ -112,16 +133,27 @@ const updateApplicationStatus = async (req, res) => {
   }
 }
 
+const generateAutoMeetLink = () => {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const gen = (len) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+  const code = `${gen(3)}-${gen(4)}-${gen(3)}`
+  return `https://cal.com/aston-recruitment/interview-${code}`
+}
+
 const scheduleInterview = async (req, res) => {
   try {
     const { applicationId } = req.params
     const { interviewDate, googleMeetLink } = req.body
 
-    if (!interviewDate || !googleMeetLink) {
+    if (!interviewDate) {
       return res
         .status(400)
-        .json({ message: 'Interview date and Google Meet link required' })
+        .json({ message: 'Interview date is required' })
     }
+
+    const finalMeetLink = (googleMeetLink && googleMeetLink.trim())
+      ? googleMeetLink.trim()
+      : generateAutoMeetLink()
 
     const application = await Application.findByPk(applicationId, {
       include: [
@@ -141,7 +173,7 @@ const scheduleInterview = async (req, res) => {
     }
 
     application.interviewDate = interviewDate
-    application.googleMeetLink = googleMeetLink
+    application.googleMeetLink = finalMeetLink
     application.status = 'INTERVIEW_SCHEDULED'
 
     await application.save()
@@ -149,16 +181,21 @@ const scheduleInterview = async (req, res) => {
     // Send email notification
     const candidateUser = application.Candidate?.User
     const recruiterUser = application.Recruiter?.User
+    const candidateEmail = candidateUser?.email || ''
+    const candidateName = application.Candidate?.name || 'Candidate'
+    const recruiterEmail = recruiterUser?.email || ''
+    const recruiterName = application.Recruiter?.name || 'Assigned Recruiter'
 
     // Try sending email but don't fail the request if email fails
     try {
-      if (candidateUser && recruiterUser) {
+      if (candidateEmail) {
         await sendInterviewScheduledEmail(
-          candidateUser.email,
-          application.Candidate.name,
-          recruiterUser.email,
+          candidateEmail,
+          candidateName,
+          recruiterEmail,
+          recruiterName,
           interviewDate,
-          googleMeetLink,
+          finalMeetLink,
         )
       }
     } catch (emailErr) {

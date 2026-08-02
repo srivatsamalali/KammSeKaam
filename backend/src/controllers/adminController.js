@@ -1,7 +1,42 @@
 const { Recruiter, Candidate, Application, User } = require('../models')
 
+const syncCandidatesAndApplications = async () => {
+  try {
+    // 1. Ensure all Users with role CANDIDATE have a Candidate profile
+    const candUsers = await User.findAll({ where: { role: 'CANDIDATE' } })
+    for (const u of candUsers) {
+      const existingProfile = await Candidate.findOne({ where: { userId: u.id } })
+      if (!existingProfile) {
+        const defaultName = u.email ? u.email.split('@')[0] : (u.phone || 'Candidate')
+        await Candidate.create({
+          userId: u.id,
+          name: defaultName,
+          mobileNumber: u.phone || '',
+          address: '',
+        })
+      }
+    }
+
+    // 2. Ensure all Candidate profiles have an Application entry
+    const allCandidates = await Candidate.findAll()
+    for (const cand of allCandidates) {
+      const existingApp = await Application.findOne({ where: { candidateId: cand.id } })
+      if (!existingApp) {
+        await Application.create({
+          candidateId: cand.id,
+          status: 'APPLICATION_RECEIVED',
+        })
+      }
+    }
+  } catch (err) {
+    console.error('Error syncing candidates and applications:', err)
+  }
+}
+
 const getDashboardStats = async (req, res) => {
   try {
+    await syncCandidatesAndApplications()
+
     const totalCandidates = await Candidate.count()
     const totalRecruiters = await Recruiter.count()
     const totalApplications = await Application.count()
@@ -29,6 +64,8 @@ const getDashboardStats = async (req, res) => {
 
 const getReports = async (req, res) => {
   try {
+    await syncCandidatesAndApplications()
+
     const applications = await Application.findAll({
       include: [
         {
@@ -40,6 +77,7 @@ const getReports = async (req, res) => {
           include: [User],
         },
       ],
+      order: [['createdAt', 'DESC']],
     })
 
     res.json(applications)
@@ -53,14 +91,16 @@ const getReports = async (req, res) => {
 
 const getUnassignedCandidates = async (req, res) => {
   try {
+    await syncCandidatesAndApplications()
+
     // Fetch all candidates with their applications (if any)
     const candidates = await Candidate.findAll({
       include: [User, { model: Application, required: false }],
     })
 
-    // Filter candidates that have no application records
+    // Filter candidates that have no application records or unassigned recruiter
     const unassigned = candidates.filter(
-      (c) => !c.Applications || c.Applications.length === 0,
+      (c) => !c.Applications || c.Applications.length === 0 || c.Applications.every(a => !a.recruiterId),
     )
 
     res.json(unassigned)

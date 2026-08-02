@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import {
   adminService,
   recruiterService,
@@ -8,6 +9,14 @@ import {
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout()
+      navigate('/admin/login')
+    }
+  }
   const [stats, setStats] = useState(null)
   const [recruiters, setRecruiters] = useState([])
   const [applications, setApplications] = useState([])
@@ -72,7 +81,8 @@ const AdminDashboard = () => {
       alert('Recruiter created successfully')
     } catch (error) {
       console.error('Error creating recruiter:', error)
-      alert('Error creating recruiter')
+      const msg = error.response?.data?.message || error.message || 'Error creating recruiter'
+      alert(msg)
     }
   }
 
@@ -93,7 +103,37 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen page-shell">
-      {/* Main Content */}
+      {/* Header with Logout */}
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Admin Portal
+            </h1>
+            <p className="text-sm text-gray-600">{user?.email || 'admin@astonrecruitment.com'}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <span>Logout</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -395,11 +435,12 @@ const AdminDashboard = () => {
                                 candidateId: c.id,
                                 recruiterId,
                               })
-                              alert('Assigned successfully')
+                              alert('Assigned successfully!')
                               fetchData()
                             } catch (err) {
                               console.error('Assign error', err)
-                              alert('Assign failed')
+                              const msg = err.response?.data?.message || err.message || 'Assign failed'
+                              alert(msg)
                             }
                           }}
                           className="btn-primary"

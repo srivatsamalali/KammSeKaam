@@ -1,32 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
 import PublicHeader from '../components/PublicHeader'
 import JobLoader from '../components/JobLoader'
 
-const CandidateRegister = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate()
-  const { login } = useAuth()
 
-  // Step 1: Phone Verification
-  const [step, setStep] = useState(1) // 1: Phone, 2: OTP, 3: Registration
-  const [phone, setPhone] = useState('')
+  // Steps: 1 = Email, 2 = OTP, 3 = New Password
+  const [step, setStep] = useState(1)
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
-  const [otpSent, setOtpSent] = useState(false)
   const [otpTimer, setOtpTimer] = useState(0)
-
-  // Step 3: Registration Form
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-  })
   const [passwordStrength, setPasswordStrength] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -64,48 +53,19 @@ const CandidateRegister = () => {
     else setPasswordStrength('Strong')
   }
 
-  const handlePhoneChange = (e) => {
-    setPhone(e.target.value)
-    setErrors({})
-  }
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value)
-    setErrors({})
-  }
-
-  const handleOtpChange = (e) => {
-    setOtp(e.target.value.replace(/[^0-9]/g, ''))
-    setErrors({})
-  }
-
-  const handleFormChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    setErrors({})
-
-    if (name === 'password') {
-      checkPasswordStrength(value)
-    }
-  }
-
   const handleSendOtp = async (e) => {
     e.preventDefault()
     setErrors({})
     setLoading(true)
 
     try {
-      if (!phone.trim()) {
-        setErrors({ phone: 'Phone number is required' })
-        return
-      }
       if (!email.trim()) {
         setErrors({ email: 'Email is required' })
+        setLoading(false)
         return
       }
 
-      await authService.sendOtp({ phone, email })
-      setOtpSent(true)
+      await authService.forgotPassword(email)
       setOtpTimer(60)
       setStep(2)
     } catch (error) {
@@ -125,11 +85,11 @@ const CandidateRegister = () => {
     try {
       if (!otp.trim()) {
         setErrors({ otp: 'OTP is required' })
+        setLoading(false)
         return
       }
 
-      await authService.verifyOtp({ phone, otp })
-      setFormData((prev) => ({ ...prev, phone, email }))
+      await authService.verifyForgotPasswordOtp({ email, otp })
       setStep(3)
     } catch (error) {
       setErrors({
@@ -146,7 +106,7 @@ const CandidateRegister = () => {
     setLoading(true)
 
     try {
-      await authService.resendOtp({ phone, email })
+      await authService.forgotPassword(email)
       setOtpTimer(60)
     } catch (error) {
       setErrors({
@@ -157,23 +117,34 @@ const CandidateRegister = () => {
     }
   }
 
-  const handleSubmit = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault()
     setErrors({})
     setLoading(true)
 
     try {
-      const response = await authService.register(formData)
-      login(response.data.user, response.data.token)
+      if (!password.trim() || !confirmPassword.trim()) {
+        setErrors({ form: 'All fields are required' })
+        setLoading(false)
+        return
+      }
+
+      if (password !== confirmPassword) {
+        setErrors({ form: 'Passwords do not match' })
+        setLoading(false)
+        return
+      }
+
+      await authService.resetPasswordWithOtp({ email, otp, password, confirmPassword })
       
-      // Show loader for 5 seconds before redirecting
+      // Show loader for 5 seconds then redirect to login
       setTimeout(() => {
-        navigate('/candidate/dashboard')
+        navigate('/candidate/login')
       }, 5000)
     } catch (error) {
       setLoading(false)
       setErrors({
-        form: error.response?.data?.message || 'Registration failed',
+        form: error.response?.data?.message || 'Failed to reset password',
       })
     }
   }
@@ -202,44 +173,31 @@ const CandidateRegister = () => {
             ></div>
           </div>
 
-          {/* Step 1: Phone Verification */}
+          {/* Step 1: Email */}
           {step === 1 && (
             <>
               <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
-                Verify Phone Number
+                Forgot Password
               </h2>
 
               {errors.form && <div className="alert-error">{errors.form}</div>}
 
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div className="form-group">
-                  <label className="form-label">Email</label>
+                  <label className="form-label">Email Address</label>
                   <input
                     type="email"
                     value={email}
-                    onChange={handleEmailChange}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      setErrors({})
+                    }}
                     className="form-input"
                     placeholder="your@email.com"
                     required
                   />
                   {errors.email && (
                     <p className="text-red-600 text-sm mt-1">{errors.email}</p>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Phone Number</label>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    value={phone}
-                    onChange={handlePhoneChange}
-                    className="form-input"
-                    placeholder="e.g. +91 98765 43210"
-                    required
-                  />
-                  {errors.phone && (
-                    <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
                   )}
                 </div>
 
@@ -253,7 +211,7 @@ const CandidateRegister = () => {
               </form>
 
               <p className="text-center text-gray-600 mt-4">
-                Already have an account?{' '}
+                Remember your password?{' '}
                 <a
                   href="/candidate/login"
                   className="text-blue-600 font-semibold hover:underline"
@@ -284,7 +242,10 @@ const CandidateRegister = () => {
                     inputMode="numeric"
                     maxLength="6"
                     value={otp}
-                    onChange={handleOtpChange}
+                    onChange={(e) => {
+                      setOtp(e.target.value.replace(/[^0-9]/g, ''))
+                      setErrors({})
+                    }}
                     className="form-input text-center text-3xl tracking-widest"
                     placeholder="000000"
                     required
@@ -320,11 +281,7 @@ const CandidateRegister = () => {
               </div>
 
               <button
-                onClick={() => {
-                  setStep(1)
-                  setOtp('')
-                  setOtpSent(false)
-                }}
+                onClick={() => setStep(1)}
                 className="text-gray-600 hover:text-gray-800 text-sm mt-4 w-full text-center"
               >
                 Back
@@ -332,58 +289,26 @@ const CandidateRegister = () => {
             </>
           )}
 
-          {/* Step 3: Registration Form */}
+          {/* Step 3: Reset Password */}
           {step === 3 && (
             <>
               <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
-                Complete Registration
+                Set New Password
               </h2>
 
               {errors.form && <div className="alert-error">{errors.form}</div>}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleFormChange}
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    className="form-input"
-                    disabled
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    className="form-input"
-                    disabled
-                  />
-                </div>
-
+              <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="form-group password-field">
-                  <label className="form-label">Password</label>
+                  <label className="form-label">New Password</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleFormChange}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      checkPasswordStrength(e.target.value)
+                      setErrors({})
+                    }}
                     className="form-input"
                     required
                   />
@@ -446,9 +371,11 @@ const CandidateRegister = () => {
                   <label className="form-label">Confirm Password</label>
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleFormChange}
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value)
+                      setErrors({})
+                    }}
                     className="form-input"
                     required
                   />
@@ -500,26 +427,23 @@ const CandidateRegister = () => {
                   disabled={loading}
                   className="btn-primary w-full"
                 >
-                  {loading ? 'Registering...' : 'Complete Registration'}
+                  {loading ? 'Resetting Password...' : 'Reset Password'}
                 </button>
               </form>
 
-              <p className="text-center text-gray-600 mt-4">
-                Already have an account?{' '}
-                <a
-                  href="/candidate/login"
-                  className="text-blue-600 font-semibold hover:underline"
-                >
-                  Login
-                </a>
-              </p>
+              <button
+                onClick={() => setStep(2)}
+                className="text-gray-600 hover:text-gray-800 text-sm mt-4 w-full text-center"
+              >
+                Back
+              </button>
             </>
           )}
         </div>
       </div>
-      {loading && <JobLoader text="Completing Registration..." />}
+      {loading && <JobLoader text={step === 3 ? 'Resetting Password...' : 'Processing...'} />}
     </div>
   )
 }
 
-export default CandidateRegister
+export default ForgotPassword
