@@ -1,105 +1,104 @@
-# kaamSeKaam - Consultancy Management Portal
+# Aston Recruitment - Consultancy Management Portal
 
-A modern, responsive, full-stack consultancy management portal that connects talent with opportunity. Built with React, Node.js, Express, and MySQL.
+A modern, responsive, full-stack recruitment and consultancy management portal connecting talent with top-tier opportunities. Built with React, Node.js, Express, and MySQL.
 
-## 🎯 Features
+---
 
-### Three Separate Portals
 
-- **Admin Portal**: Manage recruiters, candidates, and applications
-- **Recruiter Portal**: View candidates, schedule interviews, provide feedback
-- **Candidate Portal**: Manage profile, track applications, view interviews
+## 🎯 Features & Key Functionality
 
-### Key Features
+### 👥 Three Specialized Portals
 
-- ✨ JWT Authentication with role-based access
-- 📧 Email notifications for interview scheduling
-- 📄 Resume upload and management (PDF)
-- 📞 Google Meet integration for interviews
-- 📊 Analytics and reporting
-- 🔒 Secure password hashing with bcrypt
-- 🔐 Input validation and SQL injection protection
-- 📱 Fully responsive design
-- 🎨 Clean, minimal, professional UI with TailwindCSS
+- **Admin Portal**: Create and manage recruiters, view comprehensive candidate application reports, assign candidates to recruiters, and override application status/statuses.
+- **Recruiter Portal**: View assigned candidates, schedule interviews with integrated Google Meet & Cal.com links, track candidate progress, and record interview feedback.
+- **Candidate Portal**: Register with Phone OTP / Email verification, complete candidate profile (experience, CTC, location preferences), upload resume (PDF), track real-time application status, and view interview details.
+
+---
+
+### ✨ Core System Capabilities
+
+- **🔐 Dual Authentication & Security**: JWT-based role authentication (`ADMIN`, `RECRUITER`, `CANDIDATE`), bcrypt password hashing, phone OTP verification.
+- **🔑 Recruiter Password Reset Flow**: Recruiter-only 3-step password reset (Email database verification -> OTP -> Reset password).
+- **🗓️ Cal.com & Google Meet Auto-Scheduling**: Auto-generate unique meeting links (Google Meet / Cal.com) when scheduling interviews.
+- **📧 Automated Email Notifications**: Dispatches rich HTML interview invitations with complete details (date/time, assigned recruiter, meeting link, candidate guidelines) to candidates with recruiter CC.
+- **📄 Resume Management**: Secure PDF resume upload and preview (up to 5MB).
+- **📊 Real-time Dashboard Analytics**: Track candidates, recruiters, applications, selections, and rejections.
+- **📱 Responsive UI**: High-aesthetic, modern glassmorphism design system built with React, Vite, and TailwindCSS.
+
+---
 
 ## 🛠️ Technology Stack
 
 ### Frontend
-
-- React 18
-- Vite
-- React Router
-- TailwindCSS
-- React Hook Form
-- Axios
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Routing**: React Router DOM
+- **Styling**: TailwindCSS & Vanilla CSS design system
+- **HTTP Client**: Axios
 
 ### Backend
+- **Runtime**: Node.js (v18+)
+- **Framework**: Express.js
+- **ORM**: Sequelize ORM
+- **Database**: MySQL 8.0
+- **Authentication**: JSON Web Tokens (JWT) & bcryptjs
+- **Email Service**: Nodemailer (Gmail SMTP / Custom SMTP)
+- **File Storage**: Multer
 
-- Node.js
-- Express.js
-- Sequelize ORM
-- MySQL
-- JWT Authentication
-- Nodemailer
-- Multer (file upload)
+### Infrastructure & Deployment
+- **Containerization**: Docker & Docker Compose
+- **Web Server**: Nginx (Reverse Proxy for Production)
 
-### Database
-
-- MySQL 8.0
-
-### Deployment
-
-- Docker & Docker Compose
-- Production-ready MVC architecture
+---
 
 ## 📋 Prerequisites
 
 ### Local Development
-
-- Node.js v18+ ([Download](https://nodejs.org/))
-- MySQL 8.0+ ([Download](https://dev.mysql.com/downloads/mysql/))
-- npm or yarn
+- **Node.js**: v18 or higher ([Download Node.js](https://nodejs.org/))
+- **MySQL**: 8.0 or higher ([Download MySQL](https://dev.mysql.com/downloads/mysql/))
+- **Package Manager**: npm or yarn
 
 ### Docker Deployment
+- **Docker Desktop** ([Download Docker](https://www.docker.com/products/docker-desktop))
+- **Docker Compose**
 
-- Docker ([Download](https://www.docker.com/products/docker-desktop))
-- Docker Compose
+---
 
 ## 🚀 Quick Start (Local Development)
 
-### 1. Clone & Setup Backend
+### 1. Backend Setup
 
 ```bash
 cd backend
 npm install
 ```
 
-Create `.env` file in backend directory:
+Create a `.env` file in `backend/.env`:
 
 ```env
-# Database
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=password
-DB_NAME=kaamsekaaam
-DB_PORT=3306
-
-# Server
+# Server Configuration
 PORT=5000
 NODE_ENV=development
 
-# JWT
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=kaamsekaaam
+DB_USER=root
+DB_PASSWORD=password
+
+# JWT Secrets
+JWT_SECRET=your_super_secret_jwt_key_aston_recruitment
 JWT_EXPIRATION=7d
 
-# Email (Gmail SMTP)
+# Email Service (SMTP)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASSWORD=your_app_password
-ADMIN_EMAIL=admin@kaamsekaaam.com
+SMTP_USER=astonrecruitment64@gmail.com
+SMTP_PASSWORD=qwbd layp mrzy srci
+ADMIN_EMAIL=admin@astonrecruitment.com
 
-# Admin Credentials
+# Admin Default Credentials
 ADMIN_EMAIL_ENV=admin@kaamsekaaam.com
 ADMIN_PASSWORD_ENV=Admin@12345
 
@@ -107,35 +106,29 @@ ADMIN_PASSWORD_ENV=Admin@12345
 FRONTEND_URL=http://localhost:5173
 ```
 
-**Setting up Gmail SMTP:**
+Initialize MySQL Database:
 
-1. Enable 2-Factor Authentication on your Gmail account
-2. Generate an [App Password](https://myaccount.google.com/apppasswords)
-3. Use the generated password in `SMTP_PASSWORD`
-
-Create MySQL database:
-
-```bash
-mysql -u root -p
+```sql
 CREATE DATABASE kaamsekaaam;
-EXIT;
 ```
 
-Seed sample data:
+Run Database Seeder (optional sample data):
 
 ```bash
 npm run seed
 ```
 
-Start backend server:
+Start the Backend Server:
 
 ```bash
-npm run dev
+npm start
 ```
 
-Backend will run on `http://localhost:5000`
+The backend server will run on `http://localhost:5000`.
 
-### 2. Setup Frontend
+---
+
+### 2. Frontend Setup
 
 ```bash
 cd frontend
@@ -143,370 +136,125 @@ npm install
 npm run dev
 ```
 
-Frontend will run on `http://localhost:5173`
+The frontend application will run on `http://localhost:5173`.
 
-### 3. Access the Application
+---
 
-**Landing Page:** http://localhost:5173
+### 3. Default Login Credentials
 
-**Login Credentials:**
+| Role | Email / Identifier | Password | Access Rights |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@kaamsekaaam.com` | `Admin@12345` | Full administrative control |
+| **Recruiter** | `adi@gmail.com` | `Recruiter@123` | Assigned candidates & scheduling |
+| **Candidate** | Candidate Email / Phone | Registered Password | Profile & application tracking |
 
-```
-Admin Portal:
-Email: admin@kaamsekaaam.com
-Password: Admin@12345
+---
 
-Sample Recruiter:
-Email: recruiter1@kaamsekaaam.com
-Password: Recruiter@123
+## 🐳 Docker Deployment
 
-Sample Candidate:
-Email: john@example.com
-Password: Candidate@123
-```
+### Run All Services with Docker Compose
 
-## 🐳 Docker Deployment (All-in-One)
-
-### 1. Build & Run with Docker Compose
+To launch MySQL, Backend, and Frontend containers in a production-ready setup:
 
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
 
-This will start:
+### Services Mapping
 
-- MySQL database (port 3306)
-- Node.js backend (port 5000)
-- React frontend (port 5173)
+- **Frontend App**: `http://localhost:5173`
+- **Backend API**: `http://localhost:5000`
+- **MySQL Database**: `localhost:3306`
 
-### 2. Access Services
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
-- MySQL: localhost:3306
-
-### 3. Stop Services
+### Stop Docker Services
 
 ```bash
 docker-compose down
 ```
 
-To also remove volumes:
+To remove volumes and reset data:
 
 ```bash
 docker-compose down -v
 ```
 
+---
+
 ## 📁 Project Structure
 
 ```
-kaamsekaaam/
-├── frontend/                 # React + Vite frontend
+aston-recruitment/
+├── frontend/                 # React + Vite Frontend
 │   ├── src/
-│   │   ├── pages/           # Page components
-│   │   ├── components/      # Reusable components
-│   │   ├── context/         # Auth context
-│   │   ├── services/        # API service calls
-│   │   ├── styles/          # Global styles
-│   │   ├── utils/           # Utilities
-│   │   ├── App.jsx
-│   │   └── main.jsx
+│   │   ├── components/      # Navigation, Headers, Loaders
+│   │   ├── context/         # AuthContext state management
+│   │   ├── pages/           # Admin, Recruiter, Candidate Dashboards & Logins
+│   │   ├── services/        # API Axios service layers
+│   │   ├── styles/          # Design system & Tailwind styles
+│   │   └── App.jsx          # Route definitions
 │   ├── index.html
-│   ├── package.json
 │   ├── vite.config.js
-│   ├── tailwind.config.js
 │   └── Dockerfile
 │
-├── backend/                  # Node.js + Express backend
+├── backend/                  # Node.js + Express Backend
 │   ├── src/
-│   │   ├── controllers/     # Business logic
-│   │   ├── models/          # Database models
-│   │   ├── routes/          # API routes
-│   │   ├── middlewares/     # Auth, validation, file upload
-│   │   ├── utils/           # Helper functions
-│   │   ├── config/          # DB, JWT, Email config
-│   │   └── server.js        # Main server file
-│   ├── scripts/
-│   │   └── seed.js          # Database seeding
-│   ├── uploads/             # Resume storage
+│   │   ├── config/          # Database, Email, JWT configurations
+│   │   ├── controllers/     # Auth, Admin, Recruiter, Application controllers
+│   │   ├── middlewares/     # JWT Auth & Role Authorization middlewares
+│   │   ├── models/          # Sequelize models (User, Candidate, Recruiter, Application, Notification)
+│   │   ├── routes/          # API route handlers
+│   │   ├── utils/           # Email & Token utilities
+│   │   └── server.js        # Main Express server entry point
+│   ├── scripts/             # Migration & Seeding scripts
+│   ├── uploads/             # Resume PDF storage
 │   ├── package.json
-│   ├── .env.example
 │   └── Dockerfile
 │
-├── database/
-│   └── schema.sql           # Database schema
-│
-├── docker-compose.yml       # Docker orchestration
-└── README.md               # This file
+├── docker-compose.yml       # Container orchestration configuration
+└── README.md                # Project documentation
 ```
-
-## 🔐 Security Features
-
-- ✅ JWT token-based authentication
-- ✅ Password hashing with bcrypt
-- ✅ CORS protection
-- ✅ Helmet security headers
-- ✅ Rate limiting
-- ✅ Input validation
-- ✅ SQL injection protection (Sequelize ORM)
-- ✅ XSS protection
-- ✅ File upload validation (PDF only, 5MB max)
-
-## 📚 API Documentation
-
-### Authentication Endpoints
-
-```
-POST   /api/auth/register         - Register new candidate
-POST   /api/auth/login            - Login user
-POST   /api/auth/forgot-password  - Request password reset
-POST   /api/auth/reset-password   - Reset password
-```
-
-### Candidate Endpoints
-
-```
-GET    /api/candidate/profile     - Get candidate profile
-PUT    /api/candidate/profile     - Update profile with resume
-```
-
-### Recruiter Endpoints
-
-```
-GET    /api/recruiters            - Get all recruiters (Admin only)
-POST   /api/recruiters            - Create recruiter (Admin only)
-PUT    /api/recruiters/:id        - Update recruiter (Admin only)
-DELETE /api/recruiters/:id        - Delete recruiter (Admin only)
-GET    /api/recruiters/applications - Get recruiter's applications
-```
-
-### Application Endpoints
-
-```
-POST   /api/applications/assign   - Assign candidate to recruiter
-PUT    /api/applications/:id/status  - Update application status
-PUT    /api/applications/:id/interview - Schedule interview
-PUT    /api/applications/:id/feedback - Add feedback
-```
-
-### Admin Endpoints
-
-```
-GET    /api/admin/dashboard       - Dashboard statistics
-GET    /api/admin/reports         - All applications report
-PUT    /api/admin/applications/:id - Override candidate status
-```
-
-### Notification Endpoints
-
-```
-GET    /api/notifications         - Get user notifications
-PUT    /api/notifications/:id/read - Mark notification as read
-```
-
-## 🔄 User Workflow
-
-### Candidate Flow
-
-1. ✅ Register with email, password, name
-2. ✅ Login to access dashboard
-3. ✅ Complete profile (experience, skills, location, etc.)
-4. ✅ Upload resume (PDF, max 5MB)
-5. ✅ Admin assigns to recruiter
-6. ✅ Receive interview notifications
-7. ✅ Join interview via Google Meet link
-
-### Recruiter Flow
-
-1. ✅ Created by Admin
-2. ✅ Login with credentials
-3. ✅ View assigned candidates
-4. ✅ Schedule interviews
-5. ✅ Add Google Meet link
-6. ✅ Provide feedback
-7. ✅ Update application status
-
-### Admin Flow
-
-1. ✅ Login with default credentials
-2. ✅ Create recruiters
-3. ✅ Assign candidates to recruiters
-4. ✅ View dashboard analytics
-5. ✅ Override candidate status
-6. ✅ View comprehensive reports
-
-## 📧 Email Configuration
-
-The system sends automated emails for:
-
-- Interview scheduling (to candidate, CC recruiter)
-- Password reset links
-- Application status updates
-
-Gmail SMTP is configured by default. For production, use:
-
-- AWS SES
-- SendGrid
-- Mailgun
-- etc.
-
-Update `SMTP_*` variables in `.env`
-
-## 📱 Password Requirements
-
-- Minimum 8 characters
-- At least one uppercase letter
-- At least one lowercase letter
-- At least one number
-- At least one special character (@$!%\*?&)
-
-## 🚢 Production Deployment
-
-### Using GoDaddy (from the requirements)
-
-1. **Purchase VPS/Hosting:**
-   - Go to GoDaddy.com
-   - Select VPS or Web Hosting
-   - Choose appropriate plan
-
-2. **Deploy with Docker:**
-
-   ```bash
-   # SSH into your server
-   ssh user@your-godaddy-ip
-
-   # Install Docker
-   curl -fsSL https://get.docker.com -o get-docker.sh
-   sudo sh get-docker.sh
-
-   # Clone repository
-   git clone <your-repo-url>
-   cd kaamsekaaam
-
-   # Update .env with production values
-   # Update FRONTEND_URL, SMTP credentials, JWT_SECRET
-
-   # Run with Docker
-   docker-compose -f docker-compose.yml up -d
-   ```
-
-3. **Setup Domain:**
-   - Point GoDaddy domain to server IP
-   - Configure SSL certificate (Let's Encrypt)
-   - Setup reverse proxy (Nginx)
-
-4. **Environment Variables for Production:**
-   ```env
-   NODE_ENV=production
-   JWT_SECRET=<generate-strong-random-secret>
-   DB_PASSWORD=<strong-db-password>
-   SMTP_USER=<your-email>
-   SMTP_PASSWORD=<your-password>
-   FRONTEND_URL=https://yourdomain.com
-   ```
-
-### Production Checklist
-
-- [ ] Update all environment variables
-- [ ] Setup SSL/TLS certificates
-- [ ] Configure database backups
-- [ ] Setup email service (not Gmail for production)
-- [ ] Enable HTTPS only
-- [ ] Setup monitoring & logging
-- [ ] Configure firewall rules
-- [ ] Setup CI/CD pipeline
-
-## 🐛 Troubleshooting
-
-### MySQL Connection Error
-
-```bash
-# Check MySQL is running
-mysql -u root -p
-
-# Update DB_HOST, DB_USER, DB_PASSWORD in .env
-```
-
-### Port Already in Use
-
-```bash
-# Find process using port
-lsof -i :5000  # For backend
-lsof -i :5173  # For frontend
-
-# Kill process
-kill -9 <PID>
-```
-
-### Email Not Sending
-
-- Check SMTP credentials
-- Verify "Less secure apps" is enabled (Gmail)
-- Check Gmail generated app password
-- Review backend logs
-
-### Database Sync Issues
-
-```bash
-# Restart backend to re-sync
-npm run dev
-
-# Or manually sync in backend/src/server.js
-# Change: alt: process.env.NODE_ENV === 'development'
-# To: force: true (be careful, data will be lost)
-```
-
-## 📞 Support & Contact
-
-For issues or questions:
-
-- Email: support@kaamsekaaam.com
-- GitHub: [Your Repository]
-
-## 📄 License
-
-Private - All rights reserved © 2024 kaamSeKaam
-
-## 🎓 Development Notes
-
-### Adding New Features
-
-1. **New Endpoint:**
-   - Create controller in `backend/src/controllers/`
-   - Create route in `backend/src/routes/`
-   - Add route to `backend/src/server.js`
-
-2. **New Page:**
-   - Create component in `frontend/src/pages/`
-   - Add route in `frontend/src/App.jsx`
-   - Add to protected routes if needed
-
-3. **New Database Model:**
-   - Create model in `backend/src/models/`
-   - Update associations in `backend/src/models/index.js`
-   - Update schema in `database/schema.sql`
-
-### Testing Flows
-
-Use Postman or Thunder Client to test APIs:
-
-- Import endpoints from API documentation
-- Set Authorization header with JWT token
-- Test with different user roles
-
-## ✨ Future Enhancements
-
-- [ ] Video interview recording
-- [ ] Skill assessment tests
-- [ ] Salary negotiation tool
-- [ ] Multiple file resume versions
-- [ ] Interview feedback templates
-- [ ] Candidate recommendation engine
-- [ ] Mobile app (React Native)
-- [ ] Real-time notifications (Socket.io)
-- [ ] Advanced analytics & reports
-- [ ] Interview calendar sync
 
 ---
 
-**Built with ❤️ for connecting talent with opportunity**
+## 📚 API Endpoints Overview
+
+### Authentication Routes (`/api/auth`)
+- `POST /api/auth/send-otp` - Send OTP for candidate registration / verification
+- `POST /api/auth/verify-otp` - Verify phone OTP
+- `POST /api/auth/register` - Complete candidate registration
+- `POST /api/auth/login` - Login for Admin, Recruiter, and Candidate
+- `POST /api/auth/forgot-password` - Trigger Recruiter password reset (DB verified)
+- `POST /api/auth/reset-password-otp` - Verify OTP & reset Recruiter password
+
+### Application Routes (`/api/applications`)
+- `POST /api/applications/assign` - Assign candidate to recruiter (Admin only)
+- `PUT /api/applications/:id/interview` - Schedule interview & send email invite (Recruiter only)
+- `PUT /api/applications/:id/status` - Update candidate application status
+- `PUT /api/applications/:id/feedback` - Add recruiter interview feedback
+
+### Recruiter Management Routes (`/api/recruiters`)
+- `GET /api/recruiters` - List all recruiters with auto-synced profiles (Admin only)
+- `POST /api/recruiters` - Create new recruiter account (Admin only)
+- `PUT /api/recruiters/:id` - Update recruiter profile (Admin only)
+- `DELETE /api/recruiters/:id` - Remove recruiter (Admin only)
+
+### Admin Routes (`/api/admin`)
+- `GET /api/admin/dashboard` - Get dashboard stats counters
+- `GET /api/admin/reports` - Get all application reports with auto-synced candidate profiles
+- `GET /api/admin/unassigned` - Fetch unassigned candidates
+- `PUT /api/admin/applications/:id` - Admin override candidate application status
+
+---
+
+## 🔒 Security Practices
+
+- **Role-Based Access Control (RBAC)**: Route-level middleware enforces strict permission boundaries.
+- **Prepared Statements**: Sequelize ORM protects against SQL injection vulnerabilities.
+- **Secure File Uploads**: File upload validator accepts PDF files up to 5MB max.
+- **Cross-Origin Resource Sharing (CORS)**: Strict CORS policies configured.
+
+---
+
+## 📄 License & Copyright
+
+Copyright © 2026 **Aston Recruitment Team**. All rights reserved.
