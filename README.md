@@ -4,11 +4,12 @@ A modern, responsive, full-stack recruitment and consultancy management portal c
 
 ---
 
+
 ## 🎯 Features & Key Functionality
 
 ### 👥 Three Specialized Portals
 
-- **Admin Portal**: Create and manage recruiters, view comprehensive candidate application reports, assign candidates to recruiters, and override application statuses.
+- **Admin Portal**: Create and manage recruiters, view comprehensive candidate application reports, assign candidates to recruiters, and override application status/statuses.
 - **Recruiter Portal**: View assigned candidates, schedule interviews with integrated Google Meet & Cal.com links, track candidate progress, and record interview feedback.
 - **Candidate Portal**: Register with Phone OTP / Email verification, complete candidate profile (experience, CTC, location preferences), upload resume (PDF), track real-time application status, and view interview details.
 
