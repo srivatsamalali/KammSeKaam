@@ -1,6 +1,15 @@
 const transporter = require('../config/email')
 const path = require('path')
 
+const isSmtpConfigured = () => {
+  return (
+    process.env.SMTP_USER &&
+    !process.env.SMTP_USER.includes('your_email') &&
+    process.env.SMTP_PASSWORD &&
+    !process.env.SMTP_PASSWORD.includes('your_app_password')
+  )
+}
+
 const sendInterviewScheduledEmail = async (
   candidateEmail,
   candidateName,
@@ -10,6 +19,11 @@ const sendInterviewScheduledEmail = async (
   meetLink,
 ) => {
   try {
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP not configured. Interview invitation email skipped for:', candidateEmail)
+      return
+    }
+
     const formattedDate = new Date(interviewDate).toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -78,6 +92,11 @@ const sendInterviewScheduledEmail = async (
 
 const sendResetPasswordEmail = async (email, resetToken) => {
   try {
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP not configured. Reset password link skipped for:', email)
+      return
+    }
+
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
     const mailOptions = {
       from: process.env.ADMIN_EMAIL || 'admin@astonrecruitment.com',
@@ -107,6 +126,13 @@ const sendResetPasswordEmail = async (email, resetToken) => {
 
 const sendOtpEmail = async (email, otp) => {
   try {
+    console.log(`🔑 [OTP GENERATED] for ${email}: ${otp}`)
+
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP is not configured. OTP printed above for testing.')
+      return
+    }
+
     const mailOptions = {
       from: process.env.ADMIN_EMAIL || 'admin@astonrecruitment.com',
       to: email,
