@@ -98,9 +98,11 @@ const ensureAdminUser = async () => {
   if (!existingAdmin) {
     await User.create({
       email: adminEmail,
+      phone: '9000000000',
       password: adminPassword,
       role: 'ADMIN',
       isEmailVerified: true,
+      isPhoneVerified: true,
     })
     console.log('Default admin user created:', { email: adminEmail })
   } else {

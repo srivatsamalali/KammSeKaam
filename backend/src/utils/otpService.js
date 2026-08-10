@@ -6,7 +6,7 @@ const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
-// Send OTP to phone number via email (for now, in production use SMS service like Twilio)
+// Send OTP to email
 const sendOtpToPhone = async (phone, email) => {
   try {
     const otp = generateOtp()
@@ -15,8 +15,8 @@ const sendOtpToPhone = async (phone, email) => {
     // Update user with OTP
     await User.update(
       {
-        phoneOtp: otp,
-        phoneOtpExpiresAt: expiresAt,
+        emailOtp: otp,
+        emailOtpExpiresAt: expiresAt,
       },
       {
         where: { phone },
@@ -58,27 +58,28 @@ const verifyOtp = async (phone, otp) => {
     }
 
     // Check if OTP exists and not expired
-    if (!user.phoneOtp) {
+    if (!user.emailOtp) {
       return { success: false, message: 'No OTP found. Please request a new OTP' }
     }
 
-    if (new Date() > user.phoneOtpExpiresAt) {
+    if (new Date() > user.emailOtpExpiresAt) {
       return { success: false, message: 'OTP expired. Please request a new OTP' }
     }
 
     // Check if OTP matches
-    if (user.phoneOtp !== otp.toString()) {
+    if (user.emailOtp !== otp.toString()) {
       return { success: false, message: 'Invalid OTP' }
     }
 
-    // Mark phone as verified and clear OTP
+    // Mark email and phone as verified and clear OTP
     await user.update({
+      isEmailVerified: true,
       isPhoneVerified: true,
-      phoneOtp: null,
-      phoneOtpExpiresAt: null,
+      emailOtp: null,
+      emailOtpExpiresAt: null,
     })
 
-    return { success: true, message: 'Phone verified successfully' }
+    return { success: true, message: 'OTP verified successfully' }
   } catch (error) {
     console.error('Error verifying OTP:', error)
     throw error

@@ -18,7 +18,7 @@ const User = sequelize.define(
     phone: {
       type: DataTypes.STRING,
       unique: true,
-      allowNull: true,
+      allowNull: false,
     },
     password: {
       type: DataTypes.STRING,
@@ -32,11 +32,11 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    phoneOtp: {
+    emailOtp: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    phoneOtpExpiresAt: {
+    emailOtpExpiresAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },

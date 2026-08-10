@@ -15,9 +15,11 @@ const seedDatabase = async () => {
 
     const adminUser = await User.create({
       email: adminEmail,
+      phone: '9000000000',
       password: adminPassword,
       role: 'ADMIN',
       isEmailVerified: true,
+      isPhoneVerified: true,
     })
 
     console.log('Admin user created:', {
@@ -28,27 +30,35 @@ const seedDatabase = async () => {
     // Create sample recruiters
     const recruiter1 = await User.create({
       email: 'recruiter1@kaamsekaaam.com',
+      phone: '9876543201',
       password: 'Recruiter@123',
       role: 'RECRUITER',
       isEmailVerified: true,
+      isPhoneVerified: true,
     })
 
     await Recruiter.create({
       userId: recruiter1.id,
       name: 'Rajesh Kumar',
+      mobileNumber: '9876543201',
+      address: 'Bangalore',
       specialization: ['Java', 'Python'],
     })
 
     const recruiter2 = await User.create({
       email: 'recruiter2@kaamsekaaam.com',
+      phone: '9876543202',
       password: 'Recruiter@123',
       role: 'RECRUITER',
       isEmailVerified: true,
+      isPhoneVerified: true,
     })
 
     await Recruiter.create({
       userId: recruiter2.id,
       name: 'Priya Sharma',
+      mobileNumber: '9876543202',
+      address: 'Mumbai',
       specialization: ['C++', 'JavaScript'],
     })
 
@@ -57,14 +67,18 @@ const seedDatabase = async () => {
     // Create sample candidates
     const candidate1 = await User.create({
       email: 'john@example.com',
+      phone: '9876543203',
       password: 'Candidate@123',
       role: 'CANDIDATE',
       isEmailVerified: true,
+      isPhoneVerified: true,
     })
 
     await Candidate.create({
       userId: candidate1.id,
       name: 'John Doe',
+      mobileNumber: '9876543203',
+      address: 'Bangalore',
       experience: 5,
       technicalSkills: ['Java', 'Python', 'JavaScript'],
       highestQualification: 'B.Tech',
@@ -78,9 +92,11 @@ const seedDatabase = async () => {
 
     const candidate2 = await User.create({
       email: 'jane@example.com',
+      phone: '9876543204',
       password: 'Candidate@123',
       role: 'CANDIDATE',
       isEmailVerified: true,
+      isPhoneVerified: true,
     })
 
     await Candidate.create({

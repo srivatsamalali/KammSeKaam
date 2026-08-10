@@ -74,6 +74,7 @@ const register = async (req, res) => {
       user.phone = normalizedPhone
       user.password = password
       user.role = 'CANDIDATE'
+      user.isEmailVerified = true
       user.isPhoneVerified = true
       await user.save()
     } else {
@@ -82,6 +83,7 @@ const register = async (req, res) => {
         phone: normalizedPhone,
         password,
         role: 'CANDIDATE',
+        isEmailVerified: true,
         isPhoneVerified: true,
       })
     }
@@ -181,8 +183,8 @@ const forgotPassword = async (req, res) => {
     const otp = generateOtp()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
-    user.phoneOtp = otp
-    user.phoneOtpExpiresAt = expiresAt
+    user.emailOtp = otp
+    user.emailOtpExpiresAt = expiresAt
     await user.save()
 
     try {
@@ -194,7 +196,11 @@ const forgotPassword = async (req, res) => {
       }
     }
 
-    res.json({ message: 'OTP sent to your email', email })
+    res.json({
+      message: 'OTP sent to your email',
+      email,
+      ...(process.env.NODE_ENV === 'development' ? { otp } : {}),
+    })
   } catch (error) {
     console.error('Forgot password error:', error)
     res
@@ -220,16 +226,16 @@ const verifyForgotPasswordOtp = async (req, res) => {
     }
 
     // Check if OTP exists and not expired
-    if (!user.phoneOtp) {
+    if (!user.emailOtp) {
       return res.status(400).json({ message: 'No OTP found. Please request a new OTP' })
     }
 
-    if (new Date() > user.phoneOtpExpiresAt) {
+    if (new Date() > user.emailOtpExpiresAt) {
       return res.status(400).json({ message: 'OTP expired. Please request a new OTP' })
     }
 
     // Check if OTP matches
-    if (user.phoneOtp !== otp.toString()) {
+    if (user.emailOtp !== otp.toString()) {
       return res.status(400).json({ message: 'Invalid OTP' })
     }
 
@@ -268,18 +274,18 @@ const resetPasswordWithOtp = async (req, res) => {
     }
 
     // Verify OTP one more time
-    if (!user.phoneOtp || user.phoneOtp !== otp.toString()) {
+    if (!user.emailOtp || user.emailOtp !== otp.toString()) {
       return res.status(400).json({ message: 'Invalid or expired OTP' })
     }
 
-    if (new Date() > user.phoneOtpExpiresAt) {
+    if (new Date() > user.emailOtpExpiresAt) {
       return res.status(400).json({ message: 'OTP expired' })
     }
 
     // Update password and clear OTP
     user.password = password
-    user.phoneOtp = null
-    user.phoneOtpExpiresAt = null
+    user.emailOtp = null
+    user.emailOtpExpiresAt = null
     await user.save()
 
     res.json({ message: 'Password reset successful' })
