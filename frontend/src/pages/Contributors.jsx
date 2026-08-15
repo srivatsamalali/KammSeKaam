@@ -1,5 +1,4 @@
 import React from 'react'
-import PublicHeader from '../components/PublicHeader'
 
 const contributors = [
   {
@@ -43,7 +42,6 @@ const contributors = [
 const Contributors = () => {
   return (
     <div className="min-h-screen page-shell">
-      <PublicHeader />
       <div className="w-full max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="glass-card p-10 mb-12">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">

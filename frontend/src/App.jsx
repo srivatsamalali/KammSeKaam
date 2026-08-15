@@ -71,6 +71,7 @@ function AnimatedRoutes() {
 
 // Styles
 import './styles/index.css'
+import PublicHeader from './components/PublicHeader'
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
       <div className="min-h-screen w-full bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300">
         <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
           <BrowserRouter>
+            <PublicHeader />
             <AnimatedRoutes />
             <ChatBot />
           </BrowserRouter>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
-import PublicHeader from '../components/PublicHeader'
 import JobLoader from '../components/JobLoader'
 
 const ForgotPassword = () => {
@@ -151,7 +150,6 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen page-shell">
-      <PublicHeader />
       <div className="max-w-md mx-auto pt-20 px-4 sm:px-6">
         <div className="glass-card p-10">
           {/* Step Indicator */}

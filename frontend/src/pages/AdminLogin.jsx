@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
-import PublicHeader from '../components/PublicHeader'
 
 const AdminLogin = () => {
   const navigate = useNavigate()
@@ -48,7 +47,6 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen page-shell">
-      <PublicHeader />
       <div className="max-w-md mx-auto pt-20 px-4">
         <div className="glass-card p-10">
           <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">

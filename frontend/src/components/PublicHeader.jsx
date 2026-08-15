@@ -39,6 +39,9 @@ const PublicHeader = () => {
     }
   }
 
+  const isDashboard = window.location.pathname.includes('/dashboard') || window.location.pathname.includes('/meeting')
+  if (isDashboard) return null
+
   return (
     <>
       <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
@@ -160,7 +163,15 @@ const PublicHeader = () => {
             <span className="text-[10px] font-bold">Admin</span>
           </Link>
           <div onClick={toggleTheme} className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-500 cursor-pointer">
-            <span className="text-lg leading-none">{darkMode ? '☀️' : '🌙'}</span>
+            {darkMode ? (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.94-8.94h-2.25M4.14 12H1.89m17.91-6.84l-1.59 1.59m-11.83 11.83l-1.59 1.59m15.91 0l-1.59-1.59m-11.83-11.83l-1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              </svg>
+            )}
             <span className="text-[10px] font-bold">Theme</span>
           </div>
         </div>,

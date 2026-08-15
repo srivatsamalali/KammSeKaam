@@ -1,11 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import PublicHeader from '../components/PublicHeader'
 
 const LandingPage = () => {
   return (
     <div className="min-h-screen page-shell">
-      <PublicHeader />
 
       {/* Hero Section */}
       <section
