@@ -1,9 +1,10 @@
-const { User, Candidate } = require('../models')
+const { User, Candidate, Notification } = require('../models')
 const { Op } = require('sequelize')
 const { generateToken, generateResetToken } = require('../utils/tokenService')
 const { validatePassword, validateEmail } = require('../utils/validators')
 const { sendResetPasswordEmail, sendOtpEmail, sendRegistrationSuccessEmail } = require('../utils/emailService')
 const { sendOtpToPhone, verifyOtp, resendOtp, generateOtp } = require('../utils/otpService')
+const { sendPushNotification } = require('../utils/pushService')
 
 const normalizePhone = (value) =>
   value
@@ -110,6 +111,41 @@ const register = async (req, res) => {
       await sendRegistrationSuccessEmail(user.email, name)
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError)
+    }
+
+    // Welcome notification for candidate
+    try {
+      await Notification.create({
+        userId: user.id,
+        type: 'WELCOME',
+        message: 'Welcome to Aston Recruitment! Your registration was successful.',
+      })
+      await sendPushNotification(user.id, {
+        title: 'Welcome to Aston Recruitment',
+        body: 'Your registration was successful.',
+        type: 'WELCOME',
+      })
+    } catch (notifErr) {
+      console.error('Failed to create candidate welcome notification:', notifErr)
+    }
+
+    // Notify all admin users
+    try {
+      const admins = await User.findAll({ where: { role: 'ADMIN' } })
+      for (const admin of admins) {
+        await Notification.create({
+          userId: admin.id,
+          type: 'NEW_REGISTRATION',
+          message: `New candidate registered: ${name} (${email})`,
+        })
+        await sendPushNotification(admin.id, {
+          title: 'New Candidate Registered',
+          body: `${name} has registered on the portal.`,
+          type: 'NEW_REGISTRATION',
+        })
+      }
+    } catch (adminNotifErr) {
+      console.error('Failed to notify admins of new registration:', adminNotifErr)
     }
 
     res.status(201).json({

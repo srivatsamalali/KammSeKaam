@@ -6,6 +6,7 @@ const {
   Notification,
 } = require('../models')
 const { sendInterviewScheduledEmail } = require('../utils/emailService')
+const { sendPushNotification } = require('../utils/pushService')
 
 const assignCandidate = async (req, res) => {
   try {
@@ -55,6 +56,11 @@ const assignCandidate = async (req, res) => {
           userId: candidate.userId,
           type: 'APPLICATION_RECEIVED',
           message: 'Your application has been assigned to a recruiter',
+        })
+        await sendPushNotification(candidate.userId, {
+          title: 'Application Assigned',
+          body: 'Your application has been assigned to a recruiter',
+          type: 'APPLICATION_RECEIVED'
         })
       } catch (notifErr) {
         console.error('Notification error:', notifErr.message)
@@ -117,6 +123,28 @@ const updateApplicationStatus = async (req, res) => {
           type: status,
           message: `Your application status: ${status}`,
         })
+        await sendPushNotification(candidate.userId, {
+          title: 'Status Updated',
+          body: `Your application status is now: ${status}`,
+          type: status
+        })
+      }
+
+      // Notify all admin users when recruiter changes status
+      if (req.user && req.user.role === 'RECRUITER') {
+        const admins = await User.findAll({ where: { role: 'ADMIN' } })
+        for (const admin of admins) {
+          await Notification.create({
+            userId: admin.id,
+            type: 'STATUS_UPDATED',
+            message: `Recruiter updated candidate ${candidate?.name || 'Candidate'} status to: ${status}`,
+          })
+          await sendPushNotification(admin.id, {
+            title: 'Candidate Status Updated',
+            body: `Recruiter updated status to: ${status}`,
+            type: 'STATUS_UPDATED'
+          })
+        }
       }
     } catch (notifErr) {
       console.error(
@@ -212,6 +240,30 @@ const scheduleInterview = async (req, res) => {
           interviewDate,
         ).toLocaleString()}`,
       })
+      await sendPushNotification(candidateUser.id, {
+        title: 'Interview Scheduled',
+        body: `Your interview has been scheduled for ${new Date(interviewDate).toLocaleString()}`,
+        type: 'INTERVIEW_SCHEDULED'
+      })
+    }
+
+    // Create notification for recruiter
+    if (application.Recruiter && application.Recruiter.userId) {
+      try {
+        const candidateName = application.Candidate?.name || 'Candidate'
+        await Notification.create({
+          userId: application.Recruiter.userId,
+          type: 'INTERVIEW_SCHEDULED',
+          message: `Interview scheduled for candidate ${candidateName} on ${new Date(interviewDate).toLocaleString()}`,
+        })
+        await sendPushNotification(application.Recruiter.userId, {
+          title: 'Interview Scheduled',
+          body: `Interview scheduled for ${candidateName} on ${new Date(interviewDate).toLocaleString()}`,
+          type: 'INTERVIEW_SCHEDULED'
+        })
+      } catch (recruiterNotifErr) {
+        console.error('Failed to notify recruiter of scheduled interview:', recruiterNotifErr)
+      }
     }
 
     res.json({

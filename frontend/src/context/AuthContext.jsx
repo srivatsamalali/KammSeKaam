@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { subscribeUserToPush } from '../utils/pushRegister'
 
 const AuthContext = createContext()
 
@@ -19,6 +20,14 @@ export const AuthProvider = ({ children }) => {
 
     setLoading(false)
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      subscribeUserToPush().catch((err) =>
+        console.error('Push registration error:', err),
+      )
+    }
+  }, [user])
 
   const login = (userData, token) => {
     setUser(userData)

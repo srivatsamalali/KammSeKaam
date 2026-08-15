@@ -71,6 +71,8 @@ export const notificationService = {
   getAll: () => api.get('/notifications'),
   markAsRead: (notificationId) =>
     api.put(`/notifications/${notificationId}/read`),
+  subscribePush: (subscription) =>
+    api.post('/notifications/subscribe', subscription),
 }
 
 export default api

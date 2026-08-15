@@ -1,4 +1,4 @@
-const { Notification } = require('../models')
+const { Notification, PushSubscription } = require('../models')
 
 const getNotifications = async (req, res) => {
   try {
@@ -40,4 +40,35 @@ const markAsRead = async (req, res) => {
   }
 }
 
-module.exports = { getNotifications, markAsRead }
+const saveSubscription = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const { endpoint, keys } = req.body
+
+    if (!endpoint || !keys) {
+      return res.status(400).json({ message: 'Subscription details are required' })
+    }
+
+    // Upsert subscription
+    let subscription = await PushSubscription.findOne({ where: { userId, endpoint } })
+    if (subscription) {
+      subscription.keys = keys
+      await subscription.save()
+    } else {
+      subscription = await PushSubscription.create({
+        userId,
+        endpoint,
+        keys,
+      })
+    }
+
+    res.status(201).json({ message: 'Subscription saved successfully', subscription })
+  } catch (error) {
+    console.error('Save subscription error:', error)
+    res
+      .status(500)
+      .json({ message: 'Error saving push subscription', error: error.message })
+  }
+}
+
+module.exports = { getNotifications, markAsRead, saveSubscription }

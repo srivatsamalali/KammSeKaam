@@ -1,4 +1,5 @@
-const { Recruiter, Candidate, Application, User } = require('../models')
+const { Recruiter, Candidate, Application, User, Notification } = require('../models')
+const { sendPushNotification } = require('../utils/pushService')
 
 const syncCandidatesAndApplications = async () => {
   try {
@@ -132,6 +133,47 @@ const overrideCandidateStatus = async (req, res) => {
     }
 
     await application.save()
+
+    // Notify candidate of status override
+    try {
+      const candidate = await Candidate.findByPk(application.candidateId)
+      if (candidate) {
+        await Notification.create({
+          userId: candidate.userId,
+          type: status,
+          message: `Your application status was updated by administrator to: ${status}`,
+        })
+        await sendPushNotification(candidate.userId, {
+          title: 'Status Updated by Admin',
+          body: `Your application status is now: ${status}`,
+          type: status,
+        })
+      }
+    } catch (candNotifErr) {
+      console.error('Failed to notify candidate of status override:', candNotifErr)
+    }
+
+    // Notify assigned recruiter of status override
+    if (application.recruiterId) {
+      try {
+        const recruiter = await Recruiter.findByPk(application.recruiterId)
+        if (recruiter && recruiter.userId) {
+          const candidate = await Candidate.findByPk(application.candidateId)
+          await Notification.create({
+            userId: recruiter.userId,
+            type: 'STATUS_OVERRIDDEN',
+            message: `Administrator has overridden candidate ${candidate?.name || 'Candidate'} status to: ${status}`,
+          })
+          await sendPushNotification(recruiter.userId, {
+            title: 'Candidate Status Overridden by Admin',
+            body: `Admin updated candidate status to: ${status}`,
+            type: 'STATUS_OVERRIDDEN',
+          })
+        }
+      } catch (recNotifErr) {
+        console.error('Failed to notify recruiter of status override:', recNotifErr)
+      }
+    }
 
     res.json({ message: 'Status overridden successfully', application })
   } catch (error) {
