@@ -310,9 +310,13 @@ const LandingPage = () => {
         </div>
       </footer>
 
-      {showPreferenceModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4">
-          <div className="w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative border border-slate-800/80 bg-slate-950 min-h-[460px] flex flex-col justify-end p-6 md:p-8 text-center animate-fade-in">
+      {createPortal(
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 backdrop-blur-md px-4 transition-all duration-700 ease-out ${
+          showPreferenceModal ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}>
+          <div className={`w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative border border-slate-800/80 bg-slate-950 min-h-[460px] flex flex-col justify-end p-6 md:p-8 text-center transition-all duration-700 ease-out transform ${
+            showPreferenceModal ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'
+          }`}>
             {/* Full Cover Background Image with transient gradient overlay */}
             <div className="absolute inset-0 z-0">
               <img
