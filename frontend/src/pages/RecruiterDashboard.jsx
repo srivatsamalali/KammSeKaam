@@ -1029,7 +1029,16 @@ const RecruiterDashboard = () => {
                   </label>
                   <select
                     value={editingStatus}
-                    onChange={(e) => setEditingStatus(e.target.value)}
+                    onChange={(e) => {
+                      setEditingStatus(e.target.value)
+                      if (e.target.value === 'INTERVIEW_SCHEDULED') {
+                        setScheduleData({
+                          interviewDate: editingApp.interviewDate ? editingApp.interviewDate.substring(0, 16) : '',
+                          googleMeetLink: editingApp.googleMeetLink || generateCalMeetLink(),
+                          interviewDuration: editingApp.interviewDuration || 60
+                        })
+                      }
+                    }}
                     className="form-input w-full bg-slate-50 border-slate-200 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                   >
                     <option value="">-- Choose Status --</option>
@@ -1040,6 +1049,47 @@ const RecruiterDashboard = () => {
                     <option value="SENT_TO_CLIENT">Send to Client</option>
                   </select>
                 </div>
+
+                {editingStatus === 'INTERVIEW_SCHEDULED' && (
+                  <div className="space-y-4 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/40 mt-2 text-left">
+                    <h5 className="font-bold text-xs text-blue-800 uppercase tracking-wider dark:text-blue-400">Schedule Interview details</h5>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Interview Date & Time</label>
+                      <input
+                        type="datetime-local"
+                        value={scheduleData.interviewDate}
+                        onChange={(e) => {
+                          const newDate = e.target.value
+                          setScheduleData((prev) => ({
+                            ...prev,
+                            interviewDate: newDate,
+                            googleMeetLink: prev.googleMeetLink || generateCalMeetLink(),
+                          }))
+                        }}
+                        className="form-input w-full bg-white dark:bg-slate-800"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Interview Duration</label>
+                      <select
+                        value={scheduleData.interviewDuration}
+                        onChange={(e) =>
+                          setScheduleData({
+                            ...scheduleData,
+                            interviewDuration: parseInt(e.target.value),
+                          })
+                        }
+                        className="form-input w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      >
+                        <option value={30}>30 Minutes (Half-hour)</option>
+                        <option value={60}>60 Minutes (1 Hour)</option>
+                        <option value={90}>90 Minutes (1.5 Hours)</option>
+                        <option value={120}>120 Minutes (2 Hours)</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 {editingStatus === 'REJECTED' && (
                   <div>
@@ -1085,8 +1135,8 @@ const RecruiterDashboard = () => {
                             type="button"
                             onClick={() => setTechnicalRating(num)}
                             className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${technicalRating === num
-                              ? 'bg-amber-650 text-white scale-110 shadow-sm shadow-amber-500/50'
-                              : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-750 dark:text-slate-300 dark:hover:bg-slate-650'
+                              ? 'bg-amber-655 text-white scale-110 shadow-sm shadow-amber-500/50'
+                              : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-750 dark:text-slate-300 dark:hover:bg-slate-655'
                               }`}
                           >
                             {num}
@@ -1172,13 +1222,19 @@ const RecruiterDashboard = () => {
                       handleUpdateStatus(
                         editingApp.id,
                         editingStatus,
-                        editingStatus === 'INTERVIEW_COMPLETED' ? {
-                          technicalRating,
-                          communicationRating,
-                          culturalRating,
-                          recommendation,
-                          feedbackComments
-                        } : (editingStatus === 'SENT_TO_CLIENT' ? { clientId: selectedClientId } : { rejectionReason: editingReason })
+                        editingStatus === 'INTERVIEW_SCHEDULED' ? {
+                          interviewDate: scheduleData.interviewDate,
+                          googleMeetLink: scheduleData.googleMeetLink || generateCalMeetLink(),
+                          interviewDuration: scheduleData.interviewDuration
+                        } : (
+                          editingStatus === 'INTERVIEW_COMPLETED' ? {
+                            technicalRating,
+                            communicationRating,
+                            culturalRating,
+                            recommendation,
+                            feedbackComments
+                          } : (editingStatus === 'SENT_TO_CLIENT' ? { clientId: selectedClientId } : { rejectionReason: editingReason })
+                        )
                       )
                     }
                     className="btn-primary px-4 py-2 text-sm text-white"
