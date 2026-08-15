@@ -134,7 +134,7 @@ const PublicHeader = () => {
             <div 
               className="mobile-active-indicator" 
               style={{ 
-                left: `calc(20% * ${activeIndex} + 8px)`,
+                left: `calc(${activeIndex * 20}% + 8px)`,
                 width: 'calc(20% - 16px)'
               }} 
             />

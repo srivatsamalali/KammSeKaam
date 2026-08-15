@@ -123,6 +123,12 @@ body {
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@media (max-width: 767px) {
+  .page-shell {
+    padding-bottom: 110px !important;
+  }
+}
+
 .glass {
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.55);
