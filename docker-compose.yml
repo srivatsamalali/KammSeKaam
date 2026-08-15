@@ -49,7 +49,8 @@ services:
       SMTP_PASSWORD: qwbd layp mrzy srci
       ADMIN_EMAIL: admin@kaamsekaaam.com
       ADMIN_PASSWORD_ENV: Admin@12345
-      FRONTEND_URL: http://localhost:5173
+      # FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: https://astonrecruitment.in
     ports:
       - '5000:5000'
     depends_on:
