@@ -355,13 +355,17 @@ const AdminDashboard = () => {
 
   // Refs and States for iOS Liquid Glass tab physics & dragging
   const navContainerRef = useRef(null)
+  const pillRef = useRef(null)
   const tabRefs = useRef({})
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const dragStartXRef = useRef(0)
-  const dragIndicatorLeftStartRef = useRef(0)
-  const dragCurrentLeftRef = useRef(0)
-  const indicatorWidthRef = useRef(0)
+  const coordsRef = useRef({
+    isDragging: false,
+    startX: 0,
+    startLeft: 0,
+    currentLeft: 0,
+    currentWidth: 0,
+    minLeft: 0,
+    maxLeft: 0
+  })
 
   const tabs = [
     { id: 'recruiters', label: 'Recruiters' },
@@ -370,40 +374,39 @@ const AdminDashboard = () => {
     { id: 'clients', label: 'Clients' }
   ]
 
-  useEffect(() => {
-    if (isDragging) return
-
+  const syncPill = () => {
     const activeEl = tabRefs.current[activeTab]
     const containerEl = navContainerRef.current
-    if (activeEl && containerEl) {
+    const pillEl = pillRef.current
+    if (activeEl && containerEl && pillEl) {
       const activeRect = activeEl.getBoundingClientRect()
       const containerRect = containerEl.getBoundingClientRect()
-      setIndicatorStyle({
-        left: activeRect.left - containerRect.left,
-        width: activeRect.width,
-        opacity: 1
-      })
-    } else {
-      setIndicatorStyle(prev => ({ ...prev, opacity: 0 }))
+      const left = activeRect.left - containerRect.left
+      const width = activeRect.width
+      
+      coordsRef.current.currentLeft = left
+      coordsRef.current.currentWidth = width
+
+      pillEl.style.opacity = '1'
+      pillEl.style.transition = 'transform 450ms cubic-bezier(0.22, 1, 0.36, 1), width 450ms cubic-bezier(0.22, 1, 0.36, 1)'
+      pillEl.style.transform = `translate3d(${left}px, 0, 0)`
+      pillEl.style.width = `${width}px`
+    } else if (pillEl) {
+      pillEl.style.opacity = '0'
     }
-  }, [activeTab, isDragging])
+  }
 
   useEffect(() => {
-    const handleResize = () => {
-      const activeEl = tabRefs.current[activeTab]
-      const containerEl = navContainerRef.current
-      if (activeEl && containerEl) {
-        const activeRect = activeEl.getBoundingClientRect()
-        const containerRect = containerEl.getBoundingClientRect()
-        setIndicatorStyle({
-          left: activeRect.left - containerRect.left,
-          width: activeRect.width,
-          opacity: 1
-        })
-      }
+    syncPill()
+  }, [activeTab])
+
+  useEffect(() => {
+    window.addEventListener('resize', syncPill)
+    window.addEventListener('orientationchange', syncPill)
+    return () => {
+      window.removeEventListener('resize', syncPill)
+      window.removeEventListener('orientationchange', syncPill)
     }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
   }, [activeTab])
 
   const getBounds = () => {
@@ -424,57 +427,44 @@ const AdminDashboard = () => {
     if (e.button !== 0 && e.pointerType === 'mouse') return
 
     const containerEl = navContainerRef.current
-    if (!containerEl) return
+    const pillEl = pillRef.current
+    const firstEl = tabRefs.current[tabs[0].id]
+    const lastEl = tabRefs.current[tabs[tabs.length - 1].id]
+    if (!containerEl || !pillEl || !firstEl || !lastEl) return
 
-    const activeEl = tabRefs.current[activeTab]
-    const { minLeft, maxLeft, containerRect } = getBounds()
-    if (!containerRect) return
+    const containerRect = containerEl.getBoundingClientRect()
+    const activeEl = tabRefs.current[activeTab] || firstEl
+    const activeRect = activeEl.getBoundingClientRect()
 
-    let startLeft = 0
-    let startWidth = 0
+    const startLeft = activeRect.left - containerRect.left
+    const startWidth = activeRect.width
 
-    if (activeEl) {
-      const activeRect = activeEl.getBoundingClientRect()
-      startLeft = activeRect.left - containerRect.left
-      startWidth = activeRect.width
-    } else {
-      const firstTabEl = tabRefs.current[tabs[0].id]
-      if (firstTabEl) {
-        startLeft = firstTabEl.getBoundingClientRect().left - containerRect.left
-        startWidth = firstTabEl.getBoundingClientRect().width
-      }
-    }
+    coordsRef.current.isDragging = true
+    coordsRef.current.startX = e.clientX
+    coordsRef.current.startLeft = startLeft
+    coordsRef.current.currentLeft = startLeft
+    coordsRef.current.currentWidth = startWidth
+    coordsRef.current.minLeft = firstEl.getBoundingClientRect().left - containerRect.left
+    coordsRef.current.maxLeft = lastEl.getBoundingClientRect().left - containerRect.left
 
-    setIsDragging(true)
-    dragStartXRef.current = e.clientX
-    dragIndicatorLeftStartRef.current = startLeft
-    dragCurrentLeftRef.current = startLeft
-    indicatorWidthRef.current = startWidth
-
-    setIndicatorStyle(prev => ({
-      ...prev,
-      left: startLeft,
-      width: startWidth,
-      opacity: 1
-    }))
-
+    pillEl.style.transition = 'none'
     containerEl.setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e) => {
-    if (!isDragging) return
+    const coords = coordsRef.current
+    if (!coords.isDragging) return
 
     const containerEl = navContainerRef.current
-    if (!containerEl) return
+    const pillEl = pillRef.current
+    if (!containerEl || !pillEl) return
 
-    const { minLeft, maxLeft, containerRect } = getBounds()
-    if (!containerRect) return
+    const deltaX = e.clientX - coords.startX
+    const rawLeft = coords.startLeft + deltaX
+    const constrainedLeft = Math.max(coords.minLeft, Math.min(rawLeft, coords.maxLeft))
+    coords.currentLeft = constrainedLeft
 
-    const deltaX = e.clientX - dragStartXRef.current
-    const rawLeft = dragIndicatorLeftStartRef.current + deltaX
-    const constrainedLeft = Math.max(minLeft, Math.min(rawLeft, maxLeft))
-    dragCurrentLeftRef.current = constrainedLeft
-
+    const containerRect = containerEl.getBoundingClientRect()
     let closestTab = activeTab
     let minDistance = Infinity
 
@@ -483,7 +473,7 @@ const AdminDashboard = () => {
       if (el) {
         const rect = el.getBoundingClientRect()
         const tabCenter = (rect.left - containerRect.left) + rect.width / 2
-        const indicatorCenter = constrainedLeft + (indicatorWidthRef.current || rect.width) / 2
+        const indicatorCenter = constrainedLeft + coords.currentWidth / 2
         const distance = Math.abs(tabCenter - indicatorCenter)
         if (distance < minDistance) {
           minDistance = distance
@@ -493,34 +483,30 @@ const AdminDashboard = () => {
     })
 
     const closestEl = tabRefs.current[closestTab]
-    const targetWidth = closestEl ? closestEl.getBoundingClientRect().width : indicatorWidthRef.current
-    
-    // Smooth dynamic stretching logic matching Apple Liquid control
-    const stretchFactor = Math.min(Math.abs(deltaX) * 0.08, 15)
+    const targetWidth = closestEl ? closestEl.getBoundingClientRect().width : coords.currentWidth
+
+    // Liquid Dynamic Elastic Stretching physics
+    const stretchFactor = Math.min(Math.abs(deltaX) * 0.08, 16)
     const finalWidth = targetWidth + stretchFactor
-    indicatorWidthRef.current = finalWidth
+    coords.currentWidth = finalWidth
 
     requestAnimationFrame(() => {
-      setIndicatorStyle({
-        left: constrainedLeft - (deltaX > 0 ? 0 : stretchFactor),
-        width: finalWidth,
-        opacity: 1
-      })
+      pillEl.style.transform = `translate3d(${constrainedLeft - (deltaX > 0 ? 0 : stretchFactor)}px, 0, 0)`
+      pillEl.style.width = `${finalWidth}px`
     })
   }
 
   const handlePointerUp = (e) => {
-    if (!isDragging) return
+    const coords = coordsRef.current
+    if (!coords.isDragging) return
 
     const containerEl = navContainerRef.current
     if (!containerEl) return
 
     containerEl.releasePointerCapture(e.pointerId)
-    setIsDragging(false)
+    coords.isDragging = false
 
-    const { containerRect } = getBounds()
-    if (!containerRect) return
-
+    const containerRect = containerEl.getBoundingClientRect()
     let closestTab = activeTab
     let minDistance = Infinity
 
@@ -529,7 +515,7 @@ const AdminDashboard = () => {
       if (el) {
         const rect = el.getBoundingClientRect()
         const tabCenter = (rect.left - containerRect.left) + rect.width / 2
-        const indicatorCenter = dragCurrentLeftRef.current + indicatorWidthRef.current / 2
+        const indicatorCenter = coords.currentLeft + coords.currentWidth / 2
         const distance = Math.abs(tabCenter - indicatorCenter)
         if (distance < minDistance) {
           minDistance = distance
@@ -847,23 +833,26 @@ const AdminDashboard = () => {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative flex items-center p-1 bg-slate-200/50 dark:bg-slate-900/40 border border-white/20 dark:border-slate-800/45 rounded-2xl shadow-inner select-none mb-6 max-w-2xl overflow-x-auto scrollbar-none touch-none touch-pan-y"
-          style={{ touchAction: 'pan-y' }}
+          className="relative flex items-center p-1 bg-slate-200/40 dark:bg-slate-900/30 border border-white/20 dark:border-slate-800/40 rounded-2xl shadow-inner select-none mb-6 max-w-2xl overflow-x-auto scrollbar-none touch-none touch-pan-y z-10"
+          style={{ 
+            touchAction: 'pan-y', 
+            backdropFilter: 'blur(16px)', 
+            WebkitBackdropFilter: 'blur(16px)' 
+          }}
         >
           {/* Active Liquid Glass Floating Pill Indicator */}
           <div 
-            className="absolute top-1 bottom-1 bg-white/80 dark:bg-slate-850/80 rounded-[12px] shadow-md border border-white/40 dark:border-slate-700/30 select-none pointer-events-none"
+            ref={pillRef}
+            className="absolute top-1 bottom-1 bg-white/25 dark:bg-white/10 rounded-[12px] border border-white/45 dark:border-white/25 shadow-[0_4px_16px_rgba(31,38,135,0.08),inset_0_1px_1px_rgba(255,255,255,0.45)] pointer-events-none z-[5]"
             style={{
-              transform: `translate3d(${indicatorStyle.left}px, 0, 0)`,
-              width: `${indicatorStyle.width}px`,
-              opacity: indicatorStyle.opacity,
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              transition: isDragging
-                ? 'none'
-                : 'transform 450ms cubic-bezier(0.22, 1, 0.36, 1), width 450ms cubic-bezier(0.22, 1, 0.36, 1)'
+              backdropFilter: 'blur(24px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+              opacity: 0
             }}
-          />
+          >
+            {/* Layered high-gloss reflection overlay */}
+            <div className="absolute inset-0 rounded-[12px] bg-gradient-to-b from-white/25 via-transparent to-transparent opacity-90 pointer-events-none" />
+          </div>
 
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
