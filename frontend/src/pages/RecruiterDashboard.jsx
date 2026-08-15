@@ -67,16 +67,26 @@ export const InterviewCountdown = ({ date }) => {
   )
 }
 
+const parseSkills = (technicalSkills) => {
+  if (!technicalSkills) return []
+  if (Array.isArray(technicalSkills)) return technicalSkills
+  if (typeof technicalSkills === 'string') {
+    try {
+      const parsed = JSON.parse(technicalSkills)
+      return parseSkills(parsed)
+    } catch (e) {
+      return technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
+    }
+  }
+  return []
+}
+
 const calculateAiMatch = (candidate) => {
   if (!candidate) return { score: 0, strengths: [] }
   let score = 65
   const strengths = []
   
-  const skills = Array.isArray(candidate.technicalSkills)
-    ? candidate.technicalSkills
-    : typeof candidate.technicalSkills === 'string'
-    ? JSON.parse(candidate.technicalSkills || '[]')
-    : []
+  const skills = parseSkills(candidate.technicalSkills)
 
   if (skills.length > 0) {
     score += Math.min(skills.length * 7, 20)
