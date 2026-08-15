@@ -50,7 +50,7 @@ services:
       ADMIN_EMAIL: admin@kaamsekaaam.com
       ADMIN_PASSWORD_ENV: Admin@12345
       # FRONTEND_URL: http://localhost:5173
-      FRONTEND_URL: https://astonrecruitment.in
+      FRONTEND_URL: http://astonrecruitment.in,http://www.astonrecruitment.in
     ports:
       - '5000:5000'
     depends_on:
