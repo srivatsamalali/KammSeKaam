@@ -423,17 +423,23 @@ const CandidateRegister = () => {
                     )}
                   </button>
                   {passwordStrength && (
-                    <p
-                      className={`text-sm mt-2 ${
-                        passwordStrength === 'Weak'
-                          ? 'text-red-600'
-                          : passwordStrength === 'Medium'
-                            ? 'text-yellow-600'
-                            : 'text-green-600'
-                      }`}
-                    >
-                      Password Strength: {passwordStrength}
-                    </p>
+                    <div className="mt-2">
+                      <div className="flex justify-between items-center text-xs mb-1">
+                        <span className="font-bold text-slate-500">Security Strength</span>
+                        <span className={`font-bold ${
+                          passwordStrength === 'Weak' ? 'text-red-500' : passwordStrength === 'Medium' ? 'text-amber-500' : 'text-emerald-500'
+                        }`}>
+                          {passwordStrength}
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-300 ${
+                            passwordStrength === 'Weak' ? 'bg-red-500 w-1/3' : passwordStrength === 'Medium' ? 'bg-amber-500 w-2/3' : 'bg-emerald-500 w-full'
+                          }`}
+                        />
+                      </div>
+                    </div>
                   )}
                   <p className="text-xs text-gray-600 mt-2">
                     Min 8 chars, uppercase, lowercase, number, special character

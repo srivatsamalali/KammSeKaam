@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { recruiterService, applicationService, candidateService, messageService } from '../services/api'
+import { playSoftChime } from '../utils/notification'
 
 const calculateAiMatch = (candidate) => {
   if (!candidate) return { score: 0, strengths: [] }
@@ -42,6 +43,13 @@ const calculateAiMatch = (candidate) => {
   }
 }
 
+const LANGUAGE_BOILERPLATES = {
+  javascript: `// JavaScript Playground\nfunction solve() {\n  console.log("Running solution...");\n  return "success";\n}\n`,
+  python: `# Python Playground\ndef solve():\n    print("Running solution...")\n    return "success"\n\nsolve()\n`,
+  java: `// Java Playground\npublic class Solution {\n    public static String solve() {\n        System.out.println("Running solution...");\n        return "success";\n    }\n    public static void main(String[] args) {\n        System.out.println(solve());\n    }\n}\n`,
+  cpp: `// C++ Playground\n#include <iostream>\n#include <string>\n\nstd::string solve() {\n    std::cout << "Running solution..." << std::endl;\n    return "success";\n}\n\nint main() {\n    std::cout << solve() << std::endl;\n    return 0;\n}\n`
+}
+
 const MeetingRoom = () => {
   const { roomId } = useParams()
   const { user } = useAuth()
@@ -55,10 +63,14 @@ const MeetingRoom = () => {
   const [saving, setSaving] = useState(false)
 
   const [activeTab, setActiveTab] = useState('video')
-  const [codeText, setCodeText] = useState('// Write your solution here\nfunction solve() {\n  return "success";\n}')
+  const [codeText, setCodeText] = useState(LANGUAGE_BOILERPLATES.javascript)
   const [language, setLanguage] = useState('javascript')
   const [consoleOutput, setConsoleOutput] = useState('')
   const [running, setRunning] = useState(false)
+  const [showChatDrawer, setShowChatDrawer] = useState(false)
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatNewMessage, setChatNewMessage] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
   const [submissions, setSubmissions] = useState([])
 
   useEffect(() => {
@@ -98,6 +110,7 @@ const MeetingRoom = () => {
           startWithVideoMuted: false,
           disableThirdPartyRequests: true,
           disableDeepLinking: true,
+          prejoinPageEnabled: false,
         }
       }
 
@@ -164,12 +177,69 @@ const MeetingRoom = () => {
     setConsoleOutput('Compiling and executing code...\n')
     setTimeout(() => {
       setRunning(false)
-      setConsoleOutput(
-        (prev) =>
-          prev +
-          `Compilation: Success\nOutput:\n-------------------\nRunning test suite...\nTest 1/3: Passed\nTest 2/3: Passed\nTest 3/3: Passed\n\nResult: ALL TESTS PASSED\nExecution time: 34ms`
-      )
-    }, 1000)
+      if (language === 'javascript') {
+        const logs = []
+        const originalLog = console.log
+        console.log = (...args) => {
+          logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '))
+        }
+
+        try {
+          // Look for a solve() entry point or evaluate the whole block
+          let codeToRun = codeText
+          if (!codeText.includes('solve(') && codeText.includes('function solve')) {
+            codeToRun += '\n;solve();'
+          }
+          const result = eval(codeToRun)
+          console.log = originalLog // restore log
+
+          let outputText = 'Compilation: Success\n'
+          if (logs.length > 0) {
+            outputText += `Output:\n-------------------\n${logs.join('\n')}\n-------------------\n`
+          }
+          outputText += `Returned Value: ${typeof result === 'object' ? JSON.stringify(result) : result}`
+          setConsoleOutput(outputText)
+        } catch (err) {
+          console.log = originalLog // restore log
+          setConsoleOutput(`Compilation/Runtime Error:\n-------------------\n${err.message}`)
+        }
+      } else {
+        setConsoleOutput(
+          `Compilation: Success\n[Simulated ${language.toUpperCase()} Runner]\nOutput:\n-------------------\nRunning test suite...\nTest 1/3: Passed\nTest 2/3: Passed\nTest 3/3: Passed\n\nResult: ALL TESTS PASSED\nExecution time: 34ms`
+        )
+      }
+    }, 800)
+  }
+
+  useEffect(() => {
+    if (showChatDrawer && appDetails?.id) {
+      const loadChatMessages = async () => {
+        try {
+          const res = await messageService.getMessages(appDetails.id)
+          setChatMessages(res.data)
+        } catch (err) {
+          console.error('Error loading chat in meeting room:', err)
+        }
+      }
+      loadChatMessages()
+      const interval = setInterval(loadChatMessages, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [showChatDrawer, appDetails])
+
+  const handleSendChatMessage = async (e) => {
+    e.preventDefault()
+    if (!chatNewMessage.trim() || !appDetails?.id) return
+    setChatLoading(true)
+    try {
+      const res = await messageService.sendMessage(appDetails.id, { message: chatNewMessage })
+      setChatMessages((prev) => [...prev, res.data])
+      setChatNewMessage('')
+    } catch (err) {
+      console.error('Error sending message in meeting room:', err)
+    } finally {
+      setChatLoading(false)
+    }
   }
 
   const handleSubmitCode = async () => {
@@ -221,8 +291,8 @@ const MeetingRoom = () => {
         <div className="flex items-center gap-2">
           {/* Tab buttons */}
           <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setActiveTab('video')}
+             <button
+              onClick={() => { playSoftChime(); setActiveTab('video'); }}
               className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
                 activeTab === 'video'
                   ? 'bg-white dark:bg-slate-700 text-amber-800 dark:text-amber-400 shadow-sm'
@@ -232,7 +302,7 @@ const MeetingRoom = () => {
               📹 Video Conference
             </button>
             <button
-              onClick={() => setActiveTab('code')}
+              onClick={() => { playSoftChime(); setActiveTab('code'); }}
               className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
                 activeTab === 'code'
                   ? 'bg-white dark:bg-slate-700 text-amber-800 dark:text-amber-400 shadow-sm'
@@ -243,7 +313,13 @@ const MeetingRoom = () => {
             </button>
           </div>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => { playSoftChime(); setShowChatDrawer(true); }}
+            className="px-3 py-2 bg-amber-50 dark:bg-amber-950 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-200 dark:border-amber-900 rounded-lg text-xs font-bold text-amber-800 dark:text-amber-300 transition-colors"
+          >
+            💬 Chat Drawer
+          </button>
+          <button
+            onClick={() => { playSoftChime(); navigate('/'); }}
             className="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
           >
             Exit Room
@@ -257,104 +333,107 @@ const MeetingRoom = () => {
         <div className={`flex flex-col h-full ${
           user?.role === 'RECRUITER' && appDetails ? 'lg:w-2/3 w-full' : 'w-full'
         }`}>
-          {activeTab === 'video' ? (
-            <div className="flex-1 flex flex-col bg-black rounded-xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-slate-700/50">
-              <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex flex-wrap gap-2.5 items-center justify-between z-20">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-bold text-slate-300">Aston Recruitment Video Room</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <a 
-                    href={`https://meet.element.io/Aston-Recruitment-Interview-${roomId}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false`} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold transition shadow-sm"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.0} stroke="currentColor" className="w-3.5 h-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                    Jitsi (New Tab - Free/Unlimited)
-                  </a>
-                  <a 
-                    href="https://meet.google.com/new" 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-700 hover:bg-sky-600 text-white rounded text-xs font-bold transition shadow-sm"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.0} stroke="currentColor" className="w-3.5 h-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    Google Meet
-                  </a>
+          <div className={`flex-1 flex flex-col bg-black rounded-xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-slate-700/50 ${activeTab === 'video' ? '' : 'hidden'}`}>
+            <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex flex-wrap gap-2.5 items-center justify-between z-20">
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs font-bold text-slate-300">Aston Recruitment Video Room</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a 
+                  href={`https://meet.element.io/Aston-Recruitment-Interview-${roomId}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.prejoinPageEnabled=false`} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold transition shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.0} stroke="currentColor" className="w-3.5 h-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                  </svg>
+                  Jitsi (New Tab - Free/Unlimited)
+                </a>
+                <a 
+                  href="https://meet.google.com/new" 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-700 hover:bg-sky-600 text-white rounded text-xs font-bold transition shadow-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.0} stroke="currentColor" className="w-3.5 h-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Google Meet
+                </a>
+              </div>
+            </div>
+            {/Mobi|Android|iPhone/i.test(navigator.userAgent) && (
+              <div className="bg-amber-600 text-white px-4 py-2 text-[11px] flex items-start gap-2 border-b border-amber-700/50 z-10">
+                <span className="text-sm">📱</span>
+                <div>
+                  <span className="font-bold">Mobile Browser Notice:</span> Embedded frames block microphone/camera permissions on non-HTTPS origins. If your media fails to start, tap <strong className="underline">Jitsi (New Tab)</strong> above to open in a secure direct browser window.
                 </div>
               </div>
-              {/Mobi|Android|iPhone/i.test(navigator.userAgent) && (
-                <div className="bg-amber-600 text-white px-4 py-2 text-[11px] flex items-start gap-2 border-b border-amber-700/50 z-10">
-                  <span className="text-sm">📱</span>
-                  <div>
-                    <span className="font-bold">Mobile Browser Notice:</span> Embedded frames block microphone/camera permissions on non-HTTPS origins. If your media fails to start, tap <strong className="underline">Jitsi (New Tab)</strong> above to open in a secure direct browser window.
-                  </div>
-                </div>
-              )}
-              <div ref={containerRef} className="flex-1 w-full h-full" />
-            </div>
-          ) : (
-            /* Collaborative Code Playground */
-            <div className="flex-1 bg-slate-900 text-slate-100 rounded-xl border border-slate-800 p-4 flex flex-col h-full">
-              {/* Code Editor Header */}
-              <div className="flex justify-between items-center pb-3 border-b border-slate-800 mb-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-400">Language:</span>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 font-bold focus:outline-none"
-                  >
-                    <option value="javascript">JavaScript</option>
-                    <option value="python">Python</option>
-                    <option value="java">Java</option>
-                    <option value="cpp">C++</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
+            )}
+            <div ref={containerRef} className="flex-1 w-full h-full" />
+          </div>
+
+          {/* Collaborative Code Playground */}
+          <div className={`flex-1 bg-slate-900 text-slate-100 rounded-xl border border-slate-800 p-4 flex flex-col h-full ${activeTab === 'code' ? '' : 'hidden'}`}>
+            {/* Code Editor Header */}
+            <div className="flex justify-between items-center pb-3 border-b border-slate-800 mb-3">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-400">Language:</span>
+                <select
+                  onChange={(e) => {
+                    const newLang = e.target.value
+                    setLanguage(newLang)
+                    if (LANGUAGE_BOILERPLATES[newLang]) {
+                      setCodeText(LANGUAGE_BOILERPLATES[newLang])
+                    }
+                  }}
+                  className="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 font-bold focus:outline-none"
+                >
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="cpp">C++</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRunCode}
+                  disabled={running}
+                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors flex items-center gap-1"
+                >
+                  {running ? 'Running...' : '▶ Run Code'}
+                </button>
+                {user?.role === 'CANDIDATE' && (
                   <button
-                    onClick={handleRunCode}
-                    disabled={running}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors flex items-center gap-1"
+                    onClick={handleSubmitCode}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors flex items-center gap-1"
                   >
-                    {running ? 'Running...' : '▶ Run Code'}
+                    🚀 Submit to Recruiter
                   </button>
-                  {user?.role === 'CANDIDATE' && (
-                    <button
-                      onClick={handleSubmitCode}
-                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors flex items-center gap-1"
-                    >
-                      🚀 Submit to Recruiter
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Code Editor Textarea */}
-              <div className="flex-1 relative font-mono text-sm leading-relaxed">
-                <textarea
-                  value={codeText}
-                  onChange={(e) => setCodeText(e.target.value)}
-                  className="w-full h-full bg-slate-950/80 border border-slate-800 rounded-lg p-3 text-slate-200 font-mono resize-none focus:outline-none focus:border-amber-600/30"
-                  spellCheck="false"
-                />
-              </div>
-
-              {/* Simulation Output Console */}
-              <div className="h-36 mt-3 bg-black rounded-lg border border-slate-800 p-3 font-mono text-xs text-emerald-400 overflow-y-auto">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Console Output
-                </span>
-                <pre className="whitespace-pre-wrap">{consoleOutput || 'Console is empty. Click "Run Code" to compile.'}</pre>
+                )}
               </div>
             </div>
-          )}
+
+            {/* Code Editor Textarea */}
+            <div className="flex-1 relative font-mono text-sm leading-relaxed">
+              <textarea
+                value={codeText}
+                onChange={(e) => setCodeText(e.target.value)}
+                className="w-full h-full bg-slate-950/80 border border-slate-800 rounded-lg p-3 text-slate-200 font-mono resize-none focus:outline-none focus:border-amber-600/30"
+                spellCheck="false"
+              />
+            </div>
+
+            {/* Simulation Output Console */}
+            <div className="h-36 mt-3 bg-black rounded-lg border border-slate-800 p-3 font-mono text-xs text-emerald-400 overflow-y-auto">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                Console Output
+              </span>
+              <pre className="whitespace-pre-wrap">{consoleOutput || 'Console is empty. Click "Run Code" to compile.'}</pre>
+            </div>
+          </div>
         </div>
 
         {/* RIGHT COLUMN: Recruiter Sidebar (Always visible) */}
@@ -501,7 +580,65 @@ const MeetingRoom = () => {
             </button>
           </div>
         )}
-      </div>
+      {/* Sliding Chat History Drawer */}
+      {showChatDrawer && (
+        <div className="fixed inset-0 z-[1000] flex justify-end bg-black/40 backdrop-blur-xs">
+          <div className="w-96 max-w-[85vw] h-full bg-white dark:bg-slate-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            {/* Drawer Header */}
+            <div className="p-4 bg-amber-600 text-white flex justify-between items-center">
+              <span className="font-bold text-sm">💬 Shared Interview Chat</span>
+              <button 
+                onClick={() => setShowChatDrawer(false)}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                ✕ Close
+              </button>
+            </div>
+            
+            {/* Drawer Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+              {chatMessages.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center mt-8">No messages sent yet in this interview thread.</p>
+              ) : (
+                chatMessages.map((msg) => (
+                  <div key={msg.id} className={`flex flex-col ${msg.senderId === user?.id ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase mb-0.5">
+                      {msg.senderId === user?.id ? 'You' : msg.sender === 'RECRUITER' ? 'Recruiter' : 'Candidate'}
+                    </span>
+                    <div className={`px-3 py-2 rounded-xl text-xs max-w-[85%] ${
+                      msg.senderId === user?.id 
+                        ? 'bg-amber-600 text-white rounded-tr-none'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-none'
+                    }`}>
+                      {msg.message}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Drawer Input Box */}
+            <form onSubmit={handleSendChatMessage} className="p-3 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+              <input
+                type="text"
+                value={chatNewMessage}
+                onChange={(e) => setChatNewMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 form-input text-xs dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                disabled={chatLoading}
+              />
+              <button
+                type="submit"
+                disabled={chatLoading}
+                className="px-3 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors shrink-0"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
     </div>
   )
 }

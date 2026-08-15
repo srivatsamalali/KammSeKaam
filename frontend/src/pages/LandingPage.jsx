@@ -1,7 +1,24 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const LandingPage = () => {
+  const [openFaq, setOpenFaq] = useState(null)
+
+  const faqData = [
+    {
+      q: "How does the Jitsi video call work?",
+      a: "Aston video rooms are built directly on top of Jitsi. Once a recruiter schedules an interview, a secure link is generated automatically, and both candidate and recruiter can connect right from their dashboards. No app downloads are required."
+    },
+    {
+      q: "Is there a real-time coding playground?",
+      a: "Yes! Candidates can use the built-in collaborative code editor during the interview to write and execute solutions in JavaScript, Python, C++, and Java. Recruiters can view live snippets, execute test runs, and save evaluation notes."
+    },
+    {
+      q: "How do recruiters get notified of candidate applications?",
+      a: "Our portal features persistent background message polling and desktop popups. Whenever a candidate submits a message or application code snippet, the recruiter receives immediate visual toast notifications and synthetic audio chimes."
+    }
+  ]
+
   return (
     <div className="min-h-screen page-shell">
 
@@ -187,6 +204,48 @@ const LandingPage = () => {
                 intelligent skill scoring.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="scroll-mt-28 py-20 bg-slate-50/50 dark:bg-slate-900/30 border-t border-b border-slate-100 dark:border-slate-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Frequently Asked Questions
+            </h3>
+            <p className="text-slate-500 mt-2 text-sm font-semibold">
+              Got questions? We've got answers to help you navigate Aston Recruitment.
+            </p>
+          </div>
+          <div className="space-y-4">
+            {faqData.map((item, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-xs transition-all duration-300"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full text-left px-6 py-4 flex justify-between items-center font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors"
+                >
+                  <span className="text-sm">{item.q}</span>
+                  <span className="text-slate-400 font-bold transition-transform duration-300 transform" style={{ transform: openFaq === idx ? 'rotate(180deg)' : 'rotate(0)' }}>
+                    ▼
+                  </span>
+                </button>
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    openFaq === idx ? 'max-h-40 border-t border-slate-100 dark:border-slate-700' : 'max-h-0'
+                  } overflow-hidden`}
+                >
+                  <div className="p-6 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {item.a}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

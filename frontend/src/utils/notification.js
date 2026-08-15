@@ -1,3 +1,24 @@
+export const playSoftChime = () => {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    oscillator.start();
+    
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+    oscillator.stop(audioCtx.currentTime + 0.15);
+  } catch (e) {
+    // ignore
+  }
+}
+
 export const triggerMessageNotification = (sender, messageText) => {
   // 1. Play synthesized message sound using Web Audio API
   try {
