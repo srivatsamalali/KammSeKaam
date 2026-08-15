@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
 import PublicHeader from '../components/PublicHeader'
+import { Link } from 'react-router-dom'
 
 const CandidateLogin = () => {
   const navigate = useNavigate()
@@ -152,12 +153,12 @@ const CandidateLogin = () => {
 
           <p className="text-center text-gray-600 mt-4">
             Don't have an account?{' '}
-            <a
+            <Link
               href="/candidate/register"
               className="text-blue-600 font-semibold hover:underline"
             >
               Register
-            </a>
+            </Link>
           </p>
         </div>
       </div>
