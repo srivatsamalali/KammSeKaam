@@ -5,7 +5,188 @@ import {
   recruiterService,
   applicationService,
   notificationService,
+  messageService,
 } from '../services/api'
+
+const CalendarButton = ({ interviewDate, googleMeetLink }) => {
+  const [showOptions, setShowOptions] = useState(false);
+
+  if (!interviewDate) return null;
+
+  const dateObj = new Date(interviewDate);
+  const startDate = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  const endDateObj = new Date(dateObj.getTime() + 60 * 60 * 1000);
+  const endDate = endDateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aston+Recruitment+Interview&dates=${startDate}/${endDate}&details=Google+Meet+Link:+${encodeURIComponent(googleMeetLink || 'Will be provided')}&location=Online`;
+
+  const downloadIcs = () => {
+    const formattedStart = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const formattedEnd = endDateObj.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      `URL:${googleMeetLink || ''}`,
+      `DTSTART:${formattedStart}`,
+      `DTEND:${formattedEnd}`,
+      'SUMMARY:Interview with Aston Recruitment',
+      `DESCRIPTION:Google Meet Link: ${googleMeetLink || 'TBD'}`,
+      'LOCATION:Online',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', 'interview.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="relative inline-block text-left mt-2">
+      <button
+        onClick={() => setShowOptions(!showOptions)}
+        className="px-3 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold hover:bg-amber-600 transition-all flex items-center gap-1"
+      >
+        📅 Add to Calendar
+      </button>
+      {showOptions && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
+          <div className="absolute left-0 mt-1 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+            <div className="py-1">
+              <a
+                href={googleUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setShowOptions(false)}
+                className="block px-4 py-2 text-[10px] text-gray-700 hover:bg-gray-100 font-semibold"
+              >
+                Google Calendar
+              </a>
+              <button
+                onClick={() => {
+                  downloadIcs();
+                  setShowOptions(false);
+                }}
+                className="w-full text-left block px-4 py-2 text-[10px] text-gray-700 hover:bg-gray-100 font-semibold"
+              >
+                Download .ics file
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+const ChatPanel = ({ applicationId }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (isOpen) {
+      loadMessages();
+      const interval = setInterval(loadMessages, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [isOpen, applicationId]);
+
+  const loadMessages = async () => {
+    try {
+      const res = await messageService.getMessages(applicationId);
+      setMessages(res.data);
+    } catch (err) {
+      console.error('Error fetching chat messages:', err);
+    }
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    setLoading(true);
+    try {
+      const res = await messageService.sendMessage(applicationId, { message: newMessage });
+      setMessages((prev) => [...prev, res.data]);
+      setNewMessage('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 border border-amber-200 rounded-xl overflow-hidden bg-white/50">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-2.5 bg-amber-50 hover:bg-amber-100/80 text-amber-800 text-xs font-bold flex justify-between items-center transition-all"
+      >
+        <span>💬 Chat with Candidate</span>
+        <span>{isOpen ? '▲' : '▼'}</span>
+      </button>
+      {isOpen && (
+        <div className="p-4 flex flex-col h-64 bg-white">
+          <div className="flex-1 overflow-y-auto mb-3 space-y-2 pr-1">
+            {messages.length === 0 ? (
+              <p className="text-[10px] text-gray-500 text-center py-8 font-semibold">No messages yet. Send a message to coordinate!</p>
+            ) : (
+              messages.map((msg) => {
+                const isMe = msg.senderId === user.id;
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col max-w-[80%] ${
+                      isMe ? 'ml-auto items-end' : 'mr-auto items-start'
+                    }`}
+                  >
+                    <div
+                      className={`px-3 py-1.5 rounded-lg text-xs ${
+                        isMe
+                          ? 'bg-amber-600 text-white rounded-br-none'
+                          : 'bg-slate-100 text-slate-800 rounded-bl-none'
+                      }`}
+                    >
+                      {msg.message}
+                    </div>
+                    <span className="text-[9px] text-gray-400 mt-0.5 font-semibold">
+                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <form onSubmit={handleSend} className="flex gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type message..."
+              className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const RecruiterDashboard = () => {
   const { user, logout } = useAuth()
@@ -245,6 +426,7 @@ const RecruiterDashboard = () => {
                           {app.googleMeetLink}
                         </a>
                       </p>
+                      <CalendarButton interviewDate={app.interviewDate} googleMeetLink={app.googleMeetLink} />
                       <div className="mt-3">
                         {editingAppId === app.id ? (
                           <div className="space-y-2">
@@ -444,6 +626,9 @@ const RecruiterDashboard = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Direct Chat with Candidate */}
+                  <ChatPanel applicationId={app.id} />
                 </div>
               ))
             )}

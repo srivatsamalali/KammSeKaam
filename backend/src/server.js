@@ -16,6 +16,7 @@ const recruiterRoutes = require('./routes/recruiterRoutes')
 const applicationRoutes = require('./routes/applicationRoutes')
 const adminRoutes = require('./routes/adminRoutes')
 const notificationRoutes = require('./routes/notificationRoutes')
+const messageRoutes = require('./routes/messageRoutes')
 
 const app = express()
 
@@ -70,6 +71,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/candidate', candidateRoutes)
 app.use('/api/recruiters', recruiterRoutes)
 app.use('/api/applications', applicationRoutes)
+app.use('/api/applications', messageRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/notifications', notificationRoutes)
 

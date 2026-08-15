@@ -1,4 +1,6 @@
 const { Candidate, User, Application, Recruiter } = require('../models')
+const pdfParse = require('pdf-parse')
+const fs = require('fs')
 
 const getProfile = async (req, res) => {
   try {
@@ -62,6 +64,48 @@ const updateProfile = async (req, res) => {
     // Handle resume upload
     if (req.file) {
       candidate.resumePath = `/uploads/resumes/${req.file.filename}`
+      
+      // Auto parsing resume if PDF
+      if (req.file.mimetype === 'application/pdf' || req.file.filename.toLowerCase().endsWith('.pdf')) {
+        try {
+          const filePath = req.file.path
+          const dataBuffer = fs.readFileSync(filePath)
+          const pdfData = await pdfParse(dataBuffer)
+          const text = pdfData.text || ''
+          
+          // 1. Parse Skills
+          const skillsList = [
+            'JavaScript', 'Python', 'Java', 'C++', 'React', 'Node', 'SQL', 
+            'AWS', 'HTML', 'CSS', 'Angular', 'Go', 'Rust', 'Ruby', 'PHP', 
+            'Docker', 'Kubernetes', 'MongoDB', 'PostgreSQL', 'Express', 'TypeScript'
+          ]
+          const matchedSkills = []
+          for (const skill of skillsList) {
+            const regex = new RegExp(`\\b${skill}\\b`, 'i')
+            if (regex.test(text)) {
+              matchedSkills.push(skill)
+            }
+          }
+          if (matchedSkills.length > 0) {
+            // Merge with existing skills if any
+            const existingSkills = candidate.technicalSkills || []
+            const merged = Array.from(new Set([...existingSkills, ...matchedSkills]))
+            candidate.technicalSkills = merged
+          }
+
+          // 2. Parse Experience (look for a number before "years experience" or similar)
+          const expRegex = /\b(\d+)\+?\s*(years?|yrs?)\s*(of\s*)?experience\b/i
+          const match = text.match(expRegex)
+          if (match && match[1]) {
+            const years = parseInt(match[1], 10)
+            if (!isNaN(years) && (!candidate.experience || candidate.experience === 0)) {
+              candidate.experience = years
+            }
+          }
+        } catch (parseError) {
+          console.error('Failed to parse resume PDF:', parseError.message)
+        }
+      }
     }
 
     await candidate.save()

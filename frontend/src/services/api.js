@@ -75,4 +75,9 @@ export const notificationService = {
     api.post('/notifications/subscribe', subscription),
 }
 
+export const messageService = {
+  getMessages: (applicationId) => api.get(`/applications/${applicationId}/messages`),
+  sendMessage: (applicationId, data) => api.post(`/applications/${applicationId}/messages`, data),
+}
+
 export default api

@@ -122,6 +122,40 @@ const AdminDashboard = () => {
     }
   }
 
+  const exportApplicationsToCSV = () => {
+    try {
+      const headers = ['Candidate Name', 'Candidate Email', 'Recruiter Name', 'Application Status', 'Applied Date', 'Interview Date', 'Meeting Link'];
+      
+      const rows = applications.map(app => [
+        app.Candidate?.name || 'N/A',
+        app.Candidate?.User?.email || 'N/A',
+        app.Recruiter?.name || 'Not assigned',
+        app.status || 'N/A',
+        new Date(app.createdAt).toLocaleDateString(),
+        app.interviewDate ? new Date(app.interviewDate).toLocaleString() : 'N/A',
+        app.googleMeetLink || 'N/A'
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `kaamsekaaam_applications_report_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      alert('Failed to export CSV report');
+    }
+  };
+
   if (loading) return <div className="text-center py-20">Loading...</div>
 
   return (
@@ -487,6 +521,17 @@ const AdminDashboard = () => {
         {/* Applications Tab */}
         {activeTab === 'applications' && (
           <div className="space-y-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-xl font-bold text-gray-900">Applications Status Reports</h3>
+              {applications.length > 0 && (
+                <button
+                  onClick={exportApplicationsToCSV}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                >
+                  📥 Export to CSV
+                </button>
+              )}
+            </div>
             {/* Unassigned candidates section */}
             {unassignedCandidates.length > 0 && (
               <div className="card mb-4">
