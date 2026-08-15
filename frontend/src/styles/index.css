@@ -11,9 +11,9 @@
 html,
 body {
   min-height: 100%;
-  background: #e9f4ff !important;
+  background: #faf8f2 !important;
   color-scheme: light;
-  background-color: #e9f4ff !important;
+  background-color: #faf8f2 !important;
   scroll-behavior: smooth;
 }
 
@@ -23,13 +23,13 @@ body {
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(180deg, #eff8ff 0%, #e0f2fe 40%, #ffffff 100%);
+  background: linear-gradient(180deg, #fdfbf7 0%, #f7f2e4 40%, #ffffff 100%);
   color: #0f172a;
 }
 
 .page-shell {
   width: 100%;
-  background: rgba(234, 246, 255, 0.95);
+  background: rgba(251, 248, 237, 0.95);
   min-height: 100vh;
 }
 
@@ -53,13 +53,13 @@ body {
 .btn-primary {
   background: linear-gradient(
     180deg,
-    rgba(59, 130, 246, 0.95),
-    rgba(37, 99, 235, 0.95)
+    rgba(220, 185, 111, 0.95),
+    rgba(184, 143, 63, 0.95)
   );
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 10px;
-  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 6px 12px rgba(184, 143, 63, 0.18);
   transition:
     transform 0.12s ease,
     box-shadow 0.12s ease;
@@ -181,11 +181,11 @@ button:not(.btn-primary):not(.btn-secondary) {
   border-radius: 16px;
   background: linear-gradient(
     135deg,
-    rgba(14, 165, 233, 0.15),
-    rgba(59, 130, 246, 0.2)
+    rgba(220, 185, 111, 0.15),
+    rgba(184, 143, 63, 0.2)
   );
-  color: #0f172a;
-  box-shadow: inset 0 4px 15px rgba(59, 130, 246, 0.08);
+  color: #8c6a23;
+  box-shadow: inset 0 4px 15px rgba(184, 143, 63, 0.08);
   margin-bottom: 1rem;
 }
 
@@ -290,13 +290,13 @@ button:active,
 .btn-primary {
   background: linear-gradient(
     135deg,
-    rgba(45, 147, 255, 0.95),
-    rgba(21, 101, 192, 0.98)
+    rgba(220, 185, 111, 0.95),
+    rgba(184, 143, 63, 0.98)
   );
   color: white;
   padding: 0.95rem 1.6rem;
   border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.24);
+  box-shadow: 0 20px 40px rgba(184, 143, 63, 0.24);
 }
 
 .btn-secondary {
@@ -485,7 +485,7 @@ button:disabled,
   overflow: hidden;
   position: relative;
   min-height: 520px;
-  background: linear-gradient(135deg, #f8fbff 0%, #e5f3ff 45%, #e6effc 100%);
+  background: linear-gradient(135deg, #faf7f0 0%, #f5eedc 45%, #f1e6ce 100%);
   box-shadow: 0 40px 80px rgba(15, 23, 42, 0.12);
   animation: float 8s ease-in-out infinite;
 }
@@ -569,14 +569,14 @@ button:disabled,
 .btn-primary {
   background: linear-gradient(
     135deg,
-    rgba(56, 189, 248, 0.95),
-    rgba(37, 99, 235, 0.95)
+    rgba(220, 185, 111, 0.95),
+    rgba(184, 143, 63, 0.95)
   );
   color: white;
   padding: 0.85rem 1.4rem;
   border-radius: 14px;
   font-weight: 600;
-  box-shadow: 0 16px 30px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 16px 30px rgba(184, 143, 63, 0.2);
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease;
@@ -608,8 +608,8 @@ button:disabled,
   justify-content: center;
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
-  background: rgba(59, 130, 246, 0.12);
-  color: #1d4ed8;
+  background: rgba(184, 143, 63, 0.12);
+  color: #8c6a23;
   font-weight: 600;
 }
 

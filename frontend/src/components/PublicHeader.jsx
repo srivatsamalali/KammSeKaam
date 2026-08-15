@@ -2,24 +2,27 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const PublicHeader = () => {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
       <div className="w-full mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center h-auto md:h-20">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo & Brand */}
           <Link to="/" className="flex items-center gap-3">
             <img
               src="/logo.jpeg"
               alt="Aston Recruitment"
-              className="h-11 w-11 rounded-3xl object-cover shadow-lg shadow-sky-200/50"
+              className="h-11 w-11 rounded-3xl object-cover shadow-lg shadow-amber-200/50"
             />
-            <h1 className="text-2xl font-bold text-sky-700">
+            <h1 className="text-xl sm:text-2xl font-bold" style={{ color: '#8c6a23' }}>
               Aston Recruitment
             </h1>
           </Link>
 
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center gap-3">
             <Link to="/#home" className="nav-link">
               Home
             </Link>
@@ -31,42 +34,27 @@ const PublicHeader = () => {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3 relative">
+          {/* Desktop Action Buttons */}
+          <div className="hidden md:flex items-center gap-3 relative">
             <Link to="/candidate/login" className="nav-link">
               Candidate Login
             </Link>
             <div
               className="relative"
-              onMouseEnter={() => setMenuOpen(true)}
-              onMouseLeave={() => setMenuOpen(false)}
+              onMouseEnter={() => setMoreMenuOpen(true)}
+              onMouseLeave={() => setMoreMenuOpen(false)}
             >
               <button
                 type="button"
-                onClick={() => setMenuOpen((prev) => !prev)}
+                onClick={() => setMoreMenuOpen((prev) => !prev)}
                 className="nav-link inline-flex items-center gap-2"
               >
-                <span className="hidden md:inline">More</span>
-                <span className="md:hidden inline-flex h-5 w-5 items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </svg>
-                </span>
-                <span className="hidden md:inline text-slate-500">▾</span>
+                <span>More</span>
+                <span className="text-slate-500">▾</span>
               </button>
               <div
                 className={`dropdown-menu absolute right-0 top-full mt-3 w-48 overflow-hidden transition-all duration-200 ${
-                  menuOpen
+                  moreMenuOpen
                     ? 'opacity-100 visible translate-y-0'
                     : 'opacity-0 invisible -translate-y-2'
                 }`}
@@ -74,21 +62,104 @@ const PublicHeader = () => {
                 <Link
                   to="/recruiter/login"
                   className="dropdown-item"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => setMoreMenuOpen(false)}
                 >
                   Recruiter Login
                 </Link>
                 <Link
                   to="/admin/login"
                   className="dropdown-item"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => setMoreMenuOpen(false)}
                 >
                   Admin Login
                 </Link>
               </div>
             </div>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <div className="flex md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              type="button"
+              className="nav-link inline-flex items-center justify-center p-2 rounded-full"
+              style={{ padding: '0.6rem' }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-slate-700"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {mobileMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Navigation Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden pb-6 pt-2 border-t border-slate-100 flex flex-col gap-3">
+            <Link
+              to="/#home"
+              className="nav-link justify-start"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              to="/#about"
+              className="nav-link justify-start"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link
+              to="/#services"
+              className="nav-link justify-start"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Services
+            </Link>
+            <hr className="border-slate-100 my-1" />
+            <Link
+              to="/candidate/login"
+              className="nav-link justify-start"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Candidate Login
+            </Link>
+            <Link
+              to="/recruiter/login"
+              className="nav-link justify-start"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Recruiter Login
+            </Link>
+            <Link
+              to="/admin/login"
+              className="nav-link justify-start"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Admin Login
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   )

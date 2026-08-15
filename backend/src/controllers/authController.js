@@ -2,7 +2,7 @@ const { User, Candidate } = require('../models')
 const { Op } = require('sequelize')
 const { generateToken, generateResetToken } = require('../utils/tokenService')
 const { validatePassword, validateEmail } = require('../utils/validators')
-const { sendResetPasswordEmail, sendOtpEmail } = require('../utils/emailService')
+const { sendResetPasswordEmail, sendOtpEmail, sendRegistrationSuccessEmail } = require('../utils/emailService')
 const { sendOtpToPhone, verifyOtp, resendOtp, generateOtp } = require('../utils/otpService')
 
 const normalizePhone = (value) =>
@@ -104,6 +104,13 @@ const register = async (req, res) => {
     }
 
     const token = generateToken(user)
+
+    // Send welcome email
+    try {
+      await sendRegistrationSuccessEmail(user.email, name)
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError)
+    }
 
     res.status(201).json({
       message: 'Registration successful',

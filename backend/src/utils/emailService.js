@@ -164,4 +164,50 @@ const sendOtpEmail = async (email, otp) => {
   }
 }
 
-module.exports = { sendInterviewScheduledEmail, sendResetPasswordEmail, sendOtpEmail }
+const sendRegistrationSuccessEmail = async (email, name) => {
+  try {
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP not configured. Welcome email skipped for:', email)
+      return
+    }
+
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
+      to: email,
+      subject: '🎉 Welcome to Aston Recruitment!',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #0f172a; padding: 24px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">Aston Recruitment</h1>
+            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 14px;">Consultancy Management Portal</p>
+          </div>
+          <div style="padding: 24px;">
+            <h2 style="color: #0f172a; margin-top: 0;">Welcome, ${name}!</h2>
+            <p style="color: #334155; font-size: 15px;">Dear <strong>${name}</strong>,</p>
+            <p style="color: #334155; font-size: 15px;">Thank you for registering on the Aston Recruitment portal. Your account has been successfully created!</p>
+            <p style="color: #334155; font-size: 15px;">Our recruitment team will review your profile and match you with potential jobs that fit your skillset.</p>
+            
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you experience any issues or have questions, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0066cc;">Contact@astonrecruitment.in</a>.</p>
+            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+          </div>
+          <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
+            © ${new Date().getFullYear()} Aston Recruitment. All rights reserved.
+          </div>
+        </div>
+      `
+    }
+
+    await transporter.sendMail(mailOptions)
+    console.log(`Welcome email sent successfully to ${email}`)
+  } catch (error) {
+    console.error('Error sending registration email:', error)
+    throw error
+  }
+}
+
+module.exports = {
+  sendInterviewScheduledEmail,
+  sendResetPasswordEmail,
+  sendOtpEmail,
+  sendRegistrationSuccessEmail
+}
