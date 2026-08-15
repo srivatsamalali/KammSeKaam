@@ -558,8 +558,9 @@ const AdminDashboard = () => {
 
     coords.isDragging = false
 
+    const containerRect = container.getBoundingClientRect()
+
     if (coords.hasDragged) {
-      const containerRect = container.getBoundingClientRect()
       let closestTab = activeTab
       let minDistance = Infinity
 
@@ -592,17 +593,24 @@ const AdminDashboard = () => {
 
       setActiveTab(closestTab)
     } else {
-      // Simple click/tap, animate to current active element
-      const activeEl = tabRefs.current[activeTab]
-      if (activeEl) {
-        const containerRect = container.getBoundingClientRect()
-        const activeRect = activeEl.getBoundingClientRect()
-        const left = activeRect.left - containerRect.left
-        pill.style.transition =
-          'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1)'
-        pill.style.transform = `translate3d(${left}px, 0, 0)`
-        pill.style.width = `${activeRect.width}px`
-      }
+      // Simple click/tap - determine tab based on release coordinate to bypass pointer capture click blocks
+      const relativeX = e.clientX - containerRect.left
+      let clickedTab = activeTab
+
+      tabs.forEach((tab) => {
+        const el = tabRefs.current[tab.id]
+        if (!el) return
+
+        const rect = el.getBoundingClientRect()
+        const left = rect.left - containerRect.left
+        const right = rect.right - containerRect.left
+
+        if (relativeX >= left && relativeX <= right) {
+          clickedTab = tab.id
+        }
+      })
+
+      setActiveTab(clickedTab)
     }
 
     setTimeout(() => {
