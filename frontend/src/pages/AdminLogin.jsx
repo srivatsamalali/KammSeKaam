@@ -125,10 +125,6 @@ const AdminLogin = () => {
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
-
-          <p className="text-center text-gray-600 mt-4 text-sm">
-            Default: Contact@astonrecruitment.in / Admin@12345
-          </p>
         </div>
       </div>
     </div>
