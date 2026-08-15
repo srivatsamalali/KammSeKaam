@@ -11,7 +11,7 @@ const PublicHeader = () => {
   const location = useLocation()
   const { user } = useAuth()
   const lastCheckedRef = useRef({})
-  const userPref = (() => {
+  const getInitialPref = () => {
     // If logged in, map preference to the active role
     const token = localStorage.getItem('token')
     if (token) {
@@ -23,7 +23,17 @@ const PublicHeader = () => {
     }
     // Else return saved user preference
     return localStorage.getItem('user_preference') || ''
-  })()
+  }
+
+  const [userPref, setUserPref] = useState(getInitialPref)
+
+  useEffect(() => {
+    const handlePrefChange = () => {
+      setUserPref(getInitialPref())
+    }
+    window.addEventListener('local-storage-pref', handlePrefChange)
+    return () => window.removeEventListener('local-storage-pref', handlePrefChange)
+  }, [])
 
   useEffect(() => {
     if (user?.role !== 'CANDIDATE') return

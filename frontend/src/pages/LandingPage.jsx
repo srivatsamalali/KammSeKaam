@@ -315,6 +315,32 @@ const LandingPage = () => {
               <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/70 to-slate-950 z-10" />
             </div>
 
+            {/* Cancel/Close Button */}
+            <button
+              onClick={() => {
+                localStorage.setItem('user_preference', 'candidate');
+                window.dispatchEvent(new Event('local-storage-pref'));
+                setShowPreferenceModal(false);
+              }}
+              className="absolute top-4 right-4 z-30 text-slate-400 hover:text-white bg-slate-900/60 p-2 rounded-full backdrop-blur-md border border-slate-700/50 hover:border-amber-500 transition-all cursor-pointer shadow-md"
+              title="Cancel and land as candidate"
+              aria-label="Cancel"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="w-5 h-5"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
             {/* Elevated Content Container */}
             <div className="relative z-20 flex flex-col items-center w-full">
               {preferenceView === 'main' && (
