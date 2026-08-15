@@ -35,18 +35,15 @@ const LandingPage = () => {
   }
 
   useEffect(() => {
-    // If user is already logged in, do not show the modal
-    if (localStorage.getItem('token')) return
-
     // Clear preferences initially to hide all header buttons
     localStorage.removeItem('user_preference')
     localStorage.removeItem('user_preference_timestamp')
     window.dispatchEvent(new Event('local-storage-pref'))
 
-    // Delay showing the preference modal by 3 seconds
+    // Delay showing the preference modal by 500ms
     const timer = setTimeout(() => {
       setShowPreferenceModal(true)
-    }, 3000)
+    }, 500)
 
     return () => clearTimeout(timer)
   }, [])
