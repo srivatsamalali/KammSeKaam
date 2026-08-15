@@ -369,7 +369,7 @@ const sendSentToClientEmailToClient = async (clientEmail, clientName, candidateN
   }
 }
 
-const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, clientName, clientCompany) => {
+const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, clientName, clientCompany, clientEmail) => {
   try {
     if (!isSmtpConfigured()) {
       console.log('📧 [DEV MODE] SMTP not configured. Candidate referral update email skipped for:', candidateEmail)
@@ -379,20 +379,27 @@ const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, c
     const mailOptions = {
       from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
       to: candidateEmail,
-      subject: '🎉 Great News! Your profile is shared with client - Aston Recruitment',
+      cc: clientEmail || undefined,
+      subject: '🎉 Great News! 2nd Round Interview - Aston Recruitment',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
           <div style="background-color: #b88f3f; padding: 24px; text-align: center; color: #ffffff;">
             <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">Aston Recruitment</h1>
-            <p style="margin: 4px 0 0 0; color: #fef3c7; font-size: 14px;">Application Status Update</p>
+            <p style="margin: 4px 0 0 0; color: #fef3c7; font-size: 14px;">2nd Round Evaluation Referral</p>
           </div>
           <div style="padding: 24px;">
             <h2 style="color: #78350f; margin-top: 0;">Good news, ${candidateName}!</h2>
-            <p style="color: #334155; font-size: 15px;">We are excited to inform you that your profile has been successfully referred and sent to our client <strong>${clientName}</strong> at <strong>${clientCompany}</strong> (2nd Round evaluation).</p>
-            <p style="color: #334155; font-size: 15px;">The client's hiring managers are currently reviewing your details. Once they confirm availability for the next round of interviews, your recruiter will contact you immediately to schedule.</p>
+            <p style="color: #334155; font-size: 15px;">We are excited to inform you that your profile has been successfully referred to our client <strong>${clientName}</strong> at <strong>${clientCompany}</strong> for the <strong>2nd Round Interview</strong>.</p>
             
-            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions, contact your recruiter or reach out to support at <a href="mailto:Contact@astonrecruitment.in" style="color: #b88f3f;">Contact@astonrecruitment.in</a>.</p>
-            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+            <div style="background-color: #fffbeb; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 4px; margin: 20px 0;">
+              <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.6;">
+                <strong>Client Contact (Looped In):</strong> ${clientName} (${clientEmail})<br/>
+                We have CC'd the client directly on this invitation. You may reply to this thread to align on availability or the client's scheduling link directly.
+              </p>
+            </div>
+
+            <p style="color: #334155; font-size: 15px;">The client's team will review your timeline and reach out shortly to lock in a time slot.</p>
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
           </div>
           <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
             © ${new Date().getFullYear()} Aston Recruitment. All rights reserved.

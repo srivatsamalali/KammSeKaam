@@ -162,8 +162,8 @@ const updateApplicationStatus = async (req, res) => {
               if (client) {
                 // Email 1: Send to client
                 await emailService.sendSentToClientEmailToClient(client.email, client.name, candidate.name, candidate.resumePath)
-                // Email 2: Send to candidate
-                await emailService.sendSentToClientEmailToCandidate(candidate.User.email, candidate.name, client.name, client.company)
+                // Email 2: Send to candidate with client cc'd
+                await emailService.sendSentToClientEmailToCandidate(candidate.User.email, candidate.name, client.name, client.company, client.email)
               }
             }
           }

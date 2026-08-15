@@ -327,6 +327,7 @@ const RecruiterDashboard = () => {
 
   const [clients, setClients] = useState([])
   const [selectedClientId, setSelectedClientId] = useState('')
+  const [selectedClientMap, setSelectedClientMap] = useState({})
 
   useEffect(() => {
     fetchApplications()
@@ -849,6 +850,25 @@ const RecruiterDashboard = () => {
                         >
                           Reject
                         </button>
+                        <div className="flex items-center gap-1">
+                          <select
+                            value={selectedClientMap[app.id] || ''}
+                            onChange={(e) => setSelectedClientMap(prev => ({ ...prev, [app.id]: e.target.value }))}
+                            className="form-input text-xs max-w-[180px] bg-white inline-block h-9 py-1 px-2 border border-slate-300 rounded"
+                          >
+                            <option value="">-- Choose Client --</option>
+                            {clients.map(c => (
+                              <option key={c.id} value={c.id}>{c.name} ({c.company})</option>
+                            ))}
+                          </select>
+                          <button
+                            disabled={!selectedClientMap[app.id]}
+                            onClick={() => handleUpdateStatus(app.id, 'SENT_TO_CLIENT', { clientId: selectedClientMap[app.id] })}
+                            className="btn-success px-3 py-2 text-xs font-bold disabled:opacity-50 h-9 whitespace-nowrap"
+                          >
+                            🚀 Send to Client
+                          </button>
+                        </div>
                       </>
                     )}
                     {app.status === 'INTERVIEW_SCHEDULED' && (
