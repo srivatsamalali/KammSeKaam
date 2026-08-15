@@ -764,7 +764,7 @@ a {
   display: flex !important;
   justify-content: space-around !important;
   align-items: center !important;
-  padding: 10px 16px !important;
+  padding: 10px 8px !important;
   background: rgba(255, 255, 255, 0.88) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 32px !important;
@@ -780,33 +780,51 @@ a {
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
+.mobile-active-indicator {
+  position: absolute !important;
+  top: 8px !important;
+  bottom: 8px !important;
+  border-radius: 20px !important;
+  background: rgba(184, 143, 63, 0.16) !important;
+  transition: left 0.38s cubic-bezier(0.25, 1, 0.5, 1), width 0.38s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  z-index: 0 !important;
+  box-shadow: 0 4px 10px rgba(184, 143, 63, 0.1) !important;
+}
+
+.dark .mobile-active-indicator {
+  background: rgba(184, 143, 63, 0.28) !important;
+}
+
 .mobile-bottom-nav a, 
 .mobile-bottom-nav div.cursor-pointer {
+  position: relative !important;
+  z-index: 10 !important;
   text-decoration: none !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 6px 14px !important;
+  padding: 6px 4px !important;
   border-radius: 24px !important;
   color: #64748b !important;
-  transition: all 0.2s ease !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: 20% !important;
+  transition: color 0.2s ease, transform 0.2s ease !important;
 }
 
 .mobile-bottom-nav a:hover,
 .mobile-bottom-nav div.cursor-pointer:hover {
-  background: rgba(184, 143, 63, 0.1) !important;
   color: #b88f3f !important;
 }
 
 .mobile-bottom-nav a.active-mobile-tab {
-  background: rgba(184, 143, 63, 0.15) !important;
   color: #b88f3f !important;
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .dark .mobile-bottom-nav a.active-mobile-tab {
-  background: rgba(184, 143, 63, 0.25) !important;
   color: #e2a84a !important;
 }
 
