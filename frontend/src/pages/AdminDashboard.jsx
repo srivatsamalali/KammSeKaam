@@ -922,7 +922,7 @@ const AdminDashboard = () => {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative flex w-full max-w-2xl mx-auto items-center rounded-[24px] p-1.5 mb-6 overflow-hidden select-none"
+          className="relative flex w-full max-w-2xl mx-auto items-center rounded-[24px] p-1.5 mb-6 select-none"
           style={{
             touchAction: 'pan-y',
             WebkitUserSelect: 'none',
@@ -974,9 +974,9 @@ const AdminDashboard = () => {
               }}
               className={`
                 relative z-10 flex-1
-                px-3 py-3
+                px-2 py-2.5 sm:px-3 sm:py-3
                 rounded-[19px]
-                text-sm font-semibold
+                text-xs sm:text-sm font-semibold
                 whitespace-nowrap
                 transition-colors duration-300
                 ${
