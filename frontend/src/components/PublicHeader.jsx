@@ -95,6 +95,24 @@ const PublicHeader = () => {
   const isDashboard = window.location.pathname.includes('/dashboard') || window.location.pathname.includes('/meeting')
   if (isDashboard) return null
 
+  // Calculate active index and metrics for mobile bottom nav sliding glass pill
+  let activeIndex = 0
+  let totalTabs = 1
+
+  if (userPref === 'candidate') {
+    totalTabs = 2
+    if (location.pathname.startsWith('/candidate')) {
+      activeIndex = 1
+    }
+  } else if (userPref === 'hiring') {
+    totalTabs = 3
+    if (location.pathname.startsWith('/recruiter')) {
+      activeIndex = 1
+    } else if (location.pathname.startsWith('/admin')) {
+      activeIndex = 2
+    }
+  }
+
   return (
     <>
       <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
@@ -205,7 +223,31 @@ const PublicHeader = () => {
 
       {/* Mobile Bottom Navigation Bar (Rendered outside to prevent fixed placement container constraint bugs) */}
       {createPortal(
-        <div className="mobile-bottom-nav">
+        <div className="mobile-bottom-nav select-none" style={{ padding: '8px !important' }}>
+          {/* iOS Liquid Glass sliding pill */}
+          <div
+            className="absolute rounded-[24px] pointer-events-none transition-all"
+            style={{
+              zIndex: 0,
+              top: '8px',
+              bottom: '8px',
+              left: '8px',
+              width: `calc((100% - 16px) / ${totalTabs})`,
+              transform: `translate3d(calc(${activeIndex} * 100%), 0, 0)`,
+              background:
+                'linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.16))',
+              backdropFilter: 'blur(40px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+              border: '1px solid rgba(255,255,255,0.55)',
+              boxShadow: `
+                inset 0 1px 1px rgba(255,255,255,0.75),
+                inset 0 -1px 1px rgba(255,255,255,0.15),
+                0 8px 25px rgba(31,38,135,0.18)
+              `,
+              transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)'
+            }}
+          />
+
           <Link to="/" onClick={playSoftChime} className={`flex flex-col items-center gap-1 hover:text-amber-700 dark:hover:text-amber-500 ${location.pathname === '/' ? 'active-mobile-tab' : ''}`}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
