@@ -359,6 +359,7 @@ const AdminDashboard = () => {
   const tabRefs = useRef({})
   const coordsRef = useRef({
     isDragging: false,
+    hasDragged: false,
     startX: 0,
     startLeft: 0,
     currentLeft: 0,
@@ -401,9 +402,16 @@ const AdminDashboard = () => {
   }, [activeTab])
 
   useEffect(() => {
+    const containerEl = navContainerRef.current
+    if (!containerEl) return
+    const observer = new ResizeObserver(() => {
+      syncPill()
+    })
+    observer.observe(containerEl)
     window.addEventListener('resize', syncPill)
     window.addEventListener('orientationchange', syncPill)
     return () => {
+      observer.disconnect()
       window.removeEventListener('resize', syncPill)
       window.removeEventListener('orientationchange', syncPill)
     }
@@ -440,6 +448,7 @@ const AdminDashboard = () => {
     const startWidth = activeRect.width
 
     coordsRef.current.isDragging = true
+    coordsRef.current.hasDragged = false
     coordsRef.current.startX = e.clientX
     coordsRef.current.startLeft = startLeft
     coordsRef.current.currentLeft = startLeft
@@ -460,6 +469,10 @@ const AdminDashboard = () => {
     if (!containerEl || !pillEl) return
 
     const deltaX = e.clientX - coords.startX
+    if (Math.abs(deltaX) > 6) {
+      coords.hasDragged = true
+    }
+
     const rawLeft = coords.startLeft + deltaX
     const constrainedLeft = Math.max(coords.minLeft, Math.min(rawLeft, coords.maxLeft))
     coords.currentLeft = constrainedLeft
@@ -525,6 +538,9 @@ const AdminDashboard = () => {
     })
 
     setActiveTab(closestTab)
+    setTimeout(() => {
+      coords.hasDragged = false
+    }, 50)
   }
 
 
@@ -860,7 +876,14 @@ const AdminDashboard = () => {
               <button
                 key={tab.id}
                 ref={el => tabRefs.current[tab.id] = el}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={(e) => {
+                  if (coordsRef.current.hasDragged) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    return
+                  }
+                  setActiveTab(tab.id)
+                }}
                 className={`relative z-10 flex-1 px-4 py-2.5 text-xs font-bold rounded-[12px] transition-colors duration-300 select-none outline-hidden cursor-pointer ${
                   isActive 
                     ? 'text-slate-900 dark:text-white font-extrabold' 
