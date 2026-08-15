@@ -4,7 +4,20 @@ import { createPortal } from 'react-dom'
 
 const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null)
-  const [showPreferenceModal, setShowPreferenceModal] = useState(() => !localStorage.getItem('user_preference'))
+  const [showPreferenceModal, setShowPreferenceModal] = useState(() => {
+    const pref = localStorage.getItem('user_preference')
+    const timestamp = localStorage.getItem('user_preference_timestamp')
+    if (pref && timestamp) {
+      const elapsed = Date.now() - parseInt(timestamp, 10)
+      if (elapsed > 120000) { // 2 minutes in ms
+        localStorage.removeItem('user_preference')
+        localStorage.removeItem('user_preference_timestamp')
+        return true
+      }
+      return false
+    }
+    return true
+  })
   const [preferenceView, setPreferenceView] = useState('main')
 
   const faqData = [
@@ -348,11 +361,11 @@ const LandingPage = () => {
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
                   Access recruitment campaigns, shortlists, and partner dashboard controls.
                 </p>
-
                 <div className="space-y-3 w-full">
                   <button
                     onClick={() => {
                       localStorage.setItem('user_preference', 'hiring');
+                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
                       window.location.href = '/recruiter/login';
                     }}
                     className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-md shadow-amber-500/10"
@@ -362,6 +375,7 @@ const LandingPage = () => {
                   <button
                     onClick={() => {
                       localStorage.setItem('user_preference', 'hiring');
+                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
                       window.location.href = '/admin/login';
                     }}
                     className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all"
@@ -391,6 +405,7 @@ const LandingPage = () => {
                   <button
                     onClick={() => {
                       localStorage.setItem('user_preference', 'candidate');
+                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
                       window.location.href = '/candidate/login';
                     }}
                     className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-md shadow-amber-500/10"
@@ -400,6 +415,7 @@ const LandingPage = () => {
                   <button
                     onClick={() => {
                       localStorage.setItem('user_preference', 'candidate');
+                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
                       window.location.href = '/candidate/register';
                     }}
                     className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all"

@@ -11,7 +11,20 @@ const PublicHeader = () => {
   const location = useLocation()
   const { user } = useAuth()
   const lastCheckedRef = useRef({})
-  const userPref = localStorage.getItem('user_preference') || ''
+  const userPref = (() => {
+    const pref = localStorage.getItem('user_preference')
+    const timestamp = localStorage.getItem('user_preference_timestamp')
+    if (pref && timestamp) {
+      const elapsed = Date.now() - parseInt(timestamp, 10)
+      if (elapsed > 120000) { // 2 minutes
+        localStorage.removeItem('user_preference')
+        localStorage.removeItem('user_preference_timestamp')
+        return ''
+      }
+      return pref
+    }
+    return ''
+  })()
 
   useEffect(() => {
     if (user?.role !== 'CANDIDATE') return
