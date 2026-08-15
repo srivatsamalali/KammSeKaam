@@ -352,6 +352,161 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState(null)
   const [activeTab, setActiveTab] = useState('dashboard')
+
+  // Refs and States for iOS Liquid Glass tab physics & dragging
+  const navContainerRef = useRef(null)
+  const tabRefs = useRef({})
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartXRef = useRef(0)
+  const dragIndicatorLeftStartRef = useRef(0)
+
+  const tabs = [
+    { id: 'recruiters', label: 'Recruiters' },
+    { id: 'candidates', label: 'Candidates' },
+    { id: 'applications', label: 'Applications' },
+    { id: 'clients', label: 'Clients' }
+  ]
+
+  useEffect(() => {
+    if (isDragging) return
+
+    const activeEl = tabRefs.current[activeTab]
+    const containerEl = navContainerRef.current
+    if (activeEl && containerEl) {
+      const activeRect = activeEl.getBoundingClientRect()
+      const containerRect = containerEl.getBoundingClientRect()
+      setIndicatorStyle({
+        left: activeRect.left - containerRect.left,
+        width: activeRect.width,
+        opacity: 1
+      })
+    } else {
+      setIndicatorStyle(prev => ({ ...prev, opacity: 0 }))
+    }
+  }, [activeTab, isDragging])
+
+  useEffect(() => {
+    const handleResize = () => {
+      const activeEl = tabRefs.current[activeTab]
+      const containerEl = navContainerRef.current
+      if (activeEl && containerEl) {
+        const activeRect = activeEl.getBoundingClientRect()
+        const containerRect = containerEl.getBoundingClientRect()
+        setIndicatorStyle({
+          left: activeRect.left - containerRect.left,
+          width: activeRect.width,
+          opacity: 1
+        })
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [activeTab])
+
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return
+
+    const containerEl = navContainerRef.current
+    if (!containerEl) return
+
+    const activeEl = tabRefs.current[activeTab]
+    let startLeft = 0
+    let startWidth = 0
+
+    if (activeEl) {
+      const activeRect = activeEl.getBoundingClientRect()
+      const containerRect = containerEl.getBoundingClientRect()
+      startLeft = activeRect.left - containerRect.left
+      startWidth = activeRect.width
+    } else {
+      const firstTabEl = tabRefs.current[tabs[0].id]
+      if (firstTabEl) {
+        const rect = firstTabEl.getBoundingClientRect()
+        const containerRect = containerEl.getBoundingClientRect()
+        startLeft = rect.left - containerRect.left
+        startWidth = rect.width
+      }
+    }
+
+    setIsDragging(true)
+    dragStartXRef.current = e.clientX
+    dragIndicatorLeftStartRef.current = startLeft
+
+    containerEl.setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return
+
+    const containerEl = navContainerRef.current
+    if (!containerEl) return
+
+    const deltaX = e.clientX - dragStartXRef.current
+    const containerRect = containerEl.getBoundingClientRect()
+    const newLeft = dragIndicatorLeftStartRef.current + deltaX
+
+    let closestTab = activeTab
+    let minDistance = Infinity
+
+    tabs.forEach(tab => {
+      const el = tabRefs.current[tab.id]
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        const tabCenter = (rect.left - containerRect.left) + rect.width / 2
+        const indicatorCenter = newLeft + (indicatorStyle.width || rect.width) / 2
+        const distance = Math.abs(tabCenter - indicatorCenter)
+        if (distance < minDistance) {
+          minDistance = distance
+          closestTab = tab.id
+        }
+      }
+    })
+
+    const closestEl = tabRefs.current[closestTab]
+    const targetWidth = closestEl ? closestEl.getBoundingClientRect().width : indicatorStyle.width
+
+    setIndicatorStyle({
+      left: newLeft,
+      width: targetWidth,
+      opacity: 1
+    })
+  }
+
+  const handlePointerUp = (e) => {
+    if (!isDragging) return
+
+    const containerEl = navContainerRef.current
+    if (!containerEl) return
+
+    containerEl.releasePointerCapture(e.pointerId)
+    setIsDragging(false)
+
+    const containerRect = containerEl.getBoundingClientRect()
+    let closestTab = activeTab
+    let minDistance = Infinity
+
+    tabs.forEach(tab => {
+      const el = tabRefs.current[tab.id]
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        const tabCenter = (rect.left - containerRect.left) + rect.width / 2
+        const indicatorCenter = indicatorStyle.left + indicatorStyle.width / 2
+        const distance = Math.abs(tabCenter - indicatorCenter)
+        if (distance < minDistance) {
+          minDistance = distance
+          closestTab = tab.id
+        }
+      }
+    })
+
+    setActiveTab(closestTab)
+  }
+
+  const transitionStyle = isDragging 
+    ? 'transition-none' 
+    : 'transition-all duration-400 cubic-bezier(0.25, 1, 0.5, 1)'
+
   const [showCreateRecruiter, setShowCreateRecruiter] = useState(false)
   const [recruiterForm, setRecruiterForm] = useState({
     email: '',
@@ -650,44 +805,49 @@ const AdminDashboard = () => {
         {/* Analytics SVG Charts */}
         <DashboardCharts stats={stats} recruiters={recruiters} applications={applications} />
 
-        {/* Tabs */}
-        <div className="flex space-x-4 mb-6 border-b border-gray-300">
-          <button
-            onClick={() => setActiveTab('recruiters')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'recruiters'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-              }`}
-          >
-            Recruiters
-          </button>
-          <button
-            onClick={() => setActiveTab('candidates')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'candidates'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-              }`}
-          >
-            Candidates
-          </button>
-          <button
-            onClick={() => setActiveTab('applications')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'applications'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-              }`}
-          >
-            Applications
-          </button>
-          <button
-            onClick={() => setActiveTab('clients')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'clients'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-              }`}
-          >
-            Clients
-          </button>
+        {/* iOS-style Liquid Glass Navigation Bar */}
+        <div 
+          ref={navContainerRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          className="relative flex items-center p-1 bg-slate-200/50 dark:bg-slate-900/40 border border-white/20 dark:border-slate-800/45 rounded-2xl shadow-inner select-none mb-6 max-w-2xl overflow-x-auto scrollbar-none touch-none touch-pan-y"
+          style={{ touchAction: 'pan-y' }}
+        >
+          {/* Active Liquid Glass Floating Pill Indicator */}
+          <div 
+            className={`absolute top-1 bottom-1 bg-white/80 dark:bg-slate-850/80 rounded-[12px] shadow-md backdrop-blur-xs border border-white/40 dark:border-slate-700/30 ${transitionStyle}`}
+            style={{
+              left: `${indicatorStyle.left}px`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity
+            }}
+          />
+
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                ref={el => tabRefs.current[tab.id] = el}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative z-10 flex-1 px-4 py-2.5 text-xs font-bold rounded-[12px] transition-colors duration-300 select-none outline-hidden cursor-pointer ${
+                  isActive 
+                    ? 'text-slate-900 dark:text-white font-extrabold' 
+                    : 'text-slate-550 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  borderRadius: '12px'
+                }}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
 
         {/* Recruiters Tab */}
