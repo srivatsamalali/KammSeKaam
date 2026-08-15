@@ -37,6 +37,28 @@ const sendInterviewScheduledEmail = async (
       ? `${recruiterName}${recruiterEmail ? ` (${recruiterEmail})` : ''}`
       : recruiterEmail || 'Assigned Recruiter'
 
+    // Generate .ics calendar content
+    const dateObj = new Date(interviewDate)
+    const formattedStart = dateObj.toISOString().replace(/-|:|\.\d\d\d/g, "")
+    const endDateObj = new Date(dateObj.getTime() + 60 * 60 * 1000)
+    const formattedEnd = endDateObj.toISOString().replace(/-|:|\.\d\d\d/g, "")
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'CALSCALE:GREGORIAN',
+      'METHOD:REQUEST',
+      'BEGIN:VEVENT',
+      `URL:${meetLink || ''}`,
+      `DTSTART:${formattedStart}`,
+      `DTEND:${formattedEnd}`,
+      'SUMMARY:Interview with Aston Recruitment',
+      `DESCRIPTION:Interview with recruiter ${recruiterName || 'Aston Recruiter'}. Join Room: ${meetLink || ''}`,
+      'LOCATION:Online',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n')
+
     const mailOptions = {
       from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
       to: candidateEmail,
@@ -53,26 +75,26 @@ const sendInterviewScheduledEmail = async (
             <p style="color: #334155; font-size: 15px;">Dear <strong>${candidateName}</strong>,</p>
             <p style="color: #334155; font-size: 15px;">We are pleased to inform you that your interview has been scheduled with Aston Recruitment.</p>
             
-            <div style="background-color: #f8fafc; border-left: 4px solid #0284c7; padding: 16px; border-radius: 4px; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #0284c7; font-size: 16px;">Interview Details:</h3>
+            <div style="background-color: #f8fafc; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 4px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #b88f3f; font-size: 16px;">Interview Details:</h3>
               <p style="margin: 8px 0; color: #334155;"><strong>Date & Time:</strong> ${formattedDate}</p>
               <p style="margin: 8px 0; color: #334155;"><strong>Assigned Recruiter:</strong> ${recruiterDisplay}</p>
-              <p style="margin: 8px 0; color: #334155;"><strong>Platform:</strong> Google Meet (Video Call)</p>
+              <p style="margin: 8px 0; color: #334155;"><strong>Platform:</strong> Aston Meeting Room (Online Video Call)</p>
               <p style="margin: 12px 0 0 0;">
-                <strong>Google Meet Link:</strong><br/>
-                <a href="${meetLink}" target="_blank" style="display: inline-block; background-color: #0284c7; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 6px;">Join Google Meet Interview</a>
+                <strong>Meeting Link:</strong><br/>
+                <a href="${meetLink}" target="_blank" style="display: inline-block; background-color: #b88f3f; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 6px;">Join Interview Room</a>
               </p>
-              <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">Direct link: <a href="${meetLink}" style="color: #0284c7;">${meetLink}</a></p>
+              <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">Direct link: <a href="${meetLink}" style="color: #b88f3f;">${meetLink}</a></p>
             </div>
 
             <h4 style="color: #0f172a; margin-bottom: 8px;">Important Guidelines:</h4>
             <ul style="color: #475569; font-size: 14px; padding-left: 20px; line-height: 1.6;">
-              <li>Please click the Google Meet link at least 5 minutes before the scheduled time.</li>
+              <li>Please click the interview room link at least 5 minutes before the scheduled time.</li>
               <li>Ensure your webcam, microphone, and internet connection are tested beforehand.</li>
               <li>Keep an updated copy of your resume and qualifications ready.</li>
             </ul>
 
-            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions, need to reschedule, or experience any issues, please reply to this email, contact your recruiter, or reach out to support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0284c7;">Contact@astonrecruitment.in</a>.</p>
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions, need to reschedule, or experience any issues, please reply to this email, contact your recruiter, or reach out to support at <a href="mailto:Contact@astonrecruitment.in" style="color: #b88f3f;">Contact@astonrecruitment.in</a>.</p>
             <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
           </div>
           <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
@@ -80,6 +102,13 @@ const sendInterviewScheduledEmail = async (
           </div>
         </div>
       `,
+      attachments: [
+        {
+          filename: 'invite.ics',
+          content: icsContent,
+          contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+        }
+      ]
     }
 
     await transporter.sendMail(mailOptions)

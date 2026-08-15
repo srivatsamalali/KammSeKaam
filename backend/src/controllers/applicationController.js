@@ -82,7 +82,15 @@ const assignCandidate = async (req, res) => {
 const updateApplicationStatus = async (req, res) => {
   try {
     const { applicationId } = req.params
-    const { status, rejectionReason } = req.body
+    const {
+      status,
+      rejectionReason,
+      technicalRating,
+      communicationRating,
+      culturalRating,
+      feedbackComments,
+      recommendation,
+    } = req.body
 
     const validStatuses = [
       'APPLICATION_RECEIVED',
@@ -111,6 +119,12 @@ const updateApplicationStatus = async (req, res) => {
     if (status === 'REJECTED') {
       application.rejectionReason = rejectionReason
     }
+
+    if (technicalRating !== undefined) application.technicalRating = technicalRating
+    if (communicationRating !== undefined) application.communicationRating = communicationRating
+    if (culturalRating !== undefined) application.culturalRating = culturalRating
+    if (feedbackComments !== undefined) application.feedbackComments = feedbackComments
+    if (recommendation !== undefined) application.recommendation = recommendation
 
     await application.save()
 
@@ -166,7 +180,8 @@ const generateAutoMeetLink = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
   const gen = (len) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
   const code = `${gen(3)}-${gen(4)}-${gen(3)}`
-  return `https://cal.com/aston-recruitment/interview-${code}`
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',')[0]
+  return `${frontendUrl}/meeting/${code}`
 }
 
 const scheduleInterview = async (req, res) => {

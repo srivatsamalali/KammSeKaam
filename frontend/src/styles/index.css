@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-color: #faf8f2;
+  --text-color: #0f172a;
+}
+
+.dark {
+  --bg-color: #0d1117;
+  --text-color: #c9d1d9;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -11,10 +21,34 @@
 html,
 body {
   min-height: 100%;
-  background: #faf8f2 !important;
-  color-scheme: light;
-  background-color: #faf8f2 !important;
+  background: var(--bg-color) !important;
+  color: var(--text-color) !important;
   scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark .card, .dark .glass-card, .dark .glass, .dark .section-panel {
+  background: #161b22 !important;
+  border-color: rgba(220, 185, 111, 0.2) !important;
+  color: #c9d1d9 !important;
+}
+
+.dark input, .dark select, .dark textarea {
+  background-color: #0d1117 !important;
+  color: #c9d1d9 !important;
+  border-color: #30363d !important;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark label, .dark span {
+  color: #c9d1d9 !important;
+}
+
+.dark .text-gray-900, .dark .text-gray-800, .dark .text-slate-900, .dark .text-slate-800 {
+  color: #c9d1d9 !important;
+}
+
+.dark .text-gray-600, .dark .text-slate-600 {
+  color: #8b949e !important;
 }
 
 body {

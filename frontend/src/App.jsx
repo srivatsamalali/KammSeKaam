@@ -18,6 +18,7 @@ import RecruiterLogin from './pages/RecruiterLogin'
 import RecruiterDashboard from './pages/RecruiterDashboard'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import MeetingRoom from './pages/MeetingRoom'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -32,6 +33,7 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/recruiter/login" element={<RecruiterLogin />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/meeting/:roomId" element={<MeetingRoom />} />
 
         {/* Protected Routes */}
         <Route

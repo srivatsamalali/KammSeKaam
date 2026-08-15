@@ -5,6 +5,29 @@ const PublicHeader = () => {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  const [darkMode, setDarkMode] = useState(() => {
+    const isDark = localStorage.getItem('theme') === 'dark' || 
+                   (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    return isDark;
+  })
+
+  const toggleTheme = () => {
+    if (darkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setDarkMode(true);
+    }
+  }
+
   return (
     <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
       <div className="w-full mx-auto px-6 sm:px-8 lg:px-10">
@@ -36,6 +59,14 @@ const PublicHeader = () => {
 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center gap-3 relative">
+            <button
+              onClick={toggleTheme}
+              type="button"
+              className="p-2.5 rounded-full bg-amber-50 hover:bg-amber-100 transition-colors text-slate-700 font-bold border border-amber-200/50"
+              title="Toggle Theme"
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </button>
             <Link to="/candidate/login" className="nav-link">
               Candidate Login
             </Link>
@@ -112,9 +143,19 @@ const PublicHeader = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Dropdown Menu */}
+         {/* Mobile Navigation Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden pb-6 pt-2 border-t border-slate-100 flex flex-col gap-3">
+            <button
+              onClick={() => {
+                toggleTheme();
+                setMobileMenuOpen(false);
+              }}
+              type="button"
+              className="nav-link justify-start gap-2 font-bold"
+            >
+              {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
             <Link
               to="/#home"
               className="nav-link justify-start"

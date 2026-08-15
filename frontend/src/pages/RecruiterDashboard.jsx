@@ -211,6 +211,11 @@ const RecruiterDashboard = () => {
   const [editingAppId, setEditingAppId] = useState(null)
   const [editingStatus, setEditingStatus] = useState('')
   const [editingReason, setEditingReason] = useState('')
+  const [technicalRating, setTechnicalRating] = useState(5)
+  const [communicationRating, setCommunicationRating] = useState(5)
+  const [culturalRating, setCulturalRating] = useState(5)
+  const [recommendation, setRecommendation] = useState('Hire')
+  const [feedbackComments, setFeedbackComments] = useState('')
 
   useEffect(() => {
     fetchApplications()
@@ -244,7 +249,8 @@ const RecruiterDashboard = () => {
         chars[Math.floor(Math.random() * chars.length)],
       ).join('')
     const code = `${gen(3)}-${gen(4)}-${gen(3)}`
-    return `https://cal.com/aston-recruitment/interview-${code}`
+    const frontendUrl = window.location.origin
+    return `${frontendUrl}/meeting/${code}`
   }
 
   const handleOpenScheduleForm = (app) => {
@@ -274,11 +280,10 @@ const RecruiterDashboard = () => {
       alert(error.response?.data?.message || 'Error scheduling interview')
     }
   }
-  const handleUpdateStatus = async (applicationId, status, rejectionReason) => {
-    let reason = rejectionReason || ''
+  const handleUpdateStatus = async (applicationId, status, extraData = {}) => {
+    let reason = extraData.rejectionReason || ''
 
     if (status === 'REJECTED' && !reason) {
-      // If not provided programmatically, prompt the user
       reason = prompt('Enter rejection reason:')
       if (!reason) return
     }
@@ -287,12 +292,17 @@ const RecruiterDashboard = () => {
       await applicationService.updateApplicationStatus(applicationId, {
         status,
         rejectionReason: reason,
+        ...extraData,
       })
-      // reset editing UI if present
       if (editingAppId === applicationId) {
         setEditingAppId(null)
         setEditingStatus('')
         setEditingReason('')
+        setTechnicalRating(5)
+        setCommunicationRating(5)
+        setCulturalRating(5)
+        setRecommendation('Hire')
+        setFeedbackComments('')
       }
       fetchApplications()
       alert('Status updated successfully')
@@ -456,13 +466,56 @@ const RecruiterDashboard = () => {
                                 className="form-input h-24"
                               />
                             )}
+
+                            {editingStatus === 'INTERVIEW_COMPLETED' && (
+                              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50 mt-2 text-left">
+                                <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider">Interview Feedback</h5>
+                                
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500">Technical Skills Rating (1-10): {technicalRating}</label>
+                                  <input type="range" min="1" max="10" value={technicalRating} onChange={(e) => setTechnicalRating(parseInt(e.target.value, 10))} className="w-full accent-amber-600" />
+                                </div>
+                                
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500">Communication Skills Rating (1-10): {communicationRating}</label>
+                                  <input type="range" min="1" max="10" value={communicationRating} onChange={(e) => setCommunicationRating(parseInt(e.target.value, 10))} className="w-full accent-amber-600" />
+                                </div>
+                                
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500">Cultural Fit Rating (1-10): {culturalRating}</label>
+                                  <input type="range" min="1" max="10" value={culturalRating} onChange={(e) => setCulturalRating(parseInt(e.target.value, 10))} className="w-full accent-amber-600" />
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500">Recommendation</label>
+                                  <select value={recommendation} onChange={(e) => setRecommendation(e.target.value)} className="form-input text-xs">
+                                    <option value="Strong Hire">Strong Hire</option>
+                                    <option value="Hire">Hire</option>
+                                    <option value="No Hire">No Hire</option>
+                                    <option value="Strong No Hire">Strong No Hire</option>
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500">Detailed Feedback Comments</label>
+                                  <textarea value={feedbackComments} onChange={(e) => setFeedbackComments(e.target.value)} placeholder="Provide detailed remarks..." className="form-input text-xs h-20" />
+                                </div>
+                              </div>
+                            )}
+
                             <div className="space-x-2">
                               <button
                                 onClick={() =>
                                   handleUpdateStatus(
                                     app.id,
                                     editingStatus,
-                                    editingReason,
+                                    editingStatus === 'INTERVIEW_COMPLETED' ? {
+                                      technicalRating,
+                                      communicationRating,
+                                      culturalRating,
+                                      recommendation,
+                                      feedbackComments
+                                    } : { rejectionReason: editingReason }
                                   )
                                 }
                                 className="btn-primary"
@@ -474,12 +527,17 @@ const RecruiterDashboard = () => {
                                   setEditingAppId(null)
                                   setEditingStatus('')
                                   setEditingReason('')
+                                  setTechnicalRating(5)
+                                  setCommunicationRating(5)
+                                  setCulturalRating(5)
+                                  setRecommendation('Hire')
+                                  setFeedbackComments('')
                                 }}
                                 className="btn-secondary"
                               >
                                 Cancel
                               </button>
-                            </div>
+                            </div>    </div>
                           </div>
                         ) : (
                           <button

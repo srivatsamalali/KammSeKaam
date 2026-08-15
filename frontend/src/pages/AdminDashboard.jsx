@@ -7,6 +7,110 @@ import {
   applicationService,
 } from '../services/api'
 
+const DashboardCharts = ({ stats, recruiters, applications }) => {
+  if (!stats) return null;
+
+  const selected = stats.selectedCandidates || 0;
+  const rejected = stats.rejectedCandidates || 0;
+  const total = stats.totalApplications || 0;
+  const pending = total - (selected + rejected);
+
+  const totalVal = total || 1;
+  const selPct = (selected / totalVal) * 100;
+  const rejPct = (rejected / totalVal) * 100;
+  const penPct = (pending / totalVal) * 100;
+
+  const recruiterStats = recruiters.map(r => {
+    const count = applications.filter(app => app.recruiterId === r.id).length;
+    return { name: r.name || 'Recruiter', count };
+  });
+
+  const maxCount = Math.max(...recruiterStats.map(rs => rs.count), 1);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      {/* Donut Chart */}
+      <div className="glass-card p-6 flex flex-col items-center">
+        <h4 className="font-bold text-slate-800 mb-4 self-start">Application Status Split</h4>
+        <div className="relative w-40 h-40">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+            <circle
+              cx="18"
+              cy="18"
+              r="15.915"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="3"
+              strokeDasharray={`${selPct} ${100 - selPct}`}
+              strokeDashoffset="0"
+              className="transition-all duration-1000"
+            />
+            <circle
+              cx="18"
+              cy="18"
+              r="15.915"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="3"
+              strokeDasharray={`${rejPct} ${100 - rejPct}`}
+              strokeDashoffset={`-${selPct}`}
+              className="transition-all duration-1000"
+            />
+            <circle
+              cx="18"
+              cy="18"
+              r="15.915"
+              fill="none"
+              stroke="#f59e0b"
+              strokeWidth="3"
+              strokeDasharray={`${penPct} ${100 - penPct}`}
+              strokeDashoffset={`-${selPct + rejPct}`}
+              className="transition-all duration-1000"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-bold text-slate-800">{total}</span>
+            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Total</span>
+          </div>
+        </div>
+        
+        <div className="flex gap-4 mt-4 text-[10px] font-bold">
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-500" /> Selected ({selected})</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500" /> Rejected ({rejected})</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-500" /> Pending ({pending})</span>
+        </div>
+      </div>
+
+      {/* Recruiter Load Bar Chart */}
+      <div className="glass-card p-6">
+        <h4 className="font-bold text-slate-800 mb-6">Recruiter Assignments Workload</h4>
+        <div className="space-y-4">
+          {recruiterStats.length === 0 ? (
+            <p className="text-xs text-gray-500 text-center py-12 font-semibold">No recruiters registered</p>
+          ) : (
+            recruiterStats.map((rs, idx) => {
+              const pct = (rs.count / maxCount) * 100;
+              return (
+                <div key={idx} className="flex items-center gap-3">
+                  <span className="w-24 text-[10px] font-bold text-gray-600 truncate">{rs.name}</span>
+                  <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-1000"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-xs font-bold text-slate-800">{rs.count}</span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -231,6 +335,9 @@ const AdminDashboard = () => {
             </p>
           </div>
         </div>
+
+        {/* Analytics SVG Charts */}
+        <DashboardCharts stats={stats} recruiters={recruiters} applications={applications} />
 
         {/* Tabs */}
         <div className="flex space-x-4 mb-6 border-b border-gray-300">
@@ -622,6 +729,32 @@ const AdminDashboard = () => {
                               >
                                 {app.googleMeetLink}
                               </a>
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
+                      {app.technicalRating !== null && app.technicalRating !== undefined && (
+                        <div className="mt-3 bg-amber-50/50 border border-amber-200/50 p-4 rounded-xl text-left">
+                          <p className="text-sm font-bold text-amber-900 mb-2">📊 Recruiter Interview Feedback</p>
+                          <div className="grid grid-cols-3 gap-2 text-xs font-semibold mb-2">
+                            <div className="bg-white p-2 rounded border border-amber-100">
+                              <span className="block text-[10px] text-gray-500">Technical</span>
+                              <span className="text-sm text-slate-800">{app.technicalRating} / 10</span>
+                            </div>
+                            <div className="bg-white p-2 rounded border border-amber-100">
+                              <span className="block text-[10px] text-gray-500">Communication</span>
+                              <span className="text-sm text-slate-800">{app.communicationRating} / 10</span>
+                            </div>
+                            <div className="bg-white p-2 rounded border border-amber-100">
+                              <span className="block text-[10px] text-gray-500">Cultural Fit</span>
+                              <span className="text-sm text-slate-800">{app.culturalRating} / 10</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-700"><strong>Recommendation:</strong> <span className="font-bold text-amber-800">{app.recommendation}</span></p>
+                          {app.feedbackComments && (
+                            <p className="text-xs text-slate-600 mt-1.5 italic bg-white p-2 rounded border border-amber-100/50">
+                              "{app.feedbackComments}"
                             </p>
                           )}
                         </div>

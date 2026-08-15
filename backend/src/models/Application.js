@@ -45,6 +45,21 @@ const Application = sequelize.define('Application', {
   rejectionReason: {
     type: DataTypes.TEXT,
   },
+  technicalRating: {
+    type: DataTypes.INTEGER,
+  },
+  communicationRating: {
+    type: DataTypes.INTEGER,
+  },
+  culturalRating: {
+    type: DataTypes.INTEGER,
+  },
+  feedbackComments: {
+    type: DataTypes.TEXT,
+  },
+  recommendation: {
+    type: DataTypes.STRING,
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
