@@ -546,9 +546,18 @@ button:disabled,
     color 0.18s ease;
 }
 
+.dark .dropdown-item {
+  color: #e2e8f0 !important;
+}
+
 .dropdown-item:hover {
   background: rgba(56, 189, 248, 0.08);
   color: #0369a1;
+}
+
+.dark .dropdown-item:hover {
+  background: rgba(53, 59, 72, 0.9) !important;
+  color: #b88f3f !important;
 }
 
 .fade-in {
