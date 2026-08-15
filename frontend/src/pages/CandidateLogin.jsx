@@ -92,27 +92,23 @@ const CandidateLogin = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="relative flex items-center">
+              <div className="form-group flex items-end gap-3 w-full">
+                <div className="flex-1 text-left">
+                  <label className="form-label">Password</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="form-input pr-10"
+                    className="form-input"
                     placeholder="Enter password"
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 text-gray-550 dark:text-gray-400 hover:text-gray-700"
-                  >
-                    {showPassword ? '🙈' : '👁️'}
-                  </button>
-                  <MonkeyPasswordToggle isPasswordVisible={showPassword} passwordFieldSelector="input[name='password']" />
                 </div>
+                <MonkeyPasswordToggle 
+                  showPassword={showPassword} 
+                  onClick={() => setShowPassword(!showPassword)} 
+                />
               </div>
 
               <div className="flex justify-between items-center text-xs">
