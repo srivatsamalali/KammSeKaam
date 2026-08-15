@@ -5,6 +5,8 @@ const {
   getReports,
   overrideCandidateStatus,
   getUnassignedCandidates,
+  getAllCandidates,
+  deleteCandidate,
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -27,6 +29,18 @@ router.put(
   authenticateToken,
   authorizeRole('ADMIN'),
   overrideCandidateStatus,
+)
+router.get(
+  '/candidates',
+  authenticateToken,
+  authorizeRole('ADMIN'),
+  getAllCandidates,
+)
+router.delete(
+  '/candidates/:id',
+  authenticateToken,
+  authorizeRole('ADMIN'),
+  deleteCandidate,
 )
 
 module.exports = router

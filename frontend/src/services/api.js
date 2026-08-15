@@ -63,6 +63,8 @@ export const adminService = {
   getUnassignedCandidates: () => api.get('/admin/unassigned'),
   overrideStatus: (applicationId, data) =>
     api.put(`/admin/applications/${applicationId}`, data),
+  getCandidates: () => api.get('/admin/candidates'),
+  deleteCandidate: (id) => api.delete(`/admin/candidates/${id}`),
 }
 
 export const notificationService = {

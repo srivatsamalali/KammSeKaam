@@ -29,6 +29,7 @@ const Application = sequelize.define('Application', {
       'INTERVIEW_COMPLETED',
       'SELECTED',
       'REJECTED',
+      'SENT_TO_CLIENT',
     ),
     defaultValue: 'APPLICATION_RECEIVED',
   },

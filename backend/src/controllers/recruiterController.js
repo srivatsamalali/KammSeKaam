@@ -66,6 +66,7 @@ const createRecruiter = async (req, res) => {
     const user = await User.create(
       {
         email: email.trim(),
+        phone: mobileNumber || null,
         password,
         role: 'RECRUITER',
       },

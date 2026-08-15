@@ -129,7 +129,7 @@ const AdminLogin = () => {
           </form>
 
           <p className="text-center text-gray-600 mt-4 text-sm">
-            Default: admin@kaamsekaaam.com / Admin@12345
+            Default: Contact@astonrecruitment.in / Admin@12345
           </p>
         </div>
       </div>

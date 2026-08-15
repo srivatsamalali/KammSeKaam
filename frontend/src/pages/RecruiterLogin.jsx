@@ -353,7 +353,7 @@ const RecruiterLogin = () => {
                     type="email"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="recruiter@astonrecruitment.com"
+                    placeholder="recruiter@astonrecruitment.in"
                     className="form-input"
                     required
                   />

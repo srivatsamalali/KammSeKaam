@@ -38,7 +38,7 @@ const sendInterviewScheduledEmail = async (
       : recruiterEmail || 'Assigned Recruiter'
 
     const mailOptions = {
-      from: process.env.ADMIN_EMAIL || 'admin@astonrecruitment.com',
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
       to: candidateEmail,
       cc: recruiterEmail || undefined,
       subject: '🗓️ Interview Scheduled - Aston Recruitment',
@@ -72,7 +72,7 @@ const sendInterviewScheduledEmail = async (
               <li>Keep an updated copy of your resume and qualifications ready.</li>
             </ul>
 
-            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions or need to reschedule, please reply to this email or contact your recruiter.</p>
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions, need to reschedule, or experience any issues, please reply to this email, contact your recruiter, or reach out to support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0284c7;">Contact@astonrecruitment.in</a>.</p>
             <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
           </div>
           <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
@@ -99,7 +99,7 @@ const sendResetPasswordEmail = async (email, resetToken) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
     const mailOptions = {
-      from: process.env.ADMIN_EMAIL || 'admin@astonrecruitment.com',
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
       to: email,
       subject: 'Reset Your Password - Aston Recruitment',
       html: `
@@ -110,6 +110,7 @@ const sendResetPasswordEmail = async (email, resetToken) => {
             <p><a href="${resetLink}" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a></p>
             <p>This link expires in 1 hour.</p>
             <p>If you did not request this, please ignore this email.</p>
+            <p style="color: #666666; font-size: 13px; margin-top: 20px;">If you experience any issues, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0066cc;">Contact@astonrecruitment.in</a>.</p>
             <p>Best regards,<br/>Aston Recruitment Team</p>
           </div>
         </div>
@@ -134,7 +135,7 @@ const sendOtpEmail = async (email, otp) => {
     }
 
     const mailOptions = {
-      from: process.env.ADMIN_EMAIL || 'admin@astonrecruitment.com',
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
       to: email,
       subject: 'Phone Verification OTP - Aston Recruitment',
       html: `
@@ -148,6 +149,7 @@ const sendOtpEmail = async (email, otp) => {
             <p>This OTP will expire in 10 minutes.</p>
             <p>Do not share this OTP with anyone. Aston Recruitment team will never ask for your OTP.</p>
             <p>If you did not request this verification, please ignore this email.</p>
+            <p style="color: #666666; font-size: 13px; margin-top: 20px;">If you experience any issues, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0066cc;">Contact@astonrecruitment.in</a>.</p>
             <p>Best regards,<br/>Aston Recruitment Team</p>
           </div>
         </div>

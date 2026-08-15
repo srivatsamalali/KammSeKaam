@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config() // Reloaded SMTP settings
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -90,7 +90,7 @@ const ensureAdminUser = async () => {
     return
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL_ENV || 'admin@kaamsekaaam.com'
+  const adminEmail = process.env.ADMIN_EMAIL_ENV || 'Contact@astonrecruitment.in'
   const adminPassword = process.env.ADMIN_PASSWORD_ENV || 'Admin@12345'
 
   const existingAdmin = await User.findOne({ where: { role: 'ADMIN' } })

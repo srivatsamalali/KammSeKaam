@@ -29,10 +29,12 @@ services:
     container_name: kaamsekaaam-backend
     restart: always
     environment:
+      # mine
       # DB_HOST: mysql
       # DB_USER: kaamuser
       # DB_PASSWORD: root
       # DB_NAME: root
+      # server
       DB_HOST: localhost
       DB_USER: root
       DB_PASSWORD: password

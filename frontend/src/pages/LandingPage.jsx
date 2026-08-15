@@ -206,7 +206,7 @@ const LandingPage = () => {
             <div>
               <h5 className="font-bold mb-4">Contact</h5>
               <p className="text-gray-400 text-sm">
-                support@astonrecruitment.com
+                Contact@astonrecruitment.in
               </p>
             </div>
             <div>

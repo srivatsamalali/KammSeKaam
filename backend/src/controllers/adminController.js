@@ -142,9 +142,45 @@ const overrideCandidateStatus = async (req, res) => {
   }
 }
 
+const getAllCandidates = async (req, res) => {
+  try {
+    const candidates = await Candidate.findAll({
+      include: [{ model: User, attributes: ['email', 'phone'] }],
+      order: [['createdAt', 'DESC']],
+    })
+    res.json(candidates)
+  } catch (error) {
+    console.error('Get candidates error:', error)
+    res
+      .status(500)
+      .json({ message: 'Error fetching candidates', error: error.message })
+  }
+}
+
+const deleteCandidate = async (req, res) => {
+  try {
+    const { id } = req.params
+    const candidate = await Candidate.findByPk(id)
+    if (!candidate) {
+      return res.status(404).json({ message: 'Candidate not found' })
+    }
+    // Delete associated user
+    await User.destroy({ where: { id: candidate.userId } })
+    await candidate.destroy()
+    res.json({ message: 'Candidate deleted successfully' })
+  } catch (error) {
+    console.error('Delete candidate error:', error)
+    res
+      .status(500)
+      .json({ message: 'Error deleting candidate', error: error.message })
+  }
+}
+
 module.exports = {
   getDashboardStats,
   getReports,
   overrideCandidateStatus,
   getUnassignedCandidates,
+  getAllCandidates,
+  deleteCandidate,
 }

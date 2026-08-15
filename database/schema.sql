@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS Notifications (
 INSERT INTO Users (id, email, password, role, isEmailVerified) 
 VALUES (
   UUID(),
-  'admin@kaamsekaaam.com',
+  'Contact@astonrecruitment.in',
   '$2a$10$...', -- Will be hashed by backend
   'ADMIN',
   TRUE

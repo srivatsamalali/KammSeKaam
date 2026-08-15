@@ -133,6 +133,8 @@ const RecruiterDashboard = () => {
         return 'bg-rose-100 text-rose-800'
       case 'INTERVIEW_SCHEDULED':
         return 'bg-sky-100 text-sky-800'
+      case 'SENT_TO_CLIENT':
+        return 'bg-amber-100 text-amber-800'
       default:
         return 'bg-slate-100 text-slate-800'
     }
@@ -260,6 +262,7 @@ const RecruiterDashboard = () => {
                               </option>
                               <option value="SELECTED">Selected</option>
                               <option value="REJECTED">Rejected</option>
+                              <option value="SENT_TO_CLIENT">Send to Client</option>
                             </select>
                             {editingStatus === 'REJECTED' && (
                               <textarea

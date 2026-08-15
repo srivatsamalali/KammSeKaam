@@ -10,7 +10,7 @@ const seedDatabase = async () => {
     console.log('Database synced')
 
     // Create admin user
-    const adminEmail = process.env.ADMIN_EMAIL_ENV || 'admin@kaamsekaaam.com'
+    const adminEmail = process.env.ADMIN_EMAIL_ENV || 'Contact@astonrecruitment.in'
     const adminPassword = process.env.ADMIN_PASSWORD_ENV || 'Admin@12345'
 
     const adminUser = await User.create({
@@ -29,7 +29,7 @@ const seedDatabase = async () => {
 
     // Create sample recruiters
     const recruiter1 = await User.create({
-      email: 'recruiter1@kaamsekaaam.com',
+      email: 'recruiter1@astonrecruitment.in',
       phone: '9876543201',
       password: 'Recruiter@123',
       role: 'RECRUITER',
@@ -46,7 +46,7 @@ const seedDatabase = async () => {
     })
 
     const recruiter2 = await User.create({
-      email: 'recruiter2@kaamsekaaam.com',
+      email: 'recruiter2@astonrecruitment.in',
       phone: '9876543202',
       password: 'Recruiter@123',
       role: 'RECRUITER',

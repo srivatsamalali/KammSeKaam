@@ -19,6 +19,7 @@ const AdminDashboard = () => {
   }
   const [stats, setStats] = useState(null)
   const [recruiters, setRecruiters] = useState([])
+  const [candidates, setCandidates] = useState([])
   const [applications, setApplications] = useState([])
   const [unassignedCandidates, setUnassignedCandidates] = useState([])
   const [editingStatusMap, setEditingStatusMap] = useState({})
@@ -30,6 +31,7 @@ const AdminDashboard = () => {
     email: '',
     password: '',
     name: '',
+    mobileNumber: '',
     specialization: [],
   })
   const [editingRecruiterId, setEditingRecruiterId] = useState(null)
@@ -52,6 +54,13 @@ const AdminDashboard = () => {
       setStats(statsRes.data)
       setRecruiters(recruitersRes.data)
       setApplications(appsRes.data)
+      // fetch candidates
+      try {
+        const candRes = await adminService.getCandidates()
+        setCandidates(candRes.data)
+      } catch (e) {
+        console.error('Error fetching candidates:', e)
+      }
       // fetch unassigned candidates separately
       try {
         const ua = await adminService.getUnassignedCandidates()
@@ -74,6 +83,7 @@ const AdminDashboard = () => {
         email: '',
         password: '',
         name: '',
+        mobileNumber: '',
         specialization: [],
       })
       setShowCreateRecruiter(false)
@@ -99,6 +109,19 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleDeleteCandidate = async (id) => {
+    if (window.confirm('Are you sure you want to delete this candidate? This will delete their user profile and all applications.')) {
+      try {
+        await adminService.deleteCandidate(id)
+        fetchData()
+        alert('Candidate deleted successfully')
+      } catch (error) {
+        console.error('Error deleting candidate:', error)
+        alert('Error deleting candidate')
+      }
+    }
+  }
+
   if (loading) return <div className="text-center py-20">Loading...</div>
 
   return (
@@ -110,7 +133,7 @@ const AdminDashboard = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               Admin Portal
             </h1>
-            <p className="text-sm text-gray-600">{user?.email || 'admin@astonrecruitment.com'}</p>
+            <p className="text-sm text-gray-600">{user?.email || 'Contact@astonrecruitment.in'}</p>
           </div>
           <button
             onClick={handleLogout}
@@ -188,6 +211,16 @@ const AdminDashboard = () => {
             Recruiters
           </button>
           <button
+            onClick={() => setActiveTab('candidates')}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'candidates'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600'
+            }`}
+          >
+            Candidates
+          </button>
+          <button
             onClick={() => setActiveTab('applications')}
             className={`px-4 py-2 font-semibold ${
               activeTab === 'applications'
@@ -252,6 +285,21 @@ const AdminDashboard = () => {
                         setRecruiterForm({
                           ...recruiterForm,
                           password: e.target.value,
+                        })
+                      }
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={recruiterForm.mobileNumber}
+                      onChange={(e) =>
+                        setRecruiterForm({
+                          ...recruiterForm,
+                          mobileNumber: e.target.value,
                         })
                       }
                       className="form-input"
@@ -395,6 +443,47 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* Candidates Tab */}
+        {activeTab === 'candidates' && (
+          <div className="space-y-4">
+            {candidates.length === 0 ? (
+              <p className="text-gray-600">No candidates found</p>
+            ) : (
+              candidates.map((cand) => (
+                <div
+                  key={cand.id}
+                  className="card flex justify-between items-start"
+                >
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900">
+                      {cand.name || 'No Name'}
+                    </h4>
+                    <p className="text-gray-600">{cand.User?.email || 'No email'}</p>
+                    {cand.mobileNumber && (
+                      <p className="text-sm text-gray-600">
+                        Phone: {cand.mobileNumber}
+                      </p>
+                    )}
+                    {cand.technicalSkills && (
+                      <p className="text-sm text-gray-600">
+                        Skills: {cand.technicalSkills}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => handleDeleteCandidate(cand.id)}
+                      className="btn-danger px-4 py-2"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
         {/* Applications Tab */}
         {activeTab === 'applications' && (
           <div className="space-y-4">
@@ -527,8 +616,9 @@ const AdminDashboard = () => {
                           <option value="INTERVIEW_COMPLETED">
                             INTERVIEW_COMPLETED
                           </option>
-                          <option value="SELECTED">SELECTED</option>
+                           <option value="SELECTED">SELECTED</option>
                           <option value="REJECTED">REJECTED</option>
+                          <option value="SENT_TO_CLIENT">SENT_TO_CLIENT</option>
                         </select>
 
                         {editingStatusMap[app.id] === 'REJECTED' && (

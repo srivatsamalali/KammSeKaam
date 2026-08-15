@@ -84,6 +84,7 @@ const updateApplicationStatus = async (req, res) => {
       'INTERVIEW_COMPLETED',
       'SELECTED',
       'REJECTED',
+      'SENT_TO_CLIENT',
     ]
 
     if (!validStatuses.includes(status)) {
