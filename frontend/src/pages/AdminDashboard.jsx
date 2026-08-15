@@ -835,23 +835,23 @@ const AdminDashboard = () => {
     <div className="min-h-screen page-shell">
       {/* Header with Logout */}
       <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+        <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+          <div className="w-full sm:w-auto">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               Admin Portal
             </h1>
-            <p className="text-sm text-gray-600">{user?.email || 'Contact@astonrecruitment.in'}</p>
+            <p className="text-xs sm:text-sm text-gray-650">{user?.email || 'Contact@astonrecruitment.in'}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center gap-2 text-sm"
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors flex items-center gap-1.5 text-xs sm:text-sm"
             >
               <span>Logout</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
+                className="h-4 w-4 sm:h-5 sm:w-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
