@@ -885,31 +885,31 @@ const AdminDashboard = () => {
           <div className="glass-card p-6 border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-shadow">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Candidates</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              <AnimatedCounter value={stats?.totalCandidates || 0} />
+              {stats?.totalCandidates ?? 0}
             </p>
           </div>
           <div className="glass-card p-6 border-l-4 border-indigo-500 shadow-sm hover:shadow-md transition-shadow">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Recruiters</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              <AnimatedCounter value={stats?.totalRecruiters || 0} />
+              {stats?.totalRecruiters ?? 0}
             </p>
           </div>
           <div className="glass-card p-6 border-l-4 border-amber-500 shadow-sm hover:shadow-md transition-shadow">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Applications</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              <AnimatedCounter value={stats?.totalApplications || 0} />
+              {stats?.totalApplications ?? 0}
             </p>
           </div>
           <div className="glass-card p-6 border-l-4 border-emerald-500 shadow-sm hover:shadow-md transition-shadow">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Selected</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              <AnimatedCounter value={stats?.selectedCandidates || 0} />
+              {stats?.selectedCandidates ?? 0}
             </p>
           </div>
           <div className="glass-card p-6 border-l-4 border-rose-500 shadow-sm hover:shadow-md transition-shadow">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rejected</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              <AnimatedCounter value={stats?.rejectedCandidates || 0} />
+              {stats?.rejectedCandidates ?? 0}
             </p>
           </div>
         </div>
