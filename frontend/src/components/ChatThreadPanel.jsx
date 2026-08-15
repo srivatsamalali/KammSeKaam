@@ -5,17 +5,30 @@ const ChatThreadPanel = ({ isOpen, onClose, applicationId, candidateName, curren
   const [messages, setMessages] = useState([])
   const [inputText, setInputText] = useState('')
   const [loading, setLoading] = useState(false)
+  const [shouldRender, setShouldRender] = useState(isOpen)
+  const [animate, setAnimate] = useState(false)
   const threadEndRef = useRef(null)
 
   useEffect(() => {
-    if (!isOpen || !applicationId) return
+    if (isOpen) {
+      setShouldRender(true)
+      const t = setTimeout(() => setAnimate(true), 50)
+      return () => clearTimeout(t)
+    } else {
+      setAnimate(false)
+      const t = setTimeout(() => setShouldRender(false), 500)
+      return () => clearTimeout(t)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!shouldRender || !applicationId) return
 
     fetchMessages()
 
-    // Poll for new messages every 5 seconds for a real-time feel
     const interval = setInterval(fetchMessages, 5000)
     return () => clearInterval(interval)
-  }, [isOpen, applicationId])
+  }, [shouldRender, applicationId])
 
   useEffect(() => {
     // Smooth scroll to bottom when new messages are added
@@ -52,21 +65,23 @@ const ChatThreadPanel = ({ isOpen, onClose, applicationId, candidateName, curren
     }
   }
 
+  if (!shouldRender) return null
+
   return (
-    <div className={`fixed inset-0 z-[9999] flex justify-end transition-all duration-550 ease-in-out ${
-      isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
+    <div className={`fixed inset-0 z-[9999] flex justify-end transition-all duration-500 ease-in-out ${
+      animate ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
     }`}>
       {/* Dark blur backdrop */}
       <div 
         onClick={onClose}
         className={`absolute inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity duration-500 ${
-          isOpen ? 'opacity-100' : 'opacity-0'
+          animate ? 'opacity-100' : 'opacity-0'
         }`}
       />
 
       {/* Slide-out Sheet Panel */}
       <div className={`relative w-full max-w-md h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform transition-transform duration-500 ease-in-out ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
+        animate ? 'translate-x-0' : 'translate-x-full'
       }`}>
         
         {/* Panel Header */}
