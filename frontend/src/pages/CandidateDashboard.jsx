@@ -331,6 +331,39 @@ const parseSkills = (technicalSkills) => {
   return []
 }
 
+const majorCities = ['Bengaluru', 'Mumbai', 'Pune', 'Delhi NCR', 'Hyderabad', 'Chennai', 'Kolkata']
+
+const qualifications = [
+  'B.Tech / B.E.',
+  'M.Tech / M.E.',
+  'BCA',
+  'MCA',
+  'B.Sc',
+  'M.Sc',
+  'B.Com',
+  'MBA',
+  'Diploma',
+  'High School',
+  'Post Graduate',
+  'Doctorate (Ph.D)'
+]
+
+const companiesList = [
+  'Tata Consultancy Services (TCS)',
+  'Infosys',
+  'Wipro',
+  'Cognizant',
+  'Accenture',
+  'HDFC Bank',
+  'ICICI Bank',
+  'State Bank of India (SBI)',
+  'Axis Bank',
+  'HSBC',
+  'Google',
+  'Microsoft',
+  'Amazon'
+]
+
 const CandidateDashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -338,6 +371,8 @@ const CandidateDashboard = () => {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [editMode, setEditMode] = useState(false)
+  const [customSkill, setCustomSkill] = useState('')
+  const [availableSkills, setAvailableSkills] = useState(['Java', 'Python', 'Javascript', 'React', 'Node.js', 'SQL', 'AWS', 'Docker'])
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -345,6 +380,32 @@ const CandidateDashboard = () => {
       navigate('/candidate/login')
     }
   }
+
+  const handleToggleSkill = (skill) => {
+    setFormData(prev => {
+      const skills = prev.technicalSkills.includes(skill)
+        ? prev.technicalSkills.filter(s => s !== skill)
+        : [...prev.technicalSkills, skill]
+      return { ...prev, technicalSkills: skills }
+    })
+  }
+
+  const handleAddCustomSkill = (e) => {
+    e.preventDefault()
+    const trimmed = customSkill.trim()
+    if (!trimmed) return
+    if (!availableSkills.includes(trimmed)) {
+      setAvailableSkills(prev => [...prev, trimmed])
+    }
+    setFormData(prev => {
+      if (!prev.technicalSkills.includes(trimmed)) {
+        return { ...prev, technicalSkills: [...prev.technicalSkills, trimmed] }
+      }
+      return prev
+    })
+    setCustomSkill('')
+  }
+
   const [formData, setFormData] = useState({
     name: '',
     dob: '',
@@ -375,6 +436,19 @@ const CandidateDashboard = () => {
       }
       setProfile(sanitizedData)
       setFormData(sanitizedData)
+      
+      // Append loaded candidate skills to available skills checkbox list if not present
+      if (sanitizedSkills.length > 0) {
+        setAvailableSkills(prev => {
+          const next = [...prev]
+          sanitizedSkills.forEach(s => {
+            if (!next.includes(s)) {
+              next.push(s)
+            }
+          })
+          return next
+        })
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
     } finally {
@@ -605,79 +679,179 @@ const CandidateDashboard = () => {
 
                 <div className="form-group">
                   <label className="form-label">Highest Qualification</label>
-                  <input
-                    type="text"
+                  <select
                     name="highestQualification"
                     value={formData.highestQualification}
                     onChange={handleChange}
                     className="form-input"
-                  />
+                  >
+                    <option value="">Select Qualification</option>
+                    {qualifications.map((q) => (
+                      <option key={q} value={q}>{q}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Current Company</label>
-                  <input
-                    type="text"
-                    name="currentCompany"
-                    value={formData.currentCompany}
-                    onChange={handleChange}
-                    className="form-input"
-                  />
+                  {(() => {
+                    const isOther = formData.currentCompany && !companiesList.includes(formData.currentCompany)
+                    return (
+                      <div className="space-y-2">
+                        <select
+                          value={isOther ? 'Other' : (formData.currentCompany || '')}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            if (val === 'Other') {
+                              setFormData(prev => ({ ...prev, currentCompany: '' }))
+                            } else {
+                              setFormData(prev => ({ ...prev, currentCompany: val }))
+                            }
+                          }}
+                          className="form-input"
+                        >
+                          <option value="">Select Company</option>
+                          {companiesList.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                          <option value="Other">Other (Type manually)</option>
+                        </select>
+                        {(isOther || formData.currentCompany === 'Other' || !companiesList.includes(formData.currentCompany)) && (
+                          <input
+                            type="text"
+                            name="currentCompany"
+                            placeholder="Type company name manually"
+                            value={formData.currentCompany === 'Other' ? '' : formData.currentCompany}
+                            onChange={handleChange}
+                            className="form-input"
+                            required
+                          />
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Current CTC</label>
+                  <label className="form-label">Current CTC (Lakhs/Annum)</label>
                   <input
                     type="number"
+                    step="0.01"
+                    min="0"
                     name="currentCTC"
                     value={formData.currentCTC}
                     onChange={handleChange}
                     className="form-input"
+                    placeholder="e.g. 6.50"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Expected CTC</label>
+                  <label className="form-label">Expected CTC (Lakhs/Annum)</label>
                   <input
                     type="number"
+                    step="0.01"
+                    min="0"
                     name="expectedCTC"
                     value={formData.expectedCTC}
                     onChange={handleChange}
                     className="form-input"
+                    placeholder="e.g. 8.50"
                   />
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Current Location</label>
-                  <input
-                    type="text"
+                  <select
                     name="currentLocation"
                     value={formData.currentLocation}
                     onChange={handleChange}
                     className="form-input"
-                  />
+                  >
+                    <option value="">Select Location</option>
+                    {majorCities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Preferred Location</label>
-                  <input
-                    type="text"
+                  <select
                     name="preferredLocation"
                     value={formData.preferredLocation}
                     onChange={handleChange}
                     className="form-input"
-                  />
+                  >
+                    <option value="">Select Preferred Location</option>
+                    {majorCities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Notice Period</label>
+                  <label className="form-label">Notice Period (days)</label>
                   <input
-                    type="text"
+                    type="number"
+                    min="0"
                     name="noticePeriod"
                     value={formData.noticePeriod}
                     onChange={handleChange}
                     className="form-input"
+                    placeholder="e.g. 30"
                   />
+                </div>
+              </div>
+
+              {/* Skill preference checkboxes and custom addition panel */}
+              <div className="form-group border-t border-slate-100 dark:border-slate-800 pt-4 mt-6">
+                <label className="form-label font-bold text-slate-800 dark:text-slate-200">
+                  Technical Skills & Tech Stacks Checklist
+                </label>
+                <p className="text-[10px] text-slate-500 mb-3">
+                  Choose matching capabilities. Select all checkpoints that apply to unlock 100% profile coverage and stand out to recruiters.
+                </p>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 bg-slate-50/50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800/40 max-h-36 overflow-y-auto">
+                  {availableSkills.map((skill) => {
+                    const isChecked = formData.technicalSkills.includes(skill)
+                    return (
+                      <label 
+                        key={skill} 
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                          isChecked 
+                            ? 'bg-amber-500/10 text-amber-800 border-amber-500/30 dark:text-amber-400 dark:bg-amber-950/20' 
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                        }`}
+                      >
+                        <input 
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleSkill(skill)}
+                          className="w-3.5 h-3.5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                        />
+                        <span>{skill}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+
+                <div className="flex gap-2 items-center max-w-sm">
+                  <input 
+                    type="text"
+                    placeholder="Add other skill (e.g. Kotlin)"
+                    value={customSkill}
+                    onChange={(e) => setCustomSkill(e.target.value)}
+                    className="form-input text-xs h-9 py-1 flex-1"
+                  />
+                  <button 
+                    type="button"
+                    onClick={handleAddCustomSkill}
+                    className="btn-secondary text-xs h-9 px-4 shrink-0 font-bold"
+                  >
+                    ➕ Add
+                  </button>
                 </div>
               </div>
 
