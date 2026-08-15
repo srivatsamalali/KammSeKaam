@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
+import MonkeyPasswordToggle from '../components/MonkeyPasswordToggle'
 
 const RecruiterLogin = () => {
   const navigate = useNavigate()
@@ -208,21 +209,25 @@ const RecruiterLogin = () => {
               />
             </div>
 
-            <div className="form-group password-field">
-              <div className="flex justify-between items-center mb-1">
-                <label className="form-label mb-0">Password</label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setResetEmail(formData.email)
-                    setShowResetModal(true)
-                  }}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-800"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <div className="relative">
+            <div className="form-group flex flex-col items-center">
+              <MonkeyPasswordToggle 
+                showPassword={showPassword} 
+                onClick={() => setShowPassword(!showPassword)} 
+              />
+              <div className="w-full text-left">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="form-label mb-0">Password</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetEmail(formData.email)
+                      setShowResetModal(true)
+                    }}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -231,43 +236,6 @@ const RecruiterLogin = () => {
                   className="form-input"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="password-toggle-button"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5"
-                    >
-                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20.5C7 20.5 2.73 17.28 1 12c.85-2.35 2.46-4.29 4.5-5.56" />
-                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                      <path d="M1 1l22 22" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5"
-                    >
-                      <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
-                </button>
               </div>
             </div>
 

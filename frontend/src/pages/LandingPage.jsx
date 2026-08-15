@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 
 const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null)
@@ -293,8 +294,8 @@ const LandingPage = () => {
       </footer>
 
       {/* Role Preference Selector Modal */}
-      {showPreferenceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4">
+      {showPreferenceModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4">
           <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 md:p-8 flex flex-col items-center text-center animate-fade-in">
             {/* Visual Header Illustration */}
             <div className="w-full h-44 rounded-xl overflow-hidden mb-6 relative border border-slate-100 dark:border-slate-800 shadow-inner">
@@ -415,7 +416,8 @@ const LandingPage = () => {
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
