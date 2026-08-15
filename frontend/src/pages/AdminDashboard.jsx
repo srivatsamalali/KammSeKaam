@@ -200,54 +200,104 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
         return (
           <div className="glass-card p-6 md:col-span-2">
             <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Monthly Job Application Trends</h4>
-            <div className="w-full h-44">
-              <svg className="w-full h-full" viewBox="0 0 500 120" preserveAspectRatio="none">
-                <line x1="30" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-                <line x1="30" y1="55" x2="480" y2="55" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-                <line x1="30" y1="90" x2="480" y2="90" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-                
+            
+            <div className="relative w-full h-52 bg-slate-50/50 dark:bg-slate-900/40 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
+              
+              {/* Graphic area */}
+              <div className="relative flex-1 w-full mt-2">
+                {/* Horizontal dotted grid lines */}
+                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-4">
+                  <div className="w-full border-b border-dashed border-slate-200/70 dark:border-slate-800" />
+                  <div className="w-full border-b border-dashed border-slate-200/70 dark:border-slate-800" />
+                  <div className="w-full border-b border-slate-200/70 dark:border-slate-800" />
+                </div>
+
+                {/* SVG Line with preserveAspectRatio set to meet standard scales */}
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 500 100" preserveAspectRatio="none">
+                  {(() => {
+                    const maxVal = Math.max(...last6Months.map(d => d.count), 1);
+                    const points = last6Months.map((d, idx) => {
+                      const x = 30 + idx * 88;
+                      const y = 80 - (d.count / maxVal) * 60;
+                      return { x, y, count: d.count };
+                    });
+
+                    // Construct smooth bezier curve path
+                    let dPath = `M ${points[0].x},${points[0].y}`;
+                    for (let i = 0; i < points.length - 1; i++) {
+                      const p0 = points[i];
+                      const p1 = points[i + 1];
+                      const cpX1 = p0.x + 44;
+                      const cpY1 = p0.y;
+                      const cpX2 = p1.x - 44;
+                      const cpY2 = p1.y;
+                      dPath += ` C ${cpX1},${cpY1} ${cpX2},${cpY2} ${p1.x},${p1.y}`;
+                    }
+
+                    const dArea = `${dPath} L ${points[points.length - 1].x},90 L ${points[0].x},90 Z`;
+
+                    return (
+                      <>
+                        <defs>
+                          <linearGradient id="chartGradientSmooth" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#b88f3f" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#b88f3f" stopOpacity="0.0" />
+                          </linearGradient>
+                          <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="2.5" floodColor="#b88f3f" floodOpacity="0.2" />
+                          </filter>
+                        </defs>
+                        
+                        {/* Area Gradient Fill */}
+                        <path d={dArea} fill="url(#chartGradientSmooth)" />
+                        
+                        {/* Smooth Bezier Line */}
+                        <path d={dPath} fill="none" stroke="#b88f3f" strokeWidth="3" strokeLinecap="round" filter="url(#shadow)" />
+                        
+                        {/* Dot markers */}
+                        {points.map((p, idx) => (
+                          <g key={idx}>
+                            <circle cx={p.x} cy={p.y} r="4" fill="#ffffff" stroke="#b88f3f" strokeWidth="2.5" />
+                          </g>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </svg>
+
+                {/* Live count bubbles over dots (styled cleanly with HTML elements) */}
                 {(() => {
                   const maxVal = Math.max(...last6Months.map(d => d.count), 1);
-                  const points = last6Months.map((d, idx) => {
-                    const x = 30 + idx * 90;
-                    const y = 90 - (d.count / maxVal) * 70;
-                    return `${x},${y}`;
+                  return last6Months.map((d, idx) => {
+                    const leftPct = 6 + idx * 17.6;
+                    const bottomPct = (d.count / maxVal) * 60;
+                    return (
+                      <div 
+                        key={idx} 
+                        className="absolute flex flex-col items-center -translate-x-1/2"
+                        style={{ 
+                          left: `${leftPct}%`,
+                          bottom: `calc(${bottomPct}% + 18px)` 
+                        }}
+                      >
+                        <span className="bg-slate-900/80 dark:bg-slate-700 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
+                          {d.count}
+                        </span>
+                      </div>
+                    );
                   });
-                  const pathData = `M ${points.join(' L ')}`;
-                  
-                  return (
-                    <>
-                      <defs>
-                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#b88f3f" stopOpacity="0.25" />
-                          <stop offset="100%" stopColor="#b88f3f" stopOpacity="0.0" />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d={`M 30,90 L ${points.map((p) => p).join(' L ')} L ${30 + (last6Months.length-1)*90},90 Z`}
-                        fill="url(#chartGradient)"
-                      />
-                      <path d={pathData} fill="none" stroke="#b88f3f" strokeWidth="2.5" strokeLinecap="round" />
-                      
-                      {last6Months.map((d, idx) => {
-                        const x = 30 + idx * 90;
-                        const y = 90 - (d.count / maxVal) * 70;
-                        return (
-                          <g key={idx} className="group">
-                            <circle cx={x} cy={y} r="4" fill="#ffffff" stroke="#b88f3f" strokeWidth="2" className="transition-all duration-300 hover:r-6 cursor-pointer" />
-                            <text x={x} y={y - 8} textAnchor="middle" className="text-[8px] font-bold fill-amber-800 dark:fill-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              {d.count}
-                            </text>
-                            <text x={x} y="110" textAnchor="middle" className="text-[8px] font-semibold fill-slate-400">
-                              {d.month}
-                            </text>
-                          </g>
-                        );
-                      })}
-                    </>
-                  );
                 })()}
-              </svg>
+              </div>
+
+              {/* Month label list at bottom */}
+              <div className="flex justify-between items-center px-4 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                {last6Months.map((d, idx) => (
+                  <div key={idx} className="w-12 text-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    {d.month}
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
         );
