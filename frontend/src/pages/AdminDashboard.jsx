@@ -5,6 +5,7 @@ import {
   adminService,
   recruiterService,
   applicationService,
+  clientService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 
@@ -338,6 +339,14 @@ const AdminDashboard = () => {
     name: '',
     specialization: '',
   })
+  const [clients, setClients] = useState([])
+  const [showCreateClient, setShowCreateClient] = useState(false)
+  const [clientForm, setClientForm] = useState({
+    name: '',
+    company: '',
+    phone: '',
+    email: '',
+  })
 
   useEffect(() => {
     fetchData()
@@ -367,10 +376,43 @@ const AdminDashboard = () => {
       } catch (e) {
         console.error('Error fetching unassigned candidates:', e)
       }
+      // fetch clients
+      try {
+        const cliRes = await clientService.getAll()
+        setClients(cliRes.data)
+      } catch (e) {
+        console.error('Error fetching clients:', e)
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCreateClient = async (e) => {
+    e.preventDefault()
+    try {
+      await clientService.create(clientForm)
+      setClientForm({ name: '', company: '', phone: '', email: '' })
+      setShowCreateClient(false)
+      fetchData()
+      alert('Client created successfully')
+    } catch (error) {
+      console.error('Error creating client:', error)
+      alert(error.response?.data?.message || 'Error creating client')
+    }
+  }
+
+  const handleDeleteClient = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this client?')) return
+    try {
+      await clientService.delete(id)
+      fetchData()
+      alert('Client deleted successfully')
+    } catch (error) {
+      console.error('Error deleting client:', error)
+      alert(error.response?.data?.message || 'Error deleting client')
     }
   }
 
@@ -605,6 +647,16 @@ const AdminDashboard = () => {
             }`}
           >
             Applications
+          </button>
+          <button
+            onClick={() => setActiveTab('clients')}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'clients'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600'
+            }`}
+          >
+            Clients
           </button>
         </div>
 
@@ -1098,6 +1150,98 @@ const AdminDashboard = () => {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* Clients Tab */}
+        {activeTab === 'clients' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Clients Registry</h3>
+              <button
+                onClick={() => setShowCreateClient(!showCreateClient)}
+                className="btn-primary"
+              >
+                {showCreateClient ? 'Close Client Form' : '⚡ Add New Client'}
+              </button>
+            </div>
+
+            {showCreateClient && (
+              <form onSubmit={handleCreateClient} className="card p-6 bg-slate-50 border border-slate-200/50 mb-6 max-w-lg">
+                <h4 className="text-md font-bold mb-4 text-blue-900">Create Client Reference</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Name</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={clientForm.name}
+                      onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
+                      placeholder="e.g., John Doe"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Company</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={clientForm.company}
+                      onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })}
+                      placeholder="e.g., Acme Corp"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Email Address</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={clientForm.email}
+                      onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })}
+                      placeholder="e.g., hiring@company.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Phone Number</label>
+                    <input
+                      type="tel"
+                      className="form-input"
+                      value={clientForm.phone}
+                      onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
+                      placeholder="e.g., +91 9876543210"
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary w-full">Save Client</button>
+                </div>
+              </form>
+            )}
+
+            <div className="space-y-4">
+              {clients.length === 0 ? (
+                <p className="text-gray-600">No clients registered yet.</p>
+              ) : (
+                clients.map((cli) => (
+                  <div key={cli.id} className="card flex justify-between items-center p-4 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900">{cli.name}</h4>
+                      <p className="text-sm font-semibold text-blue-700">{cli.company}</p>
+                      <div className="mt-2 text-xs text-slate-600 space-y-0.5">
+                        <p>📧 Email: <span className="font-semibold text-slate-800">{cli.email}</span></p>
+                        {cli.phone && <p>📞 Phone: <span className="font-semibold text-slate-800">{cli.phone}</span></p>}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteClient(cli.id)}
+                      className="btn-danger px-4 py-2 shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )}
       </div>

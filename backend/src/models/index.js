@@ -5,6 +5,7 @@ const Application = require('./Application')
 const Notification = require('./Notification')
 const PushSubscription = require('./PushSubscription')
 const Message = require('./Message')
+const Client = require('./Client')
 
 // Define associations
 User.hasOne(Candidate, { foreignKey: 'userId', onDelete: 'CASCADE' })
@@ -35,6 +36,9 @@ Application.hasMany(Message, { foreignKey: 'applicationId', onDelete: 'CASCADE' 
 Message.belongsTo(Application, { foreignKey: 'applicationId' })
 Message.belongsTo(User, { foreignKey: 'senderId' })
 
+Client.hasMany(Application, { foreignKey: 'clientId', onDelete: 'SET NULL' })
+Application.belongsTo(Client, { foreignKey: 'clientId' })
+
 module.exports = {
   User,
   Candidate,
@@ -43,4 +47,5 @@ module.exports = {
   Notification,
   PushSubscription,
   Message,
+  Client,
 }

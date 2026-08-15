@@ -1,4 +1,4 @@
-const { Recruiter, Candidate, Application, User, Notification } = require('../models')
+const { Recruiter, Candidate, Application, User, Notification, Client } = require('../models')
 const { sendPushNotification } = require('../utils/pushService')
 
 const syncCandidatesAndApplications = async () => {
@@ -218,6 +218,45 @@ const deleteCandidate = async (req, res) => {
   }
 }
 
+const getClients = async (req, res) => {
+  try {
+    const clients = await Client.findAll()
+    res.json(clients)
+  } catch (error) {
+    console.error('Get clients error:', error)
+    res.status(500).json({ message: 'Error retrieving clients', error: error.message })
+  }
+}
+
+const createClient = async (req, res) => {
+  try {
+    const { name, company, phone, email } = req.body
+    if (!name || !company || !email) {
+      return res.status(400).json({ message: 'Name, company and email are required' })
+    }
+    const newClient = await Client.create({ name, company, phone, email })
+    res.status(201).json(newClient)
+  } catch (error) {
+    console.error('Create client error:', error)
+    res.status(500).json({ message: 'Error creating client', error: error.message })
+  }
+}
+
+const deleteClient = async (req, res) => {
+  try {
+    const { id } = req.params
+    const client = await Client.findByPk(id)
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' })
+    }
+    await client.destroy()
+    res.json({ message: 'Client deleted successfully' })
+  } catch (error) {
+    console.error('Delete client error:', error)
+    res.status(500).json({ message: 'Error deleting client', error: error.message })
+  }
+}
+
 module.exports = {
   getDashboardStats,
   getReports,
@@ -225,4 +264,7 @@ module.exports = {
   getUnassignedCandidates,
   getAllCandidates,
   deleteCandidate,
+  getClients,
+  createClient,
+  deleteClient,
 }

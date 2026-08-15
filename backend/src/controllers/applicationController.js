@@ -90,6 +90,7 @@ const updateApplicationStatus = async (req, res) => {
       culturalRating,
       feedbackComments,
       recommendation,
+      clientId,
     } = req.body
 
     const validStatuses = [
@@ -125,12 +126,15 @@ const updateApplicationStatus = async (req, res) => {
     if (culturalRating !== undefined) application.culturalRating = culturalRating
     if (feedbackComments !== undefined) application.feedbackComments = feedbackComments
     if (recommendation !== undefined) application.recommendation = recommendation
+    if (clientId !== undefined) application.clientId = clientId
 
     await application.save()
 
     // Create notification (don't fail the request if notifications fail)
     try {
-      const candidate = await Candidate.findByPk(application.candidateId)
+      const candidate = await Candidate.findByPk(application.candidateId, {
+        include: [{ model: User }]
+      })
       if (candidate) {
         await Notification.create({
           userId: candidate.userId,
@@ -142,6 +146,28 @@ const updateApplicationStatus = async (req, res) => {
           body: `Your application status is now: ${status}`,
           type: status
         })
+
+        // Send Email notifications for Selected/Rejected/Sent to Client updates
+        if (candidate.User && candidate.User.email) {
+          const emailService = require('../utils/emailService')
+          if (status === 'SELECTED') {
+            await emailService.sendSelectionEmail(candidate.User.email, candidate.name)
+          } else if (status === 'REJECTED') {
+            await emailService.sendRejectionEmail(candidate.User.email, candidate.name, rejectionReason)
+          } else if (status === 'SENT_TO_CLIENT') {
+            const finalClientId = clientId || application.clientId
+            if (finalClientId) {
+              const { Client } = require('../models')
+              const client = await Client.findByPk(finalClientId)
+              if (client) {
+                // Email 1: Send to client
+                await emailService.sendSentToClientEmailToClient(client.email, client.name, candidate.name, candidate.resumePath)
+                // Email 2: Send to candidate
+                await emailService.sendSentToClientEmailToCandidate(candidate.User.email, candidate.name, client.name, client.company)
+              }
+            }
+          }
+        }
       }
 
       // Notify all admin users when recruiter changes status
@@ -187,7 +213,7 @@ const generateAutoMeetLink = () => {
 const scheduleInterview = async (req, res) => {
   try {
     const { applicationId } = req.params
-    const { interviewDate, googleMeetLink } = req.body
+    const { interviewDate, googleMeetLink, interviewDuration } = req.body
 
     if (!interviewDate) {
       return res
@@ -218,6 +244,7 @@ const scheduleInterview = async (req, res) => {
 
     application.interviewDate = interviewDate
     application.googleMeetLink = finalMeetLink
+    application.interviewDuration = interviewDuration ? parseInt(interviewDuration) : 60
     application.status = 'INTERVIEW_SCHEDULED'
 
     await application.save()
@@ -240,6 +267,7 @@ const scheduleInterview = async (req, res) => {
           recruiterName,
           interviewDate,
           finalMeetLink,
+          application.interviewDuration || 60,
         )
       }
     } catch (emailErr) {

@@ -6,6 +6,7 @@ import {
   applicationService,
   notificationService,
   messageService,
+  clientService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
@@ -324,10 +325,23 @@ const RecruiterDashboard = () => {
   const [recommendation, setRecommendation] = useState('Hire')
   const [feedbackComments, setFeedbackComments] = useState('')
 
+  const [clients, setClients] = useState([])
+  const [selectedClientId, setSelectedClientId] = useState('')
+
   useEffect(() => {
     fetchApplications()
     fetchNotifications()
+    fetchClients()
   }, [])
+
+  const fetchClients = async () => {
+    try {
+      const response = await clientService.getAll()
+      setClients(response.data)
+    } catch (error) {
+      console.error('Error fetching clients:', error)
+    }
+  }
 
   const fetchApplications = async () => {
     try {
@@ -661,6 +675,25 @@ const RecruiterDashboard = () => {
                               />
                             )}
 
+                            {editingStatus === 'SENT_TO_CLIENT' && (
+                              <div className="space-y-1 mt-2">
+                                <label className="block text-xs font-semibold text-slate-700">Select Client Company</label>
+                                <select
+                                  value={selectedClientId}
+                                  onChange={(e) => setSelectedClientId(e.target.value)}
+                                  className="form-input text-sm bg-white"
+                                  required
+                                >
+                                  <option value="">-- Choose Client (Company) --</option>
+                                  {clients.map((cli) => (
+                                    <option key={cli.id} value={cli.id}>
+                                      {cli.name} ({cli.company})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+
                             {editingStatus === 'INTERVIEW_COMPLETED' && (
                               <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50 mt-2 text-left dark:bg-slate-800/40 dark:border-slate-700/50">
                                 <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider dark:text-amber-500">Interview Feedback</h5>
@@ -754,7 +787,7 @@ const RecruiterDashboard = () => {
                                       culturalRating,
                                       recommendation,
                                       feedbackComments
-                                    } : { rejectionReason: editingReason }
+                                    } : (editingStatus === 'SENT_TO_CLIENT' ? { clientId: selectedClientId } : { rejectionReason: editingReason })
                                   )
                                 }
                                 className="btn-primary"
@@ -771,6 +804,7 @@ const RecruiterDashboard = () => {
                                   setCulturalRating(5)
                                   setRecommendation('Hire')
                                   setFeedbackComments('')
+                                  setSelectedClientId('')
                                 }}
                                 className="btn-secondary"
                               >

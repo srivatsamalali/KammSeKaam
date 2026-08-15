@@ -80,4 +80,10 @@ export const messageService = {
   sendMessage: (applicationId, data) => api.post(`/applications/${applicationId}/messages`, data),
 }
 
+export const clientService = {
+  getAll: () => api.get('/admin/clients'),
+  create: (data) => api.post('/admin/clients', data),
+  delete: (id) => api.delete(`/admin/clients/${id}`),
+}
+
 export default api

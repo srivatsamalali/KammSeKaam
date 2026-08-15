@@ -117,7 +117,7 @@ const ensureAdminUser = async () => {
 const startServer = async () => {
   try {
     // Sync database - use force: false to prevent recreating tables
-    await sequelize.sync({ force: false })
+    await sequelize.sync({ alter: true })
     console.log('Database synced')
 
     // Ensure default admin exists in development

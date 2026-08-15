@@ -22,6 +22,13 @@ const Application = sequelize.define('Application', {
       key: 'id',
     },
   },
+  clientId: {
+    type: DataTypes.UUID,
+    references: {
+      model: 'Clients',
+      key: 'id',
+    },
+  },
   status: {
     type: DataTypes.ENUM(
       'APPLICATION_RECEIVED',
@@ -38,6 +45,10 @@ const Application = sequelize.define('Application', {
   },
   googleMeetLink: {
     type: DataTypes.STRING,
+  },
+  interviewDuration: {
+    type: DataTypes.INTEGER,
+    defaultValue: 60,
   },
   feedback: {
     type: DataTypes.TEXT,

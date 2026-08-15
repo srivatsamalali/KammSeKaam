@@ -7,6 +7,9 @@ const {
   getUnassignedCandidates,
   getAllCandidates,
   deleteCandidate,
+  getClients,
+  createClient,
+  deleteClient,
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -42,5 +45,10 @@ router.delete(
   authorizeRole('ADMIN'),
   deleteCandidate,
 )
+
+// Client management routes
+router.get('/clients', authenticateToken, getClients)
+router.post('/clients', authenticateToken, authorizeRole('ADMIN'), createClient)
+router.delete('/clients/:id', authenticateToken, authorizeRole('ADMIN'), deleteClient)
 
 module.exports = router
