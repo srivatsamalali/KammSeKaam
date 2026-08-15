@@ -12,6 +12,14 @@
   --text-color: #e2e8f0;
 }
 
+.dark body,
+.dark .page-shell,
+.dark div.bg-\[\#faf8f2\],
+.dark .bg-\[\#faf8f2\] {
+  background: var(--bg-color) !important;
+  background-color: var(--bg-color) !important;
+}
+
 * {
   margin: 0;
   padding: 0;

@@ -75,7 +75,7 @@ import './styles/index.css'
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen w-full bg-[#faf8f2] text-slate-900">
+      <div className="min-h-screen w-full bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300">
         <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
           <BrowserRouter>
             <AnimatedRoutes />

@@ -11,6 +11,9 @@ import ThemeToggle from '../components/ThemeToggle'
 const DashboardCharts = ({ stats, recruiters, applications }) => {
   if (!stats) return null;
 
+  const [activeLegendFilter, setActiveLegendFilter] = useState(null) // null, 'selected', 'rejected', 'pending'
+  const [hoveredSlice, setHoveredSlice] = useState(null) // null, 'selected', 'rejected', 'pending'
+
   const selected = stats.selectedCandidates || 0;
   const rejected = stats.rejectedCandidates || 0;
   const total = stats.totalApplications || 0;
@@ -32,7 +35,18 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       {/* Donut Chart */}
       <div className="glass-card p-6 flex flex-col items-center">
-        <h4 className="font-bold text-slate-800 mb-4 self-start">Application Status Split</h4>
+        <div className="w-full flex justify-between items-center mb-4">
+          <h4 className="font-bold text-slate-800 dark:text-slate-100">Application Status Split</h4>
+          {activeLegendFilter && (
+            <button
+              onClick={() => setActiveLegendFilter(null)}
+              className="text-[9px] font-bold text-amber-700 hover:text-amber-800 dark:text-amber-500 uppercase tracking-wider underline"
+            >
+              Reset Filter
+            </button>
+          )}
+        </div>
+        
         <div className="relative w-40 h-40">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
             <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
@@ -42,10 +56,14 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
               r="15.915"
               fill="none"
               stroke="#10b981"
-              strokeWidth="3"
+              strokeWidth={activeLegendFilter === 'selected' || hoveredSlice === 'selected' ? "4.5" : "3"}
               strokeDasharray={`${selPct} ${100 - selPct}`}
               strokeDashoffset="0"
-              className="transition-all duration-1000"
+              opacity={!activeLegendFilter || activeLegendFilter === 'selected' ? "1" : "0.3"}
+              className="transition-all duration-300 cursor-pointer"
+              onMouseEnter={() => setHoveredSlice('selected')}
+              onMouseLeave={() => setHoveredSlice(null)}
+              onClick={() => setActiveLegendFilter(activeLegendFilter === 'selected' ? null : 'selected')}
             />
             <circle
               cx="18"
@@ -53,10 +71,14 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
               r="15.915"
               fill="none"
               stroke="#ef4444"
-              strokeWidth="3"
+              strokeWidth={activeLegendFilter === 'rejected' || hoveredSlice === 'rejected' ? "4.5" : "3"}
               strokeDasharray={`${rejPct} ${100 - rejPct}`}
               strokeDashoffset={`-${selPct}`}
-              className="transition-all duration-1000"
+              opacity={!activeLegendFilter || activeLegendFilter === 'rejected' ? "1" : "0.3"}
+              className="transition-all duration-300 cursor-pointer"
+              onMouseEnter={() => setHoveredSlice('rejected')}
+              onMouseLeave={() => setHoveredSlice(null)}
+              onClick={() => setActiveLegendFilter(activeLegendFilter === 'rejected' ? null : 'rejected')}
             />
             <circle
               cx="18"
@@ -64,22 +86,64 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
               r="15.915"
               fill="none"
               stroke="#f59e0b"
-              strokeWidth="3"
+              strokeWidth={activeLegendFilter === 'pending' || hoveredSlice === 'pending' ? "4.5" : "3"}
               strokeDasharray={`${penPct} ${100 - penPct}`}
               strokeDashoffset={`-${selPct + rejPct}`}
-              className="transition-all duration-1000"
+              opacity={!activeLegendFilter || activeLegendFilter === 'pending' ? "1" : "0.3"}
+              className="transition-all duration-300 cursor-pointer"
+              onMouseEnter={() => setHoveredSlice('pending')}
+              onMouseLeave={() => setHoveredSlice(null)}
+              onClick={() => setActiveLegendFilter(activeLegendFilter === 'pending' ? null : 'pending')}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-slate-800">{total}</span>
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Total</span>
+            {hoveredSlice ? (
+              <>
+                <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                  {hoveredSlice === 'selected' ? selected : hoveredSlice === 'rejected' ? rejected : pending}
+                </span>
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+                  {hoveredSlice}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">{total}</span>
+                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Total</span>
+              </>
+            )}
           </div>
         </div>
         
+        {/* Interactive Legends */}
         <div className="flex gap-4 mt-4 text-[10px] font-bold">
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-emerald-500" /> Selected ({selected})</span>
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-red-500" /> Rejected ({rejected})</span>
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded bg-amber-500" /> Pending ({pending})</span>
+          <button
+            onClick={() => setActiveLegendFilter(activeLegendFilter === 'selected' ? null : 'selected')}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${
+              activeLegendFilter === 'selected' ? 'bg-emerald-50 dark:bg-emerald-950/20 ring-1 ring-emerald-500/20' : ''
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded bg-emerald-500" />
+            Selected ({selected})
+          </button>
+          <button
+            onClick={() => setActiveLegendFilter(activeLegendFilter === 'rejected' ? null : 'rejected')}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${
+              activeLegendFilter === 'rejected' ? 'bg-red-50 dark:bg-red-950/20 ring-1 ring-red-500/20' : ''
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded bg-red-500" />
+            Rejected ({rejected})
+          </button>
+          <button
+            onClick={() => setActiveLegendFilter(activeLegendFilter === 'pending' ? null : 'pending')}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${
+              activeLegendFilter === 'pending' ? 'bg-amber-50 dark:bg-amber-950/20 ring-1 ring-amber-500/20' : ''
+            }`}
+          >
+            <span className="w-2.5 h-2.5 rounded bg-amber-500" />
+            Pending ({pending})
+          </button>
         </div>
       </div>
 
@@ -258,6 +322,43 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error exporting CSV:', error);
       alert('Failed to export CSV report');
+    }
+  };
+
+  const exportApplicationsToExcel = () => {
+    try {
+      const headers = ['Candidate Name', 'Candidate Email', 'Recruiter Name', 'Application Status', 'Applied Date', 'Interview Date', 'Meeting Link'];
+      
+      const rows = applications.map(app => [
+        app.Candidate?.name || 'N/A',
+        app.Candidate?.User?.email || 'N/A',
+        app.Recruiter?.name || 'Not assigned',
+        app.status || 'N/A',
+        new Date(app.createdAt).toLocaleDateString(),
+        app.interviewDate ? new Date(app.interviewDate).toLocaleString() : 'N/A',
+        app.googleMeetLink || 'N/A'
+      ]);
+
+      let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">`;
+      html += `<head><meta charset="utf-8"/><style>th { background-color: #b88f3f; color: white; font-weight: bold; } td, th { border: 1px solid #cbd5e1; padding: 6px; text-align: left; }</style></head><body>`;
+      html += `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+      rows.forEach(row => {
+        html += `<tr>${row.map(val => `<td>${val}</td>`).join('')}</tr>`;
+      });
+      html += `</tbody></table></body></html>`;
+
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `kaamsekaaam_applications_report_${new Date().toISOString().split('T')[0]}.xls`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      alert('Failed to export Excel report');
     }
   };
 
@@ -635,12 +736,20 @@ const AdminDashboard = () => {
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-xl font-bold text-gray-900">Applications Status Reports</h3>
               {applications.length > 0 && (
-                <button
-                  onClick={exportApplicationsToCSV}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
-                >
-                  📥 Export to CSV
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={exportApplicationsToCSV}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                  >
+                    📥 Export to CSV
+                  </button>
+                  <button
+                    onClick={exportApplicationsToExcel}
+                    className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                  >
+                    📊 Export to Excel
+                  </button>
+                </div>
               )}
             </div>
             {/* Unassigned candidates section */}

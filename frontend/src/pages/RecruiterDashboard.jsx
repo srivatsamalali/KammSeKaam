@@ -9,6 +9,45 @@ import {
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 
+const calculateAiMatch = (candidate) => {
+  if (!candidate) return { score: 0, strengths: [] }
+  let score = 65
+  const strengths = []
+  
+  const skills = Array.isArray(candidate.technicalSkills)
+    ? candidate.technicalSkills
+    : typeof candidate.technicalSkills === 'string'
+    ? JSON.parse(candidate.technicalSkills || '[]')
+    : []
+
+  if (skills.length > 0) {
+    score += Math.min(skills.length * 7, 20)
+    strengths.push(`Core skills: ${skills.slice(0, 2).join(', ')}`)
+  } else {
+    score -= 10;
+  }
+  
+  const exp = parseInt(candidate.experience, 10) || 0
+  if (exp >= 5) {
+    score += 12
+    strengths.push('Senior capability (5+ yrs)')
+  } else if (exp >= 2) {
+    score += 6
+    strengths.push('Mid-level experience')
+  } else {
+    strengths.push('Entry level profile')
+  }
+
+  if (candidate.highestQualification) {
+    strengths.push(`Degree: ${candidate.highestQualification}`)
+  }
+
+  return {
+    score: Math.min(score, 97),
+    strengths: strengths.slice(0, 3)
+  }
+}
+
 const CalendarButton = ({ interviewDate, googleMeetLink }) => {
   const [showOptions, setShowOptions] = useState(false);
 
@@ -448,6 +487,40 @@ const RecruiterDashboard = () => {
                         <p className="text-sm text-gray-600">
                           Location: {app.Candidate?.currentLocation || 'N/A'}
                         </p>
+                        {/* AI Match Gauge */}
+                        {(() => {
+                          const aiData = calculateAiMatch(app.Candidate)
+                          return (
+                            <div className="mt-3 bg-amber-500/10 border border-amber-600/20 rounded-xl p-3 flex items-center gap-4 max-w-md">
+                              <div className="relative w-12 h-12 shrink-0">
+                                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                  <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+                                  <circle
+                                    cx="18"
+                                    cy="18"
+                                    r="15.915"
+                                    fill="none"
+                                    stroke="#b88f3f"
+                                    strokeWidth="3"
+                                    strokeDasharray={`${aiData.score} ${100 - aiData.score}`}
+                                    className="transition-all duration-1000"
+                                  />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-amber-800 dark:text-amber-500">
+                                  {aiData.score}%
+                                </div>
+                              </div>
+                              <div>
+                                <span className="text-[9px] uppercase font-bold text-amber-800 dark:text-amber-500 tracking-wider block">AI Suitability Match</span>
+                                <ul className="text-[10px] text-slate-700 dark:text-slate-300 list-disc list-inside mt-0.5 space-y-0.5">
+                                  {aiData.strengths.map((str, sIdx) => (
+                                    <li key={sIdx} className="truncate">{str}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          )
+                        })()}
                       </div>
                     </div>
                     <div className="text-right">
