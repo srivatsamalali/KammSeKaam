@@ -8,6 +8,7 @@ import {
   messageService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
+import { triggerMessageNotification } from '../utils/notification'
 
 const calculateAiMatch = (candidate) => {
   if (!candidate) return { score: 0, strengths: [] }

@@ -1,11 +1,50 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { useAuth } from '../context/AuthContext'
+import { messageService } from '../services/api'
+import { triggerMessageNotification } from '../utils/notification'
 
 const PublicHeader = () => {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
+  const { user } = useAuth()
+  const lastCheckedRef = useRef({})
+
+  useEffect(() => {
+    if (user?.role !== 'CANDIDATE') return
+
+    const checkNewMessages = async () => {
+      try {
+        const cachedIdsStr = localStorage.getItem('candidate_app_ids')
+        if (!cachedIdsStr) return
+        const appIds = JSON.parse(cachedIdsStr)
+
+        for (const appId of appIds) {
+          const res = await messageService.getMessages(appId)
+          const messages = res.data
+          const lastCount = lastCheckedRef.current[appId]
+
+          if (lastCount !== undefined && messages.length > lastCount) {
+            const newlyAdded = messages.slice(lastCount)
+            newlyAdded.forEach(msg => {
+              if (msg.sender !== 'CANDIDATE') {
+                triggerMessageNotification('Recruiter', msg.message)
+              }
+            })
+          }
+          lastCheckedRef.current[appId] = messages.length
+        }
+      } catch (err) {
+        console.error('Background message check error:', err)
+      }
+    }
+
+    checkNewMessages()
+    const interval = setInterval(checkNewMessages, 8000)
+    return () => clearInterval(interval)
+  }, [user])
 
   const [darkMode, setDarkMode] = useState(() => {
     const isDark = localStorage.getItem('theme') === 'dark' || 
@@ -49,6 +88,26 @@ const PublicHeader = () => {
               Aston Recruitment
             </h1>
           </Link>
+
+          {/* Mobile Theme Toggle Button */}
+          <div className="flex md:hidden items-center">
+            <button
+              onClick={toggleTheme}
+              type="button"
+              className="p-2 w-9 h-9 rounded-full bg-amber-50 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-amber-400 font-bold border border-amber-200/50 dark:border-slate-700 flex items-center justify-center"
+              title="Toggle Theme"
+            >
+              {darkMode ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.94-8.94h-2.25M4.14 12H1.89m17.91-6.84l-1.59 1.59m-11.83 11.83l-1.59 1.59m15.91 0l-1.59-1.59m-11.83-11.83l-1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+              )}
+            </button>
+          </div>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-3">
@@ -144,18 +203,6 @@ const PublicHeader = () => {
             </svg>
             <span className="text-[10px] font-bold">Admin</span>
           </Link>
-          <div onClick={toggleTheme} className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-500 cursor-pointer">
-            {darkMode ? (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.94-8.94h-2.25M4.14 12H1.89m17.91-6.84l-1.59 1.59m-11.83 11.83l-1.59 1.59m15.91 0l-1.59-1.59m-11.83-11.83l-1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-              </svg>
-            )}
-            <span className="text-[10px] font-bold">Theme</span>
-          </div>
         </div>,
         document.body
       )}

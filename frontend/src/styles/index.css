@@ -768,9 +768,9 @@ a {
   right: 16px !important;
   z-index: 9999 !important;
   display: flex !important;
-  justify-content: flex-start !important;
+  justify-content: space-around !important;
   align-items: center !important;
-  padding: 8px 12px !important;
+  padding: 8px !important;
   background: rgba(255, 255, 255, 0.88) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 32px !important;
@@ -778,15 +778,6 @@ a {
   backdrop-filter: blur(20px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  overflow-x: auto !important;
-  scroll-behavior: smooth !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-.mobile-bottom-nav::-webkit-scrollbar {
-  display: none !important;
 }
 
 .dark .mobile-bottom-nav {
@@ -795,8 +786,7 @@ a {
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
-.mobile-bottom-nav a, 
-.mobile-bottom-nav div.cursor-pointer {
+.mobile-bottom-nav a {
   position: relative !important;
   z-index: 10 !important;
   text-decoration: none !important;
@@ -804,14 +794,14 @@ a {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 8px 18px !important;
+  padding: 8px 10px !important;
   border-radius: 24px !important;
   color: #64748b !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  flex-shrink: 0 !important;
-  min-width: 90px !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -849,4 +839,11 @@ a {
 .mobile-bottom-nav div:active {
   outline: none !important;
   -webkit-tap-highlight-color: transparent !important;
+}
+
+@media (max-width: 767px) {
+  .chatbot-container {
+    bottom: 96px !important;
+    right: 16px !important;
+  }
 }

@@ -63,7 +63,7 @@ const MeetingRoom = () => {
 
   useEffect(() => {
     const script = document.createElement('script')
-    script.src = 'https://meet.jit.si/external_api.js'
+    script.src = 'https://meet.element.io/external_api.js'
     script.async = true
     script.onload = () => setJitsiLoaded(true)
     document.body.appendChild(script)
@@ -80,9 +80,9 @@ const MeetingRoom = () => {
 
   useEffect(() => {
     if (jitsiLoaded && containerRef.current && roomId) {
-      const domain = 'meet.jit.si'
+      const domain = 'meet.element.io'
       const options = {
-        roomName: `KaamSeKaam-Interview-${roomId}`,
+        roomName: `Aston-Recruitment-Interview-${roomId}`,
         width: '100%',
         height: '100%',
         parentNode: containerRef.current,
@@ -257,9 +257,38 @@ const MeetingRoom = () => {
           user?.role === 'RECRUITER' && appDetails ? 'lg:w-2/3 w-full' : 'w-full'
         }`}>
           {activeTab === 'video' ? (
-            /* Jitsi meeting video */
-            <div className="flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-slate-700/50">
-              <div ref={containerRef} className="w-full h-full" />
+            <div className="flex-1 flex flex-col bg-black rounded-xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-slate-700/50">
+              <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex flex-wrap gap-2.5 items-center justify-between z-20">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs font-bold text-slate-300">Aston Recruitment Video Room</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a 
+                    href={`https://meet.jit.si/Aston-Recruitment-Interview-${roomId}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold transition shadow-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.0} stroke="currentColor" className="w-3.5 h-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                    Jitsi (New Tab - Free/Unlimited)
+                  </a>
+                  <a 
+                    href="https://meet.google.com/new" 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-700 hover:bg-sky-600 text-white rounded text-xs font-bold transition shadow-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.0} stroke="currentColor" className="w-3.5 h-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Google Meet
+                  </a>
+                </div>
+              </div>
+              <div ref={containerRef} className="flex-1 w-full h-full" />
             </div>
           ) : (
             /* Collaborative Code Playground */

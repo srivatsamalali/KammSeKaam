@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { candidateService, messageService } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
+import { triggerMessageNotification } from '../utils/notification'
 
 const ApplicationStepper = ({ status }) => {
   const steps = [
@@ -166,7 +167,16 @@ const ChatPanel = ({ applicationId }) => {
   const loadMessages = async () => {
     try {
       const res = await messageService.getMessages(applicationId);
-      setMessages(res.data);
+      const incoming = res.data;
+      if (messages.length > 0 && incoming.length > messages.length) {
+        const newlyAdded = incoming.slice(messages.length);
+        newlyAdded.forEach((msg) => {
+          if (msg.sender !== 'CANDIDATE') {
+            triggerMessageNotification('Recruiter', msg.message);
+          }
+        });
+      }
+      setMessages(incoming);
     } catch (err) {
       console.error('Error fetching chat messages:', err);
     }
@@ -300,6 +310,8 @@ const CandidateDashboard = () => {
     try {
       const res = await candidateService.getApplications()
       setApplications(res.data)
+      const appIds = res.data.map(app => app.id)
+      localStorage.setItem('candidate_app_ids', JSON.stringify(appIds))
     } catch (err) {
       console.error('Error fetching candidate applications:', err)
     }
