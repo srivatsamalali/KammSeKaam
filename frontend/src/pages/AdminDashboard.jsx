@@ -360,6 +360,8 @@ const AdminDashboard = () => {
   const [isDragging, setIsDragging] = useState(false)
   const dragStartXRef = useRef(0)
   const dragIndicatorLeftStartRef = useRef(0)
+  const dragCurrentLeftRef = useRef(0)
+  const indicatorWidthRef = useRef(0)
 
   const tabs = [
     { id: 'recruiters', label: 'Recruiters' },
@@ -404,6 +406,20 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [activeTab])
 
+  const getBounds = () => {
+    const containerEl = navContainerRef.current
+    const firstEl = tabRefs.current[tabs[0].id]
+    const lastEl = tabRefs.current[tabs[tabs.length - 1].id]
+    if (containerEl && firstEl && lastEl) {
+      const containerRect = containerEl.getBoundingClientRect()
+      const minLeft = firstEl.getBoundingClientRect().left - containerRect.left
+      const lastRect = lastEl.getBoundingClientRect()
+      const maxLeft = lastRect.left - containerRect.left
+      return { minLeft, maxLeft, containerRect }
+    }
+    return { minLeft: 0, maxLeft: 0, containerRect: null }
+  }
+
   const handlePointerDown = (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return
 
@@ -411,27 +427,36 @@ const AdminDashboard = () => {
     if (!containerEl) return
 
     const activeEl = tabRefs.current[activeTab]
+    const { minLeft, maxLeft, containerRect } = getBounds()
+    if (!containerRect) return
+
     let startLeft = 0
     let startWidth = 0
 
     if (activeEl) {
       const activeRect = activeEl.getBoundingClientRect()
-      const containerRect = containerEl.getBoundingClientRect()
       startLeft = activeRect.left - containerRect.left
       startWidth = activeRect.width
     } else {
       const firstTabEl = tabRefs.current[tabs[0].id]
       if (firstTabEl) {
-        const rect = firstTabEl.getBoundingClientRect()
-        const containerRect = containerEl.getBoundingClientRect()
-        startLeft = rect.left - containerRect.left
-        startWidth = rect.width
+        startLeft = firstTabEl.getBoundingClientRect().left - containerRect.left
+        startWidth = firstTabEl.getBoundingClientRect().width
       }
     }
 
     setIsDragging(true)
     dragStartXRef.current = e.clientX
     dragIndicatorLeftStartRef.current = startLeft
+    dragCurrentLeftRef.current = startLeft
+    indicatorWidthRef.current = startWidth
+
+    setIndicatorStyle(prev => ({
+      ...prev,
+      left: startLeft,
+      width: startWidth,
+      opacity: 1
+    }))
 
     containerEl.setPointerCapture(e.pointerId)
   }
@@ -442,9 +467,13 @@ const AdminDashboard = () => {
     const containerEl = navContainerRef.current
     if (!containerEl) return
 
+    const { minLeft, maxLeft, containerRect } = getBounds()
+    if (!containerRect) return
+
     const deltaX = e.clientX - dragStartXRef.current
-    const containerRect = containerEl.getBoundingClientRect()
-    const newLeft = dragIndicatorLeftStartRef.current + deltaX
+    const rawLeft = dragIndicatorLeftStartRef.current + deltaX
+    const constrainedLeft = Math.max(minLeft, Math.min(rawLeft, maxLeft))
+    dragCurrentLeftRef.current = constrainedLeft
 
     let closestTab = activeTab
     let minDistance = Infinity
@@ -454,7 +483,7 @@ const AdminDashboard = () => {
       if (el) {
         const rect = el.getBoundingClientRect()
         const tabCenter = (rect.left - containerRect.left) + rect.width / 2
-        const indicatorCenter = newLeft + (indicatorStyle.width || rect.width) / 2
+        const indicatorCenter = constrainedLeft + (indicatorWidthRef.current || rect.width) / 2
         const distance = Math.abs(tabCenter - indicatorCenter)
         if (distance < minDistance) {
           minDistance = distance
@@ -464,12 +493,19 @@ const AdminDashboard = () => {
     })
 
     const closestEl = tabRefs.current[closestTab]
-    const targetWidth = closestEl ? closestEl.getBoundingClientRect().width : indicatorStyle.width
+    const targetWidth = closestEl ? closestEl.getBoundingClientRect().width : indicatorWidthRef.current
+    
+    // Smooth dynamic stretching logic matching Apple Liquid control
+    const stretchFactor = Math.min(Math.abs(deltaX) * 0.08, 15)
+    const finalWidth = targetWidth + stretchFactor
+    indicatorWidthRef.current = finalWidth
 
-    setIndicatorStyle({
-      left: newLeft,
-      width: targetWidth,
-      opacity: 1
+    requestAnimationFrame(() => {
+      setIndicatorStyle({
+        left: constrainedLeft - (deltaX > 0 ? 0 : stretchFactor),
+        width: finalWidth,
+        opacity: 1
+      })
     })
   }
 
@@ -482,7 +518,9 @@ const AdminDashboard = () => {
     containerEl.releasePointerCapture(e.pointerId)
     setIsDragging(false)
 
-    const containerRect = containerEl.getBoundingClientRect()
+    const { containerRect } = getBounds()
+    if (!containerRect) return
+
     let closestTab = activeTab
     let minDistance = Infinity
 
@@ -491,7 +529,7 @@ const AdminDashboard = () => {
       if (el) {
         const rect = el.getBoundingClientRect()
         const tabCenter = (rect.left - containerRect.left) + rect.width / 2
-        const indicatorCenter = indicatorStyle.left + indicatorStyle.width / 2
+        const indicatorCenter = dragCurrentLeftRef.current + indicatorWidthRef.current / 2
         const distance = Math.abs(tabCenter - indicatorCenter)
         if (distance < minDistance) {
           minDistance = distance
@@ -503,9 +541,6 @@ const AdminDashboard = () => {
     setActiveTab(closestTab)
   }
 
-  const transitionStyle = isDragging 
-    ? 'transition-none' 
-    : 'transition-all duration-400 cubic-bezier(0.25, 1, 0.5, 1)'
 
   const [showCreateRecruiter, setShowCreateRecruiter] = useState(false)
   const [recruiterForm, setRecruiterForm] = useState({
@@ -817,11 +852,16 @@ const AdminDashboard = () => {
         >
           {/* Active Liquid Glass Floating Pill Indicator */}
           <div 
-            className={`absolute top-1 bottom-1 bg-white/80 dark:bg-slate-850/80 rounded-[12px] shadow-md backdrop-blur-xs border border-white/40 dark:border-slate-700/30 ${transitionStyle}`}
+            className="absolute top-1 bottom-1 bg-white/80 dark:bg-slate-850/80 rounded-[12px] shadow-md border border-white/40 dark:border-slate-700/30 select-none pointer-events-none"
             style={{
-              left: `${indicatorStyle.left}px`,
+              transform: `translate3d(${indicatorStyle.left}px, 0, 0)`,
               width: `${indicatorStyle.width}px`,
-              opacity: indicatorStyle.opacity
+              opacity: indicatorStyle.opacity,
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              transition: isDragging
+                ? 'none'
+                : 'transform 450ms cubic-bezier(0.22, 1, 0.36, 1), width 450ms cubic-bezier(0.22, 1, 0.36, 1)'
             }}
           />
 
