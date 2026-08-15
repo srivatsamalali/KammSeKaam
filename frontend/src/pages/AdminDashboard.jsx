@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -315,7 +315,7 @@ const AnimatedCounter = ({ value }) => {
     }
     const duration = 1000 // 1.0s animation duration
     const stepTime = Math.max(Math.floor(duration / end), 15)
-    
+
     const timer = setInterval(() => {
       start += Math.ceil(end / (duration / stepTime))
       if (start >= end) {
@@ -351,196 +351,163 @@ const AdminDashboard = () => {
   const [editingReasonMap, setEditingReasonMap] = useState({})
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState(null)
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState('recruiters')
 
-  // Refs and States for iOS Liquid Glass tab physics & dragging
-  const navContainerRef = useRef(null)
-  const pillRef = useRef(null)
-  const tabRefs = useRef({})
-  const coordsRef = useRef({
-    isDragging: false,
-    hasDragged: false,
+  // iOS-style draggable Liquid Glass navigation
+  const dragRef = useRef({
+    active: false,
     startX: 0,
     startLeft: 0,
     currentLeft: 0,
-    currentWidth: 0,
-    minLeft: 0,
-    maxLeft: 0
+    moved: false,
   })
 
-  const tabs = [
-    { id: 'recruiters', label: 'Recruiters' },
-    { id: 'candidates', label: 'Candidates' },
-    { id: 'applications', label: 'Applications' },
-    { id: 'clients', label: 'Clients' }
-  ]
-
-  const syncPill = () => {
-    const activeEl = tabRefs.current[activeTab]
-    const containerEl = navContainerRef.current
-    const pillEl = pillRef.current
-    if (activeEl && containerEl && pillEl) {
-      const activeRect = activeEl.getBoundingClientRect()
-      const containerRect = containerEl.getBoundingClientRect()
-      const left = activeRect.left - containerRect.left
-      const width = activeRect.width
-      
-      coordsRef.current.currentLeft = left
-      coordsRef.current.currentWidth = width
-
-      pillEl.style.opacity = '1'
-      pillEl.style.transition = 'transform 450ms cubic-bezier(0.22, 1, 0.36, 1), width 450ms cubic-bezier(0.22, 1, 0.36, 1)'
-      pillEl.style.transform = `translate3d(${left}px, 0, 0)`
-      pillEl.style.width = `${width}px`
-    } else if (pillEl) {
-      pillEl.style.opacity = '0'
+  const getTabMetrics = (tabId) => {
+    const el = tabRefs.current[tabId]
+    const container = navContainerRef.current
+    if (!el || !container) return null
+    const elRect = el.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    return {
+      left: elRect.left - containerRect.left,
+      width: elRect.width,
     }
   }
 
+  const movePillToTab = (tabId, animate = true) => {
+    const metrics = getTabMetrics(tabId)
+    const pill = pillRef.current
+    if (!metrics || !pill) return
+
+    pill.style.opacity = '1'
+    if (animate) {
+      pill.style.transition =
+        'transform 450ms cubic-bezier(0.22, 1, 0.36, 1), width 450ms cubic-bezier(0.22, 1, 0.36, 1)'
+    } else {
+      pill.style.transition = 'none'
+    }
+    pill.style.transform = `translate3d(${metrics.left}px, 0, 0)`
+    pill.style.width = `${metrics.width}px`
+  }
+
   useEffect(() => {
-    syncPill()
+    movePillToTab(activeTab, false)
   }, [activeTab])
 
   useEffect(() => {
-    const containerEl = navContainerRef.current
-    if (!containerEl) return
+    const container = navContainerRef.current
+    if (!container) return
     const observer = new ResizeObserver(() => {
-      syncPill()
+      movePillToTab(activeTab, false)
     })
-    observer.observe(containerEl)
-    window.addEventListener('resize', syncPill)
-    window.addEventListener('orientationchange', syncPill)
+    observer.observe(container)
+    
+    const handleResizeSync = () => movePillToTab(activeTab, false)
+    window.addEventListener('resize', handleResizeSync)
+    window.addEventListener('orientationchange', handleResizeSync)
     return () => {
       observer.disconnect()
-      window.removeEventListener('resize', syncPill)
-      window.removeEventListener('orientationchange', syncPill)
+      window.removeEventListener('resize', handleResizeSync)
+      window.removeEventListener('orientationchange', handleResizeSync)
     }
   }, [activeTab])
-
-  const getBounds = () => {
-    const containerEl = navContainerRef.current
-    const firstEl = tabRefs.current[tabs[0].id]
-    const lastEl = tabRefs.current[tabs[tabs.length - 1].id]
-    if (containerEl && firstEl && lastEl) {
-      const containerRect = containerEl.getBoundingClientRect()
-      const minLeft = firstEl.getBoundingClientRect().left - containerRect.left
-      const lastRect = lastEl.getBoundingClientRect()
-      const maxLeft = lastRect.left - containerRect.left
-      return { minLeft, maxLeft, containerRect }
-    }
-    return { minLeft: 0, maxLeft: 0, containerRect: null }
-  }
 
   const handlePointerDown = (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return
+    const container = navContainerRef.current
+    const pill = pillRef.current
+    if (!container || !pill) return
 
-    const containerEl = navContainerRef.current
-    const pillEl = pillRef.current
-    const firstEl = tabRefs.current[tabs[0].id]
-    const lastEl = tabRefs.current[tabs[tabs.length - 1].id]
-    if (!containerEl || !pillEl || !firstEl || !lastEl) return
+    const metrics = getTabMetrics(activeTab)
+    const currentLeft = metrics ? metrics.left : 0
 
-    const containerRect = containerEl.getBoundingClientRect()
-    const activeEl = tabRefs.current[activeTab] || firstEl
-    const activeRect = activeEl.getBoundingClientRect()
+    const drag = dragRef.current
+    drag.active = true
+    drag.moved = false
+    drag.startX = e.clientX
+    drag.startLeft = currentLeft
+    drag.currentLeft = currentLeft
 
-    const startLeft = activeRect.left - containerRect.left
-    const startWidth = activeRect.width
-
-    coordsRef.current.isDragging = true
-    coordsRef.current.hasDragged = false
-    coordsRef.current.startX = e.clientX
-    coordsRef.current.startLeft = startLeft
-    coordsRef.current.currentLeft = startLeft
-    coordsRef.current.currentWidth = startWidth
-    coordsRef.current.minLeft = firstEl.getBoundingClientRect().left - containerRect.left
-    coordsRef.current.maxLeft = lastEl.getBoundingClientRect().left - containerRect.left
-
-    pillEl.style.transition = 'none'
-    containerEl.setPointerCapture(e.pointerId)
+    pill.style.transition = 'none'
+    container.setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e) => {
-    const coords = coordsRef.current
-    if (!coords.isDragging) return
+    const drag = dragRef.current
+    if (!drag.active) return
 
-    const containerEl = navContainerRef.current
-    const pillEl = pillRef.current
-    if (!containerEl || !pillEl) return
+    const container = navContainerRef.current
+    const pill = pillRef.current
+    if (!container || !pill) return
 
-    const deltaX = e.clientX - coords.startX
-    if (Math.abs(deltaX) > 6) {
-      coords.hasDragged = true
+    const deltaX = e.clientX - drag.startX
+    if (Math.abs(deltaX) > 5) {
+      drag.moved = true
     }
 
-    const rawLeft = coords.startLeft + deltaX
-    const constrainedLeft = Math.max(coords.minLeft, Math.min(rawLeft, coords.maxLeft))
-    coords.currentLeft = constrainedLeft
+    const first = getTabMetrics(tabs[0].id)
+    const last = getTabMetrics(tabs[tabs.length - 1].id)
+    if (!first || !last) return
 
-    const containerRect = containerEl.getBoundingClientRect()
-    let closestTab = activeTab
-    let minDistance = Infinity
+    const minLeft = first.left
+    const maxLeft = last.left
 
-    tabs.forEach(tab => {
-      const el = tabRefs.current[tab.id]
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        const tabCenter = (rect.left - containerRect.left) + rect.width / 2
-        const indicatorCenter = constrainedLeft + coords.currentWidth / 2
-        const distance = Math.abs(tabCenter - indicatorCenter)
-        if (distance < minDistance) {
-          minDistance = distance
-          closestTab = tab.id
-        }
-      }
-    })
+    let newLeft = drag.startLeft + deltaX
 
-    const closestEl = tabRefs.current[closestTab]
-    const targetWidth = closestEl ? closestEl.getBoundingClientRect().width : coords.currentWidth
+    // Rubber-band resistance at edges
+    if (newLeft < minLeft) {
+      newLeft = minLeft + (newLeft - minLeft) * 0.25
+    }
+    if (newLeft > maxLeft) {
+      newLeft = maxLeft + (newLeft - maxLeft) * 0.25
+    }
 
-    // Liquid Dynamic Elastic Stretching physics
+    drag.currentLeft = newLeft
+
+    // Dynamic stretching
+    const targetMetrics = getTabMetrics(activeTab)
+    const targetWidth = targetMetrics ? targetMetrics.width : 0
     const stretchFactor = Math.min(Math.abs(deltaX) * 0.08, 16)
     const finalWidth = targetWidth + stretchFactor
-    coords.currentWidth = finalWidth
 
-    requestAnimationFrame(() => {
-      pillEl.style.transform = `translate3d(${constrainedLeft - (deltaX > 0 ? 0 : stretchFactor)}px, 0, 0)`
-      pillEl.style.width = `${finalWidth}px`
-    })
+    pill.style.transform = `translate3d(${newLeft - (deltaX > 0 ? 0 : stretchFactor)}px, 0, 0)`
+    pill.style.width = `${finalWidth}px`
   }
 
   const handlePointerUp = (e) => {
-    const coords = coordsRef.current
-    if (!coords.isDragging) return
+    const drag = dragRef.current
+    if (!drag.active) return
 
-    const containerEl = navContainerRef.current
-    if (!containerEl) return
+    const container = navContainerRef.current
+    drag.active = false
 
-    containerEl.releasePointerCapture(e.pointerId)
-    coords.isDragging = false
+    if (container?.hasPointerCapture?.(e.pointerId)) {
+      container.releasePointerCapture(e.pointerId)
+    }
 
-    const containerRect = containerEl.getBoundingClientRect()
     let closestTab = activeTab
-    let minDistance = Infinity
+    let smallestDistance = Infinity
 
-    tabs.forEach(tab => {
-      const el = tabRefs.current[tab.id]
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        const tabCenter = (rect.left - containerRect.left) + rect.width / 2
-        const indicatorCenter = coords.currentLeft + coords.currentWidth / 2
-        const distance = Math.abs(tabCenter - indicatorCenter)
-        if (distance < minDistance) {
-          minDistance = distance
-          closestTab = tab.id
-        }
+    tabs.forEach((tab) => {
+      const metrics = getTabMetrics(tab.id)
+      if (!metrics) return
+
+      const distance = Math.abs(metrics.left - drag.currentLeft)
+      if (distance < smallestDistance) {
+        smallestDistance = distance
+        closestTab = tab.id
       }
     })
 
     setActiveTab(closestTab)
+
+    requestAnimationFrame(() => {
+      movePillToTab(closestTab, true)
+    })
+
     setTimeout(() => {
-      coords.hasDragged = false
-    }, 50)
+      drag.moved = false
+    }, 100)
   }
 
 
@@ -842,58 +809,78 @@ const AdminDashboard = () => {
         {/* Analytics SVG Charts */}
         <DashboardCharts stats={stats} recruiters={recruiters} applications={applications} />
 
-        {/* iOS-style Liquid Glass Navigation Bar */}
-        <div 
+        {/* iOS Liquid Glass Navigation */}
+        <div
           ref={navContainerRef}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative flex items-center p-1 bg-slate-200/40 dark:bg-slate-900/30 border border-white/20 dark:border-slate-800/40 rounded-2xl shadow-inner select-none mb-6 max-w-2xl overflow-x-auto scrollbar-none touch-none touch-pan-y z-10"
-          style={{ 
-            touchAction: 'pan-y', 
-            backdropFilter: 'blur(16px)', 
-            WebkitBackdropFilter: 'blur(16px)' 
+          className="relative flex w-full max-w-2xl items-center gap-1 p-1.5 mb-6 rounded-[22px] select-none overflow-hidden"
+          style={{
+            touchAction: 'pan-y',
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.32), rgba(255,255,255,0.08))',
+            backdropFilter: 'blur(30px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.35)',
+            boxShadow:
+              '0 8px 32px rgba(31,38,135,0.10), inset 0 1px 1px rgba(255,255,255,0.35)',
           }}
         >
-          {/* Active Liquid Glass Floating Pill Indicator */}
-          <div 
+          {/* Liquid Glass moving pill */}
+          <div
             ref={pillRef}
-            className="absolute top-1 bottom-1 bg-white/25 dark:bg-white/10 rounded-[12px] border border-white/45 dark:border-white/25 shadow-[0_4px_16px_rgba(31,38,135,0.08),inset_0_1px_1px_rgba(255,255,255,0.45)] pointer-events-none z-[5]"
+            className="absolute top-1.5 bottom-1.5 left-0 rounded-[17px] pointer-events-none z-0 overflow-hidden"
             style={{
-              backdropFilter: 'blur(24px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-              opacity: 0
+              opacity: 0,
+              width: 0,
+              background:
+                'linear-gradient(135deg, rgba(255,255,255,0.58), rgba(255,255,255,0.20))',
+              backdropFilter: 'blur(35px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(35px) saturate(200%)',
+              border: '1px solid rgba(255,255,255,0.65)',
+              boxShadow:
+                '0 6px 18px rgba(31,38,135,0.13), inset 0 1px 2px rgba(255,255,255,0.75)',
             }}
           >
-            {/* Layered high-gloss reflection overlay */}
-            <div className="absolute inset-0 rounded-[12px] bg-gradient-to-b from-white/25 via-transparent to-transparent opacity-90 pointer-events-none" />
+            {/* Glass reflection */}
+            <div
+              className="absolute inset-x-1 top-1 h-[45%] rounded-[14px] pointer-events-none"
+              style={{
+                background:
+                  'linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0))',
+              }}
+            />
           </div>
 
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
+
             return (
               <button
                 key={tab.id}
-                ref={el => tabRefs.current[tab.id] = el}
+                ref={(el) => {
+                  tabRefs.current[tab.id] = el
+                }}
                 onClick={(e) => {
-                  if (coordsRef.current.hasDragged) {
+                  if (dragRef.current.moved) {
                     e.preventDefault()
-                    e.stopPropagation()
                     return
                   }
+
                   setActiveTab(tab.id)
                 }}
-                className={`relative z-10 flex-1 px-4 py-2.5 text-xs font-bold rounded-[12px] transition-colors duration-300 select-none outline-hidden cursor-pointer ${
-                  isActive 
-                    ? 'text-slate-900 dark:text-white font-extrabold' 
-                    : 'text-slate-550 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                className={`relative z-10 flex-1 min-w-0 px-3 py-3 rounded-[17px] text-xs sm:text-sm font-bold whitespace-nowrap transition-colors duration-300 ${
+                  isActive
+                    ? 'text-slate-900 dark:text-white font-extrabold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
                 style={{
+                  WebkitTapHighlightColor: 'transparent',
                   background: 'transparent',
                   border: 'none',
-                  boxShadow: 'none',
-                  borderRadius: '12px'
+                  boxShadow: 'none'
                 }}
               >
                 {tab.label}
@@ -1341,10 +1328,10 @@ const AdminDashboard = () => {
                     <div className="text-right">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${app.status === 'SELECTED'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : app.status === 'REJECTED'
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-slate-100 text-slate-800'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : app.status === 'REJECTED'
+                            ? 'bg-rose-100 text-rose-800'
+                            : 'bg-slate-100 text-slate-800'
                           }`}
                       >
                         {app.status}
