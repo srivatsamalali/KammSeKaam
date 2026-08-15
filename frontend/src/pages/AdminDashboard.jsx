@@ -350,6 +350,7 @@ const AdminDashboard = () => {
   const [editingStatusMap, setEditingStatusMap] = useState({})
   const [editingReasonMap, setEditingReasonMap] = useState({})
   const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [showCreateRecruiter, setShowCreateRecruiter] = useState(false)
   const [recruiterForm, setRecruiterForm] = useState({
@@ -379,6 +380,7 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
+      setErrorMsg(null)
       const [statsRes, recruitersRes, appsRes] = await Promise.all([
         adminService.getDashboardStats(),
         recruiterService.getAll(),
@@ -410,6 +412,7 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching data:', error)
+      setErrorMsg(error.response?.data?.message || error.message || 'Failed to retrieve admin dashboard metrics')
     } finally {
       setLoading(false)
     }
@@ -603,6 +606,12 @@ const AdminDashboard = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
           Admin Dashboard
         </h2>
+
+        {errorMsg && (
+          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 p-4 rounded-xl mb-6 text-sm font-semibold text-red-800 dark:text-red-400">
+            ⚠️ {errorMsg}. Please refresh or try logging in again.
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
