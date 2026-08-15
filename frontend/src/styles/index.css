@@ -78,6 +78,34 @@ body {
   color: #94a3b8 !important;
 }
 
+.dark button:not(.btn-primary):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.px-3) {
+  background: #242933 !important;
+  color: #e2e8f0 !important;
+  border-color: #454d5b !important;
+}
+
+/* Reset default button styling inside tab lists to be flat text links */
+.flex.space-x-4.border-b button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.flex.space-x-4.border-b button.text-blue-600 {
+  border-bottom: 2px solid rgb(37, 99, 235) !important;
+}
+
+.dark .flex.space-x-4.border-b button.text-blue-600 {
+  color: #b88f3f !important;
+  border-bottom: 2px solid #b88f3f !important;
+}
+
+.dark .flex.space-x-4.border-b button.text-gray-600 {
+  color: #94a3b8 !important;
+}
+
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
