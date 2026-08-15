@@ -15,7 +15,7 @@ const normalizePhone = (value) =>
 
 const register = async (req, res) => {
   try {
-    const { email, phone, password, confirmPassword, name } = req.body
+    const { email, phone, password, confirmPassword, name, technicalSkills } = req.body
     const normalizedPhone = normalizePhone(phone)
 
     // Validation
@@ -94,6 +94,9 @@ const register = async (req, res) => {
     if (profile) {
       profile.name = name
       profile.mobileNumber = normalizedPhone || ''
+      if (technicalSkills) {
+        profile.technicalSkills = typeof technicalSkills === 'string' ? JSON.parse(technicalSkills) : technicalSkills
+      }
       await profile.save()
     } else {
       await Candidate.create({
@@ -101,6 +104,7 @@ const register = async (req, res) => {
         name,
         mobileNumber: normalizedPhone || '',
         address: '',
+        technicalSkills: technicalSkills ? (typeof technicalSkills === 'string' ? JSON.parse(technicalSkills) : technicalSkills) : []
       })
     }
 

@@ -26,10 +26,13 @@ const CandidateRegister = () => {
     phone: '',
     password: '',
     confirmPassword: '',
+    technicalSkills: [],
   })
   const [passwordStrength, setPasswordStrength] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [customSkill, setCustomSkill] = useState('')
+  const [availableSkills, setAvailableSkills] = useState(['React', 'Node.js', 'Python', 'Java', 'SQL', 'AWS', 'Docker', 'TypeScript'])
 
   // Timer for OTP resend
   useEffect(() => {
@@ -157,6 +160,31 @@ const CandidateRegister = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleToggleSkill = (skill) => {
+    setFormData(prev => {
+      const skills = prev.technicalSkills.includes(skill)
+        ? prev.technicalSkills.filter(s => s !== skill)
+        : [...prev.technicalSkills, skill]
+      return { ...prev, technicalSkills: skills }
+    })
+  }
+
+  const handleAddCustomSkill = (e) => {
+    e.preventDefault()
+    const trimmed = customSkill.trim()
+    if (!trimmed) return
+    if (!availableSkills.includes(trimmed)) {
+      setAvailableSkills(prev => [...prev, trimmed])
+    }
+    setFormData(prev => {
+      if (!prev.technicalSkills.includes(trimmed)) {
+        return { ...prev, technicalSkills: [...prev.technicalSkills, trimmed] }
+      }
+      return prev
+    })
+    setCustomSkill('')
   }
 
   const handleSubmit = async (e) => {
@@ -500,6 +528,56 @@ const CandidateRegister = () => {
                       </svg>
                     )}
                   </button>
+                </div>
+
+                <div className="form-group border-t border-slate-100 dark:border-slate-800 pt-4 mt-4">
+                  <label className="form-label font-bold text-slate-800 dark:text-slate-200">
+                    Select Technical Skills / Tech Stacks
+                  </label>
+                  <p className="text-[10px] text-slate-500 mb-3">
+                    Choose matching capabilities to power our automatic AI resume suitability index matcher.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-2 mb-4 bg-slate-50/30 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800/40 max-h-36 overflow-y-auto">
+                    {availableSkills.map((skill) => {
+                      const isChecked = formData.technicalSkills.includes(skill)
+                      return (
+                        <label 
+                          key={skill} 
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                            isChecked 
+                              ? 'bg-amber-500/10 text-amber-800 border-amber-500/35 dark:text-amber-400 dark:bg-amber-950/20' 
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50'
+                          }`}
+                        >
+                          <input 
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleSkill(skill)}
+                            className="w-3.5 h-3.5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                          />
+                          <span>{skill}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="text"
+                      placeholder="Add other skill (e.g. NextJS)"
+                      value={customSkill}
+                      onChange={(e) => setCustomSkill(e.target.value)}
+                      className="form-input text-xs h-9 py-1 flex-1"
+                    />
+                    <button 
+                      type="button"
+                      onClick={handleAddCustomSkill}
+                      className="btn-secondary text-xs h-9 px-4 shrink-0 font-bold"
+                    >
+                      ➕ Add
+                    </button>
+                  </div>
                 </div>
 
                 <button

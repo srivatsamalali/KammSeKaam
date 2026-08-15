@@ -209,12 +209,8 @@ const RecruiterLogin = () => {
               />
             </div>
 
-            <div className="form-group flex flex-col items-center">
-              <MonkeyPasswordToggle 
-                showPassword={showPassword} 
-                onClick={() => setShowPassword(!showPassword)} 
-              />
-              <div className="w-full text-left">
+            <div className="form-group flex items-end gap-3 w-full">
+              <div className="flex-1 text-left">
                 <div className="flex justify-between items-center mb-1">
                   <label className="form-label mb-0">Password</label>
                   <button
@@ -237,6 +233,10 @@ const RecruiterLogin = () => {
                   required
                 />
               </div>
+              <MonkeyPasswordToggle 
+                showPassword={showPassword} 
+                onClick={() => setShowPassword(!showPassword)} 
+              />
             </div>
 
             <button
