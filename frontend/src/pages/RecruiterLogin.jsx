@@ -175,9 +175,20 @@ const RecruiterLogin = () => {
   }
 
   return (
-    <div className="min-h-screen page-shell">
-      <div className="max-w-md mx-auto pt-20 px-4">
-        <div className="glass-card p-10">
+    <div className="min-h-[calc(100vh-80px)] flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 bg-slate-50/30 dark:bg-slate-950/10 gap-8">
+      {/* Left side branding banner */}
+      <div className="hidden md:flex flex-col max-w-lg text-left space-y-4">
+        <h1 className="text-4xl font-extrabold text-slate-950 dark:text-white leading-tight">
+          Aston Recruitment
+        </h1>
+        <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed">
+          Recruiter Portal. Manage assigned candidates, coordinate interviews, rate skill scores, refer files to clients, and chat in real-time.
+        </p>
+      </div>
+
+      {/* Right side form */}
+      <div className="w-full max-w-md">
+        <div className="glass-card p-10 shadow-xl border border-slate-100/50 dark:border-slate-800/40">
           <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
             Recruiter Login
           </h2>
