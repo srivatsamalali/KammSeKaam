@@ -537,7 +537,7 @@ const RecruiterDashboard = () => {
                               >
                                 Cancel
                               </button>
-                            </div>    </div>
+                            </div>
                           </div>
                         ) : (
                           <button
