@@ -8,7 +8,6 @@ import {
   clientService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
-import AccentPicker from '../components/AccentPicker'
 
 const DashboardCharts = ({ stats, recruiters, applications }) => {
   if (!stats) return null;
@@ -577,7 +576,6 @@ const AdminDashboard = () => {
             <p className="text-sm text-gray-600">{user?.email || 'Contact@astonrecruitment.in'}</p>
           </div>
           <div className="flex items-center gap-4">
-            <AccentPicker />
             <ThemeToggle />
             <button
               onClick={handleLogout}
