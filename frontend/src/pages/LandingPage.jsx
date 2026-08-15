@@ -306,131 +306,132 @@ const LandingPage = () => {
         </div>
       </footer>
 
-      {/* Role Preference Selector Modal */}
       {showPreferenceModal && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md px-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 md:p-8 flex flex-col items-center text-center animate-fade-in">
-            {/* Visual Header Illustration */}
-            <div className="w-full h-44 rounded-xl overflow-hidden mb-6 relative border border-slate-100 dark:border-slate-800 shadow-inner">
+          <div className="w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl relative border border-slate-800/80 bg-slate-950 min-h-[460px] flex flex-col justify-end p-6 md:p-8 text-center animate-fade-in">
+            {/* Full Cover Background Image with transient gradient overlay */}
+            <div className="absolute inset-0 z-0">
               <img
                 src="/hiring_job.jpg"
-                alt="Aston Career Finder"
-                className="w-full h-full object-cover"
+                alt="Aston Recruitment Opportunities"
+                className="w-full h-full object-cover opacity-50"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent flex items-end justify-center p-3">
-                <span className="text-white text-xs font-bold tracking-widest uppercase">ASTON OPPORTUNITIES</span>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/70 to-slate-950 z-10" />
             </div>
 
-            {preferenceView === 'main' && (
-              <>
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mb-2">
-                  Welcome to Aston Recruitment
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
-                  Let's personalize your portal experience. What are you looking to do today?
-                </p>
+            {/* Elevated Content Container */}
+            <div className="relative z-20 flex flex-col items-center w-full">
+              {preferenceView === 'main' && (
+                <>
+                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                    Welcome to Aston Recruitment
+                  </h3>
+                  <p className="text-sm text-slate-300 mb-6 max-w-sm leading-relaxed">
+                    Let's personalize your portal experience. What are you looking to do today?
+                  </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                  <button
-                    onClick={() => setPreferenceView('hiring')}
-                    className="p-4 rounded-xl border border-slate-200 hover:border-amber-500 bg-slate-50 hover:bg-amber-500/10 text-slate-800 hover:text-amber-800 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-amber-500 dark:text-slate-200 dark:hover:text-amber-400 font-bold transition-all flex flex-col items-center justify-center gap-2 group"
-                  >
-                    <span className="text-2xl group-hover:scale-110 transition-transform">💼</span>
-                    <span className="text-sm">Are you hiring?</span>
-                    <span className="text-[10px] text-slate-450 font-normal">Recruiter & Client tools</span>
-                  </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                    <button
+                      onClick={() => setPreferenceView('hiring')}
+                      className="p-5 rounded-2xl border border-slate-700/80 hover:border-amber-500 bg-slate-900/60 hover:bg-amber-500/10 text-white hover:text-amber-400 font-bold transition-all flex flex-col items-center justify-center gap-2 group backdrop-blur-md shadow-lg"
+                    >
+                      <span className="text-3xl group-hover:scale-110 transition-transform">💼</span>
+                      <span className="text-sm">Are you hiring?</span>
+                      <span className="text-[10px] text-slate-400 font-normal">Recruiter & Client tools</span>
+                    </button>
 
-                  <button
-                    onClick={() => setPreferenceView('candidate')}
-                    className="p-4 rounded-xl border border-slate-200 hover:border-amber-500 bg-slate-50 hover:bg-amber-500/10 text-slate-800 hover:text-amber-800 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-amber-500 dark:text-slate-200 dark:hover:text-amber-400 font-bold transition-all flex flex-col items-center justify-center gap-2 group"
-                  >
-                    <span className="text-2xl group-hover:scale-110 transition-transform">🎯</span>
-                    <span className="text-sm">Looking for a job?</span>
-                    <span className="text-[10px] text-slate-450 font-normal">Candidate dashboard</span>
-                  </button>
-                </div>
-              </>
-            )}
+                    <button
+                      onClick={() => setPreferenceView('candidate')}
+                      className="p-5 rounded-2xl border border-slate-700/80 hover:border-amber-500 bg-slate-900/60 hover:bg-amber-500/10 text-white hover:text-amber-400 font-bold transition-all flex flex-col items-center justify-center gap-2 group backdrop-blur-md shadow-lg"
+                    >
+                      <span className="text-3xl group-hover:scale-110 transition-transform">🎯</span>
+                      <span className="text-sm">Looking for a job?</span>
+                      <span className="text-[10px] text-slate-400 font-normal">Candidate dashboard</span>
+                    </button>
+                  </div>
+                </>
+              )}
 
-            {preferenceView === 'hiring' && (
-              <>
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mb-2">
-                  Employer & Hiring Access
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
-                  Access recruitment campaigns, shortlists, and partner dashboard controls.
-                </p>
-                <div className="space-y-3 w-full">
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('user_preference', 'hiring');
-                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
-                      window.location.href = '/recruiter/login';
-                    }}
-                    className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-md shadow-amber-500/10"
-                  >
-                    Recruiter Console
-                  </button>
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('user_preference', 'hiring');
-                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
-                      window.location.href = '/admin/login';
-                    }}
-                    className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all"
-                  >
-                    Admin Control Center
-                  </button>
-                  <button
-                    onClick={() => setPreferenceView('main')}
-                    className="w-full py-2.5 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-semibold"
-                  >
-                    ← Go Back
-                  </button>
-                </div>
-              </>
-            )}
+              {preferenceView === 'hiring' && (
+                <>
+                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                    Employer & Hiring Access
+                  </h3>
+                  <p className="text-sm text-slate-300 mb-6 max-w-sm leading-relaxed">
+                    Access recruitment campaigns, shortlists, and partner dashboard controls.
+                  </p>
 
-            {preferenceView === 'candidate' && (
-              <>
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mb-2">
-                  Career Seeker Access
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm">
-                  Register, submit your resume, track application stages, and join calls.
-                </p>
+                  <div className="space-y-3 w-full">
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('user_preference', 'hiring');
+                        localStorage.setItem('user_preference_timestamp', Date.now().toString());
+                        window.location.href = '/recruiter/login';
+                      }}
+                      className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-md shadow-amber-500/20"
+                    >
+                      Recruiter Console
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('user_preference', 'hiring');
+                        localStorage.setItem('user_preference_timestamp', Date.now().toString());
+                        window.location.href = '/admin/login';
+                      }}
+                      className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all border border-slate-700"
+                    >
+                      Admin Control Center
+                    </button>
+                    <button
+                      onClick={() => setPreferenceView('main')}
+                      className="w-full py-2.5 text-xs text-slate-400 hover:text-white font-semibold transition-colors"
+                    >
+                      ← Go Back
+                    </button>
+                  </div>
+                </>
+              )}
 
-                <div className="space-y-3 w-full">
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('user_preference', 'candidate');
-                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
-                      window.location.href = '/candidate/login';
-                    }}
-                    className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-md shadow-amber-500/10"
-                  >
-                    Candidate Login
-                  </button>
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('user_preference', 'candidate');
-                      localStorage.setItem('user_preference_timestamp', Date.now().toString());
-                      window.location.href = '/candidate/register';
-                    }}
-                    className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all"
-                  >
-                    Register New Account
-                  </button>
-                  <button
-                    onClick={() => setPreferenceView('main')}
-                    className="w-full py-2.5 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-semibold"
-                  >
-                    ← Go Back
-                  </button>
-                </div>
-              </>
-            )}
+              {preferenceView === 'candidate' && (
+                <>
+                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                    Career Seeker Access
+                  </h3>
+                  <p className="text-sm text-slate-300 mb-6 max-w-sm leading-relaxed">
+                    Register, submit your resume, track application stages, and join calls.
+                  </p>
+
+                  <div className="space-y-3 w-full">
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('user_preference', 'candidate');
+                        localStorage.setItem('user_preference_timestamp', Date.now().toString());
+                        window.location.href = '/candidate/login';
+                      }}
+                      className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition-all shadow-md shadow-amber-500/20"
+                    >
+                      Candidate Login
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('user_preference', 'candidate');
+                        localStorage.setItem('user_preference_timestamp', Date.now().toString());
+                        window.location.href = '/candidate/register';
+                      }}
+                      className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all border border-slate-700"
+                    >
+                      Register New Account
+                    </button>
+                    <button
+                      onClick={() => setPreferenceView('main')}
+                      className="w-full py-2.5 text-xs text-slate-400 hover:text-white font-semibold transition-colors"
+                    >
+                      ← Go Back
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>,
         document.body
