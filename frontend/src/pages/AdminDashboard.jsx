@@ -47,7 +47,7 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
             </button>
           )}
         </div>
-        
+
         <div className="relative w-40 h-40">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
             <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
@@ -115,32 +115,29 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
             )}
           </div>
         </div>
-        
+
         {/* Interactive Legends */}
         <div className="flex gap-4 mt-4 text-[10px] font-bold">
           <button
             onClick={() => setActiveLegendFilter(activeLegendFilter === 'selected' ? null : 'selected')}
-            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${
-              activeLegendFilter === 'selected' ? 'bg-emerald-50 dark:bg-emerald-950/20 ring-1 ring-emerald-500/20' : ''
-            }`}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${activeLegendFilter === 'selected' ? 'bg-emerald-50 dark:bg-emerald-950/20 ring-1 ring-emerald-500/20' : ''
+              }`}
           >
             <span className="w-2.5 h-2.5 rounded bg-emerald-500" />
             Selected ({selected})
           </button>
           <button
             onClick={() => setActiveLegendFilter(activeLegendFilter === 'rejected' ? null : 'rejected')}
-            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${
-              activeLegendFilter === 'rejected' ? 'bg-red-50 dark:bg-red-950/20 ring-1 ring-red-500/20' : ''
-            }`}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${activeLegendFilter === 'rejected' ? 'bg-red-50 dark:bg-red-950/20 ring-1 ring-red-500/20' : ''
+              }`}
           >
             <span className="w-2.5 h-2.5 rounded bg-red-500" />
             Rejected ({rejected})
           </button>
           <button
             onClick={() => setActiveLegendFilter(activeLegendFilter === 'pending' ? null : 'pending')}
-            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${
-              activeLegendFilter === 'pending' ? 'bg-amber-50 dark:bg-amber-950/20 ring-1 ring-amber-500/20' : ''
-            }`}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-all ${activeLegendFilter === 'pending' ? 'bg-amber-50 dark:bg-amber-950/20 ring-1 ring-amber-500/20' : ''
+              }`}
           >
             <span className="w-2.5 h-2.5 rounded bg-amber-500" />
             Pending ({pending})
@@ -201,9 +198,9 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
         return (
           <div className="glass-card p-6 md:col-span-2">
             <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Monthly Job Application Trends</h4>
-            
+
             <div className="relative w-full h-52 bg-slate-50/50 dark:bg-slate-900/40 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col justify-between">
-              
+
               {/* Graphic area */}
               <div className="relative flex-1 w-full mt-2">
                 {/* Horizontal dotted grid lines */}
@@ -248,13 +245,13 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
                             <feDropShadow dx="0" dy="3" stdDeviation="2.5" floodColor="#b88f3f" floodOpacity="0.2" />
                           </filter>
                         </defs>
-                        
+
                         {/* Area Gradient Fill */}
                         <path d={dArea} fill="url(#chartGradientSmooth)" />
-                        
+
                         {/* Smooth Bezier Line */}
                         <path d={dPath} fill="none" stroke="#b88f3f" strokeWidth="3" strokeLinecap="round" filter="url(#shadow)" />
-                        
+
                         {/* Dot markers */}
                         {points.map((p, idx) => (
                           <g key={idx}>
@@ -273,12 +270,12 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
                     const leftPct = 6 + idx * 17.6;
                     const bottomPct = (d.count / maxVal) * 60;
                     return (
-                      <div 
-                        key={idx} 
+                      <div
+                        key={idx}
                         className="absolute flex flex-col items-center -translate-x-1/2"
-                        style={{ 
+                        style={{
                           left: `${leftPct}%`,
-                          bottom: `calc(${bottomPct}% + 18px)` 
+                          bottom: `calc(${bottomPct}% + 18px)`
                         }}
                       >
                         <span className="bg-slate-900/80 dark:bg-slate-700 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
@@ -466,7 +463,7 @@ const AdminDashboard = () => {
   const exportApplicationsToCSV = () => {
     try {
       const headers = ['Candidate Name', 'Candidate Email', 'Recruiter Name', 'Application Status', 'Applied Date', 'Interview Date', 'Meeting Link'];
-      
+
       const rows = applications.map(app => [
         app.Candidate?.name || 'N/A',
         app.Candidate?.User?.email || 'N/A',
@@ -500,7 +497,7 @@ const AdminDashboard = () => {
   const exportApplicationsToExcel = () => {
     try {
       const headers = ['Candidate Name', 'Candidate Email', 'Recruiter Name', 'Application Status', 'Applied Date', 'Interview Date', 'Meeting Link'];
-      
+
       const rows = applications.map(app => [
         app.Candidate?.name || 'N/A',
         app.Candidate?.User?.email || 'N/A',
@@ -620,41 +617,37 @@ const AdminDashboard = () => {
         <div className="flex space-x-4 mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('recruiters')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'recruiters'
+            className={`px-4 py-2 font-semibold ${activeTab === 'recruiters'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
-            }`}
+              }`}
           >
             Recruiters
           </button>
           <button
             onClick={() => setActiveTab('candidates')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'candidates'
+            className={`px-4 py-2 font-semibold ${activeTab === 'candidates'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
-            }`}
+              }`}
           >
             Candidates
           </button>
           <button
             onClick={() => setActiveTab('applications')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'applications'
+            className={`px-4 py-2 font-semibold ${activeTab === 'applications'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
-            }`}
+              }`}
           >
             Applications
           </button>
           <button
             onClick={() => setActiveTab('clients')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'clients'
+            className={`px-4 py-2 font-semibold ${activeTab === 'clients'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-600'
-            }`}
+              }`}
           >
             Clients
           </button>
@@ -951,31 +944,72 @@ const AdminDashboard = () => {
                         <p className="text-sm text-gray-600">{c.User?.email}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <select id={`rec-${c.id}`} className="form-input">
+                        {/* Recruiter Dropdown */}
+                        <select
+                          id={`rec-${c.id}`}
+                          className="form-input"
+                        >
                           <option value="">Select recruiter</option>
+
                           {recruiters.map((r) => (
                             <option key={r.id} value={r.id}>
                               {r.name}
                             </option>
                           ))}
                         </select>
+
+                        {/* Client Dropdown */}
+                        <select
+                          id={`client-${c.id}`}
+                          className="form-input"
+                        >
+                          <option value="">Select client</option>
+
+                          {clients.map((client) => (
+                            <option key={client.id} value={client.id}>
+                              {client.name} - {client.company}
+                            </option>
+                          ))}
+                        </select>
+
                         <button
-                          onClick={async (e) => {
-                            const select = document.getElementById(
+                          onClick={async () => {
+                            const recruiterSelect = document.getElementById(
                               `rec-${c.id}`,
                             )
-                            const recruiterId = select.value
-                            if (!recruiterId) return alert('Select a recruiter')
+
+                            const clientSelect = document.getElementById(
+                              `client-${c.id}`,
+                            )
+
+                            const recruiterId = recruiterSelect.value
+                            const clientId = clientSelect.value
+
+                            if (!recruiterId) {
+                              return alert('Select a recruiter')
+                            }
+
+                            if (!clientId) {
+                              return alert('Select a client')
+                            }
+
                             try {
                               await applicationService.assign({
                                 candidateId: c.id,
                                 recruiterId,
+                                clientId,
                               })
+
                               alert('Assigned successfully!')
                               fetchData()
                             } catch (err) {
                               console.error('Assign error', err)
-                              const msg = err.response?.data?.message || err.message || 'Assign failed'
+
+                              const msg =
+                                err.response?.data?.message ||
+                                err.message ||
+                                'Assign failed'
+
                               alert(msg)
                             }
                           }}
@@ -1028,7 +1062,7 @@ const AdminDashboard = () => {
                           )}
                         </div>
                       )}
-                      
+
                       {app.technicalRating !== null && app.technicalRating !== undefined && (
                         <div className="mt-3 bg-amber-50/50 border border-amber-200/50 p-4 rounded-xl text-left">
                           <p className="text-sm font-bold text-amber-900 mb-2">📊 Recruiter Interview Feedback</p>
@@ -1057,13 +1091,12 @@ const AdminDashboard = () => {
                     </div>
                     <div className="text-right">
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                          app.status === 'SELECTED'
+                        className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${app.status === 'SELECTED'
                             ? 'bg-emerald-100 text-emerald-800'
                             : app.status === 'REJECTED'
                               ? 'bg-rose-100 text-rose-800'
                               : 'bg-slate-100 text-slate-800'
-                        }`}
+                          }`}
                       >
                         {app.status}
                       </span>
@@ -1089,7 +1122,7 @@ const AdminDashboard = () => {
                           <option value="INTERVIEW_COMPLETED">
                             INTERVIEW_COMPLETED
                           </option>
-                           <option value="SELECTED">SELECTED</option>
+                          <option value="SELECTED">SELECTED</option>
                           <option value="REJECTED">REJECTED</option>
                           <option value="SENT_TO_CLIENT">SENT_TO_CLIENT</option>
                         </select>
@@ -1135,7 +1168,7 @@ const AdminDashboard = () => {
                                 console.error('Override error', err)
                                 alert(
                                   err.response?.data?.message ||
-                                    'Error overriding status',
+                                  'Error overriding status',
                                 )
                               }
                             }}
