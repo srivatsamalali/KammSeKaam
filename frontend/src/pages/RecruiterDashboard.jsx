@@ -772,181 +772,16 @@ const RecruiterDashboard = () => {
                       </p>
                       <CalendarButton interviewDate={app.interviewDate} googleMeetLink={app.googleMeetLink} />
                       <div className="mt-3">
-                        {editingAppId === app.id ? (
-                          <div className="space-y-2">
-                            <label className="block text-sm font-medium">
-                              Update Status
-                            </label>
-                            <select
-                              value={editingStatus}
-                              onChange={(e) => setEditingStatus(e.target.value)}
-                              className="form-input"
-                            >
-                              <option value="">Select status</option>
-                              <option value="INTERVIEW_COMPLETED">
-                                Interview Completed
-                              </option>
-                              <option value="SELECTED">Selected</option>
-                              <option value="REJECTED">Rejected</option>
-                              <option value="SENT_TO_CLIENT">Send to Client</option>
-                            </select>
-                            {editingStatus === 'REJECTED' && (
-                              <textarea
-                                placeholder="Rejection reason"
-                                value={editingReason}
-                                onChange={(e) =>
-                                  setEditingReason(e.target.value)
-                                }
-                                className="form-input h-24"
-                              />
-                            )}
-
-                            {editingStatus === 'SENT_TO_CLIENT' && (
-                              <div className="space-y-1 mt-2">
-                                <label className="block text-xs font-semibold text-slate-700">Select Client Company</label>
-                                <select
-                                  value={selectedClientId}
-                                  onChange={(e) => setSelectedClientId(e.target.value)}
-                                  className="form-input text-sm bg-white"
-                                  required
-                                >
-                                  <option value="">-- Choose Client (Company) --</option>
-                                  {clients.map((cli) => (
-                                    <option key={cli.id} value={cli.id}>
-                                      {cli.name} ({cli.company})
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            )}
-
-                            {editingStatus === 'INTERVIEW_COMPLETED' && (
-                              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50 mt-2 text-left dark:bg-slate-800/40 dark:border-slate-700/50">
-                                <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider dark:text-amber-500">Interview Feedback</h5>
-
-                                <div>
-                                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Technical Skills Rating (1-10): {technicalRating}</label>
-                                  <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                                      <button
-                                        key={num}
-                                        type="button"
-                                        onClick={() => setTechnicalRating(num)}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${technicalRating === num
-                                          ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
-                                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                                          }`}
-                                      >
-                                        {num}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Communication Skills Rating (1-10): {communicationRating}</label>
-                                  <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                                      <button
-                                        key={num}
-                                        type="button"
-                                        onClick={() => setCommunicationRating(num)}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${communicationRating === num
-                                          ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
-                                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                                          }`}
-                                      >
-                                        {num}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Cultural Fit Rating (1-10): {culturalRating}</label>
-                                  <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                                      <button
-                                        key={num}
-                                        type="button"
-                                        onClick={() => setCulturalRating(num)}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${culturalRating === num
-                                          ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
-                                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                                          }`}
-                                      >
-                                        {num}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <label className="block text-[10px] font-bold text-gray-500">Recommendation</label>
-                                  <select value={recommendation} onChange={(e) => setRecommendation(e.target.value)} className="form-input text-xs">
-                                    <option value="Strong Hire">Strong Hire</option>
-                                    <option value="Hire">Hire</option>
-                                    <option value="No Hire">No Hire</option>
-                                    <option value="Strong No Hire">Strong No Hire</option>
-                                  </select>
-                                </div>
-
-                                <div>
-                                  <label className="block text-[10px] font-bold text-gray-500">Detailed Feedback Comments</label>
-                                  <textarea value={feedbackComments} onChange={(e) => setFeedbackComments(e.target.value)} placeholder="Provide detailed remarks..." className="form-input text-xs h-20" />
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="space-x-2">
-                              <button
-                                onClick={() =>
-                                  handleUpdateStatus(
-                                    app.id,
-                                    editingStatus,
-                                    editingStatus === 'INTERVIEW_COMPLETED' ? {
-                                      technicalRating,
-                                      communicationRating,
-                                      culturalRating,
-                                      recommendation,
-                                      feedbackComments
-                                    } : (editingStatus === 'SENT_TO_CLIENT' ? { clientId: selectedClientId } : { rejectionReason: editingReason })
-                                  )
-                                }
-                                className="btn-primary"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditingAppId(null)
-                                  setEditingStatus('')
-                                  setEditingReason('')
-                                  setTechnicalRating(5)
-                                  setCommunicationRating(5)
-                                  setCulturalRating(5)
-                                  setRecommendation('Hire')
-                                  setFeedbackComments('')
-                                  setSelectedClientId('')
-                                }}
-                                className="btn-secondary"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setEditingAppId(app.id)
-                              setEditingStatus('INTERVIEW_COMPLETED')
-                              setEditingReason('')
-                            }}
-                            className="btn-warning px-3 py-1"
-                          >
-                            Edit
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            setEditingAppId(app.id)
+                            setEditingStatus(app.status === 'APPLICATION_RECEIVED' ? 'INTERVIEW_SCHEDULED' : 'INTERVIEW_COMPLETED')
+                            setEditingReason('')
+                          }}
+                          className="btn-warning px-3 py-1.5 text-xs font-semibold rounded-lg"
+                        >
+                          Edit Status
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1166,6 +1001,196 @@ const RecruiterDashboard = () => {
         candidateName={activeChatCandidateName}
         currentUser={user}
       />
+
+      {/* Centered Edit Status Modal Overlay */}
+      {editingAppId && (() => {
+        const editingApp = applications.find(a => a.id === editingAppId);
+        if (!editingApp) return null;
+        return (
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-[#2b2f3a] rounded-[28px] max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-800 pb-3 text-left">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">⚙️ Update Status</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Candidate: {editingApp.Candidate?.name || 'Unassigned'}</p>
+                </div>
+                <button
+                  onClick={() => setEditingAppId(null)}
+                  className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 text-2xl font-bold p-1"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="space-y-4 text-left">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Select New Status
+                  </label>
+                  <select
+                    value={editingStatus}
+                    onChange={(e) => setEditingStatus(e.target.value)}
+                    className="form-input w-full bg-slate-50 border-slate-200 dark:bg-slate-800 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  >
+                    <option value="">-- Choose Status --</option>
+                    <option value="INTERVIEW_SCHEDULED">Interview Scheduled</option>
+                    <option value="INTERVIEW_COMPLETED">Interview Completed</option>
+                    <option value="SELECTED">Selected</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="SENT_TO_CLIENT">Send to Client</option>
+                  </select>
+                </div>
+
+                {editingStatus === 'REJECTED' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Rejection Reason</label>
+                    <textarea
+                      placeholder="Specify rejection details..."
+                      value={editingReason}
+                      onChange={(e) => setEditingReason(e.target.value)}
+                      className="form-input w-full h-24"
+                    />
+                  </div>
+                )}
+
+                {editingStatus === 'SENT_TO_CLIENT' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Select Client Company</label>
+                    <select
+                      value={selectedClientId}
+                      onChange={(e) => setSelectedClientId(e.target.value)}
+                      className="form-input w-full"
+                      required
+                    >
+                      <option value="">-- Choose Client (Company) --</option>
+                      {clients.map((cli) => (
+                        <option key={cli.id} value={cli.id}>
+                          {cli.name} ({cli.company})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {editingStatus === 'INTERVIEW_COMPLETED' && (
+                  <div className="space-y-4 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/40 mt-2 text-left">
+                    <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider dark:text-amber-500">Interview Feedback & Ratings</h5>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-650 dark:text-slate-400">Technical Skills Rating (1-10): {technicalRating}</label>
+                      <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setTechnicalRating(num)}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${technicalRating === num
+                              ? 'bg-amber-650 text-white scale-110 shadow-sm shadow-amber-500/50'
+                              : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-750 dark:text-slate-300 dark:hover:bg-slate-650'
+                              }`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-655 dark:text-slate-400">Communication Skills Rating (1-10): {communicationRating}</label>
+                      <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setCommunicationRating(num)}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${communicationRating === num
+                              ? 'bg-amber-655 text-white scale-110 shadow-sm shadow-amber-500/50'
+                              : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-750 dark:text-slate-300 dark:hover:bg-slate-655'
+                              }`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-655 dark:text-slate-400">Cultural Fit Rating (1-10): {culturalRating}</label>
+                      <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setCulturalRating(num)}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${culturalRating === num
+                              ? 'bg-amber-655 text-white scale-110 shadow-sm shadow-amber-500/50'
+                              : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-750 dark:text-slate-300 dark:hover:bg-slate-655'
+                              }`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-750 dark:text-slate-300 mb-1">Recommendation</label>
+                      <select value={recommendation} onChange={(e) => setRecommendation(e.target.value)} className="form-input text-xs w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+                        <option value="Strong Hire">Strong Hire</option>
+                        <option value="Hire">Hire</option>
+                        <option value="No Hire">No Hire</option>
+                        <option value="Strong No Hire">Strong No Hire</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-750 dark:text-slate-300 mb-1">Detailed Remarks</label>
+                      <textarea value={feedbackComments} onChange={(e) => setFeedbackComments(e.target.value)} placeholder="Enter details..." className="form-input text-xs h-20 w-full" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-850">
+                  <button
+                    onClick={() => {
+                      setEditingAppId(null)
+                      setEditingStatus('')
+                      setEditingReason('')
+                      setTechnicalRating(5)
+                      setCommunicationRating(5)
+                      setCulturalRating(5)
+                      setRecommendation('Hire')
+                      setFeedbackComments('')
+                      setSelectedClientId('')
+                    }}
+                    className="btn-secondary px-4 py-2 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleUpdateStatus(
+                        editingApp.id,
+                        editingStatus,
+                        editingStatus === 'INTERVIEW_COMPLETED' ? {
+                          technicalRating,
+                          communicationRating,
+                          culturalRating,
+                          recommendation,
+                          feedbackComments
+                        } : (editingStatus === 'SENT_TO_CLIENT' ? { clientId: selectedClientId } : { rejectionReason: editingReason })
+                      )
+                    }
+                    className="btn-primary px-4 py-2 text-sm text-white"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
