@@ -764,13 +764,13 @@ a {
 .mobile-bottom-nav {
   position: fixed !important;
   bottom: 20px !important;
-  left: 20px !important;
-  right: 20px !important;
+  left: 16px !important;
+  right: 16px !important;
   z-index: 9999 !important;
   display: flex !important;
-  justify-content: space-around !important;
+  justify-content: flex-start !important;
   align-items: center !important;
-  padding: 10px 8px !important;
+  padding: 8px 12px !important;
   background: rgba(255, 255, 255, 0.88) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 32px !important;
@@ -778,27 +778,21 @@ a {
   backdrop-filter: blur(20px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  overflow-x: auto !important;
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.mobile-bottom-nav::-webkit-scrollbar {
+  display: none !important;
 }
 
 .dark .mobile-bottom-nav {
   background: rgba(43, 47, 58, 0.88) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-}
-
-.mobile-active-indicator {
-  position: absolute !important;
-  top: 8px !important;
-  bottom: 8px !important;
-  border-radius: 20px !important;
-  background: rgba(184, 143, 63, 0.16) !important;
-  transition: left 0.38s cubic-bezier(0.25, 1, 0.5, 1), width 0.38s cubic-bezier(0.25, 1, 0.5, 1) !important;
-  z-index: 0 !important;
-  box-shadow: 0 4px 10px rgba(184, 143, 63, 0.1) !important;
-}
-
-.dark .mobile-active-indicator {
-  background: rgba(184, 143, 63, 0.28) !important;
 }
 
 .mobile-bottom-nav a, 
@@ -810,14 +804,15 @@ a {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 6px 4px !important;
+  padding: 8px 18px !important;
   border-radius: 24px !important;
   color: #64748b !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  width: 20% !important;
-  transition: color 0.2s ease, transform 0.2s ease !important;
+  flex-shrink: 0 !important;
+  min-width: 90px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .mobile-bottom-nav a:hover,
@@ -826,11 +821,14 @@ a {
 }
 
 .mobile-bottom-nav a.active-mobile-tab {
+  background: rgba(184, 143, 63, 0.16) !important;
   color: #b88f3f !important;
-  transform: scale(1.04);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(184, 143, 63, 0.08) !important;
 }
 
 .dark .mobile-bottom-nav a.active-mobile-tab {
+  background: rgba(184, 143, 63, 0.28) !important;
   color: #e2a84a !important;
 }
 
