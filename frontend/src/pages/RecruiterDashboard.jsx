@@ -44,7 +44,7 @@ export const InterviewCountdown = ({ date }) => {
       if (days > 0) timeString += `${days}d `
       if (hours > 0 || days > 0) timeString += `${hours}h `
       timeString += `${minutes}m ${seconds}s`
-      
+
       setTimeLeft(timeString)
     }
 
@@ -56,11 +56,10 @@ export const InterviewCountdown = ({ date }) => {
   if (timeLeft === 'Passed') return null
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${
-      isLive 
-        ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse' 
-        : 'bg-amber-50 text-amber-800 border border-amber-200'
-    }`}>
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${isLive
+      ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse'
+      : 'bg-amber-50 text-amber-800 border border-amber-200'
+      }`}>
       <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-red-600 animate-ping' : 'bg-amber-600 animate-pulse'}`} />
       <span>{isLive ? '' : 'In: '}{timeLeft}</span>
     </div>
@@ -85,7 +84,7 @@ const calculateAiMatch = (candidate) => {
   if (!candidate) return { score: 0, strengths: [] }
   let score = 65
   const strengths = []
-  
+
   const skills = parseSkills(candidate.technicalSkills)
 
   if (skills.length > 0) {
@@ -94,7 +93,7 @@ const calculateAiMatch = (candidate) => {
   } else {
     score -= 10;
   }
-  
+
   const exp = parseInt(candidate.experience, 10) || 0
   if (exp >= 5) {
     score += 12
@@ -262,16 +261,14 @@ const ChatPanel = ({ applicationId }) => {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex flex-col max-w-[80%] ${
-                      isMe ? 'ml-auto items-end' : 'mr-auto items-start'
-                    }`}
+                    className={`flex flex-col max-w-[80%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'
+                      }`}
                   >
                     <div
-                      className={`px-3 py-1.5 rounded-lg text-xs ${
-                        isMe
-                          ? 'bg-amber-600 text-white rounded-br-none'
-                          : 'bg-slate-100 text-slate-800 rounded-bl-none'
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg text-xs ${isMe
+                        ? 'bg-amber-600 text-white rounded-br-none'
+                        : 'bg-slate-100 text-slate-800 rounded-bl-none'
+                        }`}
                     >
                       {msg.message}
                     </div>
@@ -542,21 +539,19 @@ const RecruiterDashboard = () => {
         <div className="flex space-x-4 mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('applications')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'applications'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-            }`}
+            className={`px-4 py-2 font-semibold ${activeTab === 'applications'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600'
+              }`}
           >
             Applications ({applications.length})
           </button>
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'notifications'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600'
-            }`}
+            className={`px-4 py-2 font-semibold ${activeTab === 'notifications'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600'
+              }`}
           >
             Notifications ({notifications.length})
           </button>
@@ -708,7 +703,7 @@ const RecruiterDashboard = () => {
                             {editingStatus === 'INTERVIEW_COMPLETED' && (
                               <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50 mt-2 text-left dark:bg-slate-800/40 dark:border-slate-700/50">
                                 <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider dark:text-amber-500">Interview Feedback</h5>
-                                
+
                                 <div>
                                   <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Technical Skills Rating (1-10): {technicalRating}</label>
                                   <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
@@ -717,18 +712,17 @@ const RecruiterDashboard = () => {
                                         key={num}
                                         type="button"
                                         onClick={() => setTechnicalRating(num)}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                                          technicalRating === num
-                                            ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
-                                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                                        }`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${technicalRating === num
+                                          ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
+                                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                                          }`}
                                       >
                                         {num}
                                       </button>
                                     ))}
                                   </div>
                                 </div>
-                                
+
                                 <div>
                                   <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Communication Skills Rating (1-10): {communicationRating}</label>
                                   <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
@@ -737,18 +731,17 @@ const RecruiterDashboard = () => {
                                         key={num}
                                         type="button"
                                         onClick={() => setCommunicationRating(num)}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                                          communicationRating === num
-                                            ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
-                                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                                        }`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${communicationRating === num
+                                          ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
+                                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                                          }`}
                                       >
                                         {num}
                                       </button>
                                     ))}
                                   </div>
                                 </div>
-                                
+
                                 <div>
                                   <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Cultural Fit Rating (1-10): {culturalRating}</label>
                                   <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
@@ -757,11 +750,10 @@ const RecruiterDashboard = () => {
                                         key={num}
                                         type="button"
                                         onClick={() => setCulturalRating(num)}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                                          culturalRating === num
-                                            ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
-                                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                                        }`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${culturalRating === num
+                                          ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
+                                          : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                                          }`}
                                       >
                                         {num}
                                       </button>
