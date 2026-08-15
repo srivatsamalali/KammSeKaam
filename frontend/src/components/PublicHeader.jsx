@@ -29,9 +29,10 @@ const PublicHeader = () => {
   }
 
   return (
-    <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
-      <div className="w-full mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="flex justify-between items-center h-20">
+    <>
+      <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
+        <div className="w-full mx-auto px-6 sm:px-8 lg:px-10">
+          <div className="flex justify-between items-center h-20">
           {/* Logo & Brand */}
           <Link to="/" className="flex items-center gap-3">
             <img
@@ -109,8 +110,9 @@ const PublicHeader = () => {
           </div>
         </div>
       </div>
+    </nav>
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* Mobile Bottom Navigation Bar (Rendered outside to prevent fixed placement container constraint bugs) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 py-3 px-6 flex justify-around items-center z-50 shadow-2xl">
         <Link to="/" className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-500">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -136,12 +138,12 @@ const PublicHeader = () => {
           </svg>
           <span className="text-[10px] font-bold">Admin</span>
         </Link>
-        <button onClick={toggleTheme} className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-500 bg-transparent border-none p-0 shadow-none">
+        <div onClick={toggleTheme} className="flex flex-col items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-500 cursor-pointer">
           <span className="text-lg leading-none">{darkMode ? '☀️' : '🌙'}</span>
           <span className="text-[10px] font-bold">Theme</span>
-        </button>
+        </div>
       </div>
-    </nav>
+    </>
   )
 }
 
