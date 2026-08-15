@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { candidateService, messageService } from '../services/api'
+import ThemeToggle from '../components/ThemeToggle'
 
 const ApplicationStepper = ({ status }) => {
   const steps = [
@@ -345,17 +346,56 @@ const CandidateDashboard = () => {
             </h1>
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="w-full mx-auto px-4 py-8">
+        {applications.filter(app => app.status === 'INTERVIEW_SCHEDULED').map((app) => (
+          <div key={app.id} className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between dark:bg-amber-950/20 dark:border-amber-900/30">
+            <div className="mb-4 md:mb-0">
+              <span className="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 uppercase tracking-wider mb-2">
+                Upcoming Interview
+              </span>
+              <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                Scheduled for {new Date(app.interviewDate).toLocaleString()}
+              </h4>
+              {app.googleMeetLink && (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Meet Link:{' '}
+                  <a
+                    href={app.googleMeetLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline text-blue-600 dark:text-blue-400"
+                  >
+                    {app.googleMeetLink}
+                  </a>
+                </p>
+              )}
+            </div>
+            {app.googleMeetLink && (
+              <a
+                href={app.googleMeetLink}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-6 rounded-lg text-center transition-all shadow-md shadow-amber-500/20"
+              >
+                Join Interview Room
+              </a>
+            )}
+          </div>
+        ))}
+
         <div className="mb-6">
           <h2 className="text-3xl font-bold text-gray-900">
             Welcome to Your Dashboard

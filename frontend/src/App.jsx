@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import ChatBot from './components/ChatBot'
 
 // Pages
 import LandingPage from './pages/LandingPage'
@@ -78,6 +79,7 @@ function App() {
         <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
           <BrowserRouter>
             <AnimatedRoutes />
+            <ChatBot />
           </BrowserRouter>
         </div>
       </div>

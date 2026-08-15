@@ -7,6 +7,7 @@ import {
   notificationService,
   messageService,
 } from '../services/api'
+import ThemeToggle from '../components/ThemeToggle'
 
 const CalendarButton = ({ interviewDate, googleMeetLink }) => {
   const [showOptions, setShowOptions] = useState(false);
@@ -344,12 +345,15 @@ const RecruiterDashboard = () => {
             </h1>
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
@@ -358,6 +362,44 @@ const RecruiterDashboard = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
           Recruiter Dashboard
         </h2>
+
+        {/* Upcoming Interviews Reminder Banner */}
+        {applications.filter(app => app.status === 'INTERVIEW_SCHEDULED' && app.interviewDate).length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 shadow-sm dark:bg-amber-950/20 dark:border-amber-900/30">
+            <h3 className="text-sm font-bold text-amber-800 dark:text-amber-500 uppercase tracking-wider mb-3">
+              Upcoming Scheduled Interviews
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {applications
+                .filter(app => app.status === 'INTERVIEW_SCHEDULED' && app.interviewDate)
+                .map((app) => (
+                  <div key={app.id} className="bg-white border border-slate-200 p-4 rounded-xl shadow-xs flex flex-col justify-between dark:bg-slate-800 dark:border-slate-700">
+                    <div>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-100">
+                        {app.Candidate?.name || 'Candidate'}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {new Date(app.interviewDate).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1 dark:text-slate-400">
+                        Email: {app.Candidate?.User?.email || 'N/A'}
+                      </p>
+                    </div>
+                    {app.googleMeetLink && (
+                      <a
+                        href={app.googleMeetLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 block text-center bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1.5 px-4 rounded-lg text-xs transition-colors shadow-sm"
+                      >
+                        Join Interview Room
+                      </a>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex space-x-4 mb-6 border-b border-gray-300">
@@ -468,22 +510,67 @@ const RecruiterDashboard = () => {
                             )}
 
                             {editingStatus === 'INTERVIEW_COMPLETED' && (
-                              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50 mt-2 text-left">
-                                <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider">Interview Feedback</h5>
+                              <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50 mt-2 text-left dark:bg-slate-800/40 dark:border-slate-700/50">
+                                <h5 className="font-bold text-xs text-amber-800 uppercase tracking-wider dark:text-amber-500">Interview Feedback</h5>
                                 
                                 <div>
-                                  <label className="block text-[10px] font-bold text-gray-500">Technical Skills Rating (1-10): {technicalRating}</label>
-                                  <input type="range" min="1" max="10" value={technicalRating} onChange={(e) => setTechnicalRating(parseInt(e.target.value, 10))} className="w-full accent-amber-600" />
+                                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Technical Skills Rating (1-10): {technicalRating}</label>
+                                  <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                      <button
+                                        key={num}
+                                        type="button"
+                                        onClick={() => setTechnicalRating(num)}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
+                                          technicalRating >= num
+                                            ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
+                                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                                        }`}
+                                      >
+                                        {num}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
                                 
                                 <div>
-                                  <label className="block text-[10px] font-bold text-gray-500">Communication Skills Rating (1-10): {communicationRating}</label>
-                                  <input type="range" min="1" max="10" value={communicationRating} onChange={(e) => setCommunicationRating(parseInt(e.target.value, 10))} className="w-full accent-amber-600" />
+                                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Communication Skills Rating (1-10): {communicationRating}</label>
+                                  <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                      <button
+                                        key={num}
+                                        type="button"
+                                        onClick={() => setCommunicationRating(num)}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
+                                          communicationRating >= num
+                                            ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
+                                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                                        }`}
+                                      >
+                                        {num}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
                                 
                                 <div>
-                                  <label className="block text-[10px] font-bold text-gray-500">Cultural Fit Rating (1-10): {culturalRating}</label>
-                                  <input type="range" min="1" max="10" value={culturalRating} onChange={(e) => setCulturalRating(parseInt(e.target.value, 10))} className="w-full accent-amber-600" />
+                                  <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400">Cultural Fit Rating (1-10): {culturalRating}</label>
+                                  <div className="flex items-center space-x-1 mt-1 overflow-x-auto py-1">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                      <button
+                                        key={num}
+                                        type="button"
+                                        onClick={() => setCulturalRating(num)}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
+                                          culturalRating >= num
+                                            ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
+                                            : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                                        }`}
+                                      >
+                                        {num}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
 
                                 <div>
