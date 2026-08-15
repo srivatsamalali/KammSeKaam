@@ -558,39 +558,52 @@ const AdminDashboard = () => {
 
     coords.isDragging = false
 
-    const containerRect = container.getBoundingClientRect()
+    if (coords.hasDragged) {
+      const containerRect = container.getBoundingClientRect()
+      let closestTab = activeTab
+      let minDistance = Infinity
 
-    let closestTab = activeTab
-    let minDistance = Infinity
+      tabs.forEach((tab) => {
+        const el = tabRefs.current[tab.id]
 
-    tabs.forEach((tab) => {
-      const el = tabRefs.current[tab.id]
+        if (!el) return
 
-      if (!el) return
+        const rect = el.getBoundingClientRect()
 
-      const rect = el.getBoundingClientRect()
+        const tabCenter =
+          rect.left -
+          containerRect.left +
+          rect.width / 2
 
-      const tabCenter =
-        rect.left -
-        containerRect.left +
-        rect.width / 2
+        const pillCenter =
+          coords.currentLeft +
+          coords.currentWidth / 2
 
-      const pillCenter =
-        coords.currentLeft +
-        coords.currentWidth / 2
+        const distance = Math.abs(tabCenter - pillCenter)
 
-      const distance = Math.abs(tabCenter - pillCenter)
+        if (distance < minDistance) {
+          minDistance = distance
+          closestTab = tab.id
+        }
+      })
 
-      if (distance < minDistance) {
-        minDistance = distance
-        closestTab = tab.id
+      pill.style.transition =
+        'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1)'
+
+      setActiveTab(closestTab)
+    } else {
+      // Simple click/tap, animate to current active element
+      const activeEl = tabRefs.current[activeTab]
+      if (activeEl) {
+        const containerRect = container.getBoundingClientRect()
+        const activeRect = activeEl.getBoundingClientRect()
+        const left = activeRect.left - containerRect.left
+        pill.style.transition =
+          'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1)'
+        pill.style.transform = `translate3d(${left}px, 0, 0)`
+        pill.style.width = `${activeRect.width}px`
       }
-    })
-
-    pill.style.transition =
-      'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1)'
-
-    setActiveTab(closestTab)
+    }
 
     setTimeout(() => {
       coords.hasDragged = false
