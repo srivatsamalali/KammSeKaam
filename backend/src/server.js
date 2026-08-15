@@ -19,13 +19,15 @@ const notificationRoutes = require('./routes/notificationRoutes')
 
 const app = express()
 
+app.set('trust proxy', 1)
+
 // Security middleware
 app.use(helmet())
 
 // CORS
 const frontendOrigins = (
   process.env.FRONTEND_URL ||
-  'http://localhost:5173,http://localhost:5174,http://localhost:5175'
+  'http://astonrecruitment.in,https://astonrecruitment.in,http://www.astonrecruitment.in,https://www.astonrecruitment.in'
 )
   .split(',')
   .map((url) => url.trim())
