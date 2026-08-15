@@ -97,6 +97,7 @@ const MeetingRoom = () => {
           startWithAudioMuted: false,
           startWithVideoMuted: false,
           disableThirdPartyRequests: true,
+          disableDeepLinking: true,
         }
       }
 
@@ -265,7 +266,7 @@ const MeetingRoom = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <a 
-                    href={`https://meet.element.io/Aston-Recruitment-Interview-${roomId}`} 
+                    href={`https://meet.element.io/Aston-Recruitment-Interview-${roomId}#config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false`} 
                     target="_blank" 
                     rel="noreferrer" 
                     className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold transition shadow-sm"
