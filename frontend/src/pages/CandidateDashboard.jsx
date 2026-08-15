@@ -317,6 +317,20 @@ const ChatPanel = ({ applicationId }) => {
   );
 };
 
+const parseSkills = (technicalSkills) => {
+  if (!technicalSkills) return []
+  if (Array.isArray(technicalSkills)) return technicalSkills
+  if (typeof technicalSkills === 'string') {
+    try {
+      const parsed = JSON.parse(technicalSkills)
+      return parseSkills(parsed)
+    } catch (e) {
+      return technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
+    }
+  }
+  return []
+}
+
 const CandidateDashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -353,8 +367,14 @@ const CandidateDashboard = () => {
   const fetchProfile = async () => {
     try {
       const response = await candidateService.getProfile()
-      setProfile(response.data)
-      setFormData(response.data)
+      const data = response.data || {}
+      const sanitizedSkills = parseSkills(data.technicalSkills)
+      const sanitizedData = {
+        ...data,
+        technicalSkills: sanitizedSkills
+      }
+      setProfile(sanitizedData)
+      setFormData(sanitizedData)
     } catch (error) {
       console.error('Error fetching profile:', error)
     } finally {
@@ -496,11 +516,7 @@ const CandidateDashboard = () => {
           if (profile.experience) score += 20;
           if (profile.currentLocation) score += 20;
           if (profile.currentCompany) score += 20;
-          const skills = Array.isArray(profile.technicalSkills)
-            ? profile.technicalSkills
-            : typeof profile.technicalSkills === 'string'
-            ? JSON.parse(profile.technicalSkills || '[]')
-            : [];
+          const skills = parseSkills(profile.technicalSkills)
           if (skills.length > 0) score += 20;
 
           const missing = [];
@@ -728,12 +744,7 @@ const CandidateDashboard = () => {
                   <div className="flex-1 w-full">
                     <span className="text-[10px] uppercase font-bold text-slate-400">Extracted Core Skills</span>
                     <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                      {(Array.isArray(profile?.technicalSkills)
-                        ? profile.technicalSkills
-                        : typeof profile?.technicalSkills === 'string'
-                        ? JSON.parse(profile.technicalSkills || '[]')
-                        : []
-                      ).map((skill, idx) => (
+                      {parseSkills(profile?.technicalSkills).map((skill, idx) => (
                         <span key={idx} className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 text-[10px] rounded font-semibold border border-amber-200/30">
                           {skill}
                         </span>
