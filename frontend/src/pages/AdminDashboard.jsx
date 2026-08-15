@@ -303,6 +303,34 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
     </div>
   );
 };
+const AnimatedCounter = ({ value }) => {
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    let start = 0
+    const end = parseInt(value, 10) || 0
+    if (end === 0) {
+      setDisplayValue(0)
+      return
+    }
+    const duration = 1000 // 1.0s animation duration
+    const stepTime = Math.max(Math.floor(duration / end), 15)
+    
+    const timer = setInterval(() => {
+      start += Math.ceil(end / (duration / stepTime))
+      if (start >= end) {
+        setDisplayValue(end)
+        clearInterval(timer)
+      } else {
+        setDisplayValue(start)
+      }
+    }, stepTime)
+
+    return () => clearInterval(timer)
+  }, [value])
+
+  return <span>{displayValue}</span>
+}
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth()
@@ -578,34 +606,34 @@ const AdminDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <div className="glass-card p-6">
-            <p className="text-sm text-slate-500">Total Candidates</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {stats?.totalCandidates || 0}
+          <div className="glass-card p-6 border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Candidates</p>
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+              <AnimatedCounter value={stats?.totalCandidates || 0} />
             </p>
           </div>
-          <div className="glass-card p-6">
-            <p className="text-sm text-slate-500">Total Recruiters</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {stats?.totalRecruiters || 0}
+          <div className="glass-card p-6 border-l-4 border-indigo-500 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Recruiters</p>
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+              <AnimatedCounter value={stats?.totalRecruiters || 0} />
             </p>
           </div>
-          <div className="glass-card p-6">
-            <p className="text-sm text-slate-500">Total Applications</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {stats?.totalApplications || 0}
+          <div className="glass-card p-6 border-l-4 border-amber-500 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Applications</p>
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+              <AnimatedCounter value={stats?.totalApplications || 0} />
             </p>
           </div>
-          <div className="glass-card p-6">
-            <p className="text-sm text-slate-500">Selected</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {stats?.selectedCandidates || 0}
+          <div className="glass-card p-6 border-l-4 border-emerald-500 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Selected</p>
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+              <AnimatedCounter value={stats?.selectedCandidates || 0} />
             </p>
           </div>
-          <div className="glass-card p-6">
-            <p className="text-sm text-slate-500">Rejected</p>
-            <p className="text-3xl font-bold text-slate-900">
-              {stats?.rejectedCandidates || 0}
+          <div className="glass-card p-6 border-l-4 border-rose-500 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rejected</p>
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+              <AnimatedCounter value={stats?.rejectedCandidates || 0} />
             </p>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { candidateService, messageService } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
+import ChatThreadPanel from '../components/ChatThreadPanel'
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -409,6 +410,8 @@ const CandidateDashboard = () => {
   const [customSkill, setCustomSkill] = useState('')
   const [availableSkills, setAvailableSkills] = useState(['Java', 'Python', 'Javascript', 'React', 'Node.js', 'SQL', 'AWS', 'Docker'])
   const [showCompanySuggestions, setShowCompanySuggestions] = useState(false)
+  const [activeChatAppId, setActiveChatAppId] = useState(null)
+  const [activeChatCandidateName, setActiveChatCandidateName] = useState('')
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -1039,15 +1042,32 @@ const CandidateDashboard = () => {
                 {/* Stepper Timeline */}
                 <ApplicationStepper status={app.status} />
 
-                {/* Recruiter Chat */}
+                {/* Recruiter Chat Button trigger */}
                 {app.recruiterId && (
-                  <ChatPanel applicationId={app.id} />
+                  <button
+                    onClick={() => {
+                      setActiveChatAppId(app.id)
+                      setActiveChatCandidateName(profile?.name || 'Candidate')
+                    }}
+                    className="mt-4 w-full py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 border border-amber-200/40"
+                  >
+                    💬 Open Real-Time Chat Loop with Recruiter & Client
+                  </button>
                 )}
               </div>
             ))
           )}
         </div>
       </div>
+
+      {/* Global Slide-out Chat Thread Panel */}
+      <ChatThreadPanel
+        isOpen={!!activeChatAppId}
+        onClose={() => setActiveChatAppId(null)}
+        applicationId={activeChatAppId}
+        candidateName={activeChatCandidateName}
+        currentUser={user}
+      />
     </div>
   )
 }

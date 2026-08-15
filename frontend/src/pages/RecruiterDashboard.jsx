@@ -10,6 +10,7 @@ import {
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
+import ChatThreadPanel from '../components/ChatThreadPanel'
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -316,6 +317,9 @@ const RecruiterDashboard = () => {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('applications')
+  const [isKanbanView, setIsKanbanView] = useState(false)
+  const [activeChatAppId, setActiveChatAppId] = useState(null)
+  const [activeChatCandidateName, setActiveChatCandidateName] = useState('')
   const [selectedApp, setSelectedApp] = useState(null)
   const [showScheduleForm, setShowScheduleForm] = useState(false)
   const [scheduleData, setScheduleData] = useState({
@@ -560,12 +564,128 @@ const RecruiterDashboard = () => {
         {/* Applications Tab */}
         {activeTab === 'applications' && (
           <div className="space-y-4">
-            {applications.length === 0 ? (
-              <p className="text-gray-600">No applications assigned yet</p>
+            <div className="flex justify-between items-center mb-6 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-black uppercase text-slate-500 tracking-wider">Recruit Pipeline Layout</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsKanbanView(false)}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    !isKanbanView 
+                      ? 'bg-amber-600 text-white shadow-md' 
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  List
+                </button>
+                <button
+                  onClick={() => setIsKanbanView(true)}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    isKanbanView 
+                      ? 'bg-amber-600 text-white shadow-md' 
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  Kanban Board
+                </button>
+              </div>
+            </div>
+
+            {isKanbanView ? (
+              <div className="flex overflow-x-auto gap-4 pb-6 min-h-[500px]">
+                {[
+                  { key: 'APPLICATION_RECEIVED', label: 'Received' },
+                  { key: 'INTERVIEW_SCHEDULED', label: 'Scheduled' },
+                  { key: 'INTERVIEW_COMPLETED', label: 'Completed' },
+                  { key: 'SENT_TO_CLIENT', label: 'Client Review' },
+                  { key: 'SELECTED', label: 'Selected' },
+                  { key: 'REJECTED', label: 'Rejected' }
+                ].map((stage) => {
+                  const stageApps = applications.filter(app => app.status === stage.key)
+                  return (
+                    <div key={stage.key} className="w-80 shrink-0 bg-slate-50/40 dark:bg-slate-900/10 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col h-full max-h-[700px]">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">{stage.label}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200/65 dark:bg-slate-850 text-slate-600 dark:text-slate-400 font-bold">{stageApps.length}</span>
+                      </div>
+                      
+                      <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                        {stageApps.length === 0 ? (
+                          <div className="text-center py-8 text-[10px] text-slate-400 font-semibold border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                            Empty stage
+                          </div>
+                        ) : (
+                          stageApps.map((app) => {
+                            const aiData = calculateAiMatch(app.Candidate)
+                            return (
+                              <div key={app.id} className="bg-white dark:bg-slate-850 p-4 rounded-xl border border-slate-200 dark:border-slate-850 shadow-sm flex flex-col gap-2">
+                                <div className="flex justify-between items-start gap-2">
+                                  <div>
+                                    <h5 className="font-bold text-xs text-slate-800 dark:text-white">{app.Candidate?.name}</h5>
+                                    <p className="text-[9px] text-slate-450 mt-0.5 truncate max-w-[150px]">{app.Candidate?.User?.email}</p>
+                                  </div>
+                                  <div className="relative w-8 h-8 shrink-0">
+                                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+                                      <circle
+                                        cx="18"
+                                        cy="18"
+                                        r="15.915"
+                                        fill="none"
+                                        stroke="#b88f3f"
+                                        strokeWidth="3"
+                                        strokeDasharray={`${aiData.score} ${100 - aiData.score}`}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-amber-800 dark:text-amber-500">
+                                      {aiData.score}%
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="text-[9px] text-slate-500 space-y-0.5 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                                  <p>💼 Exp: <span className="font-bold">{app.Candidate?.experience || 'N/A'} yrs</span></p>
+                                  <p>📍 Location: <span className="font-bold">{app.Candidate?.currentLocation || 'N/A'}</span></p>
+                                  {app.interviewDate && <p>📅 Date: <span className="font-bold">{new Date(app.interviewDate).toLocaleDateString()}</span></p>}
+                                </div>
+
+                                <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                                  <button
+                                    onClick={() => {
+                                      setActiveChatAppId(app.id)
+                                      setActiveChatCandidateName(app.Candidate?.name || 'Candidate')
+                                    }}
+                                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[9px] font-bold rounded-md border border-amber-200/50 flex-1 shrink-0"
+                                    title="Open chat"
+                                  >
+                                    💬 Chat
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditingAppId(app.id)
+                                      setEditingStatus(app.status === 'APPLICATION_RECEIVED' ? 'INTERVIEW_SCHEDULED' : 'INTERVIEW_COMPLETED')
+                                      setEditingReason('')
+                                    }}
+                                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-850 dark:text-slate-200 text-[9px] font-bold rounded-md border border-slate-200 dark:border-slate-750 flex-1 shrink-0"
+                                  >
+                                    ⚙️ Action
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             ) : (
-              applications.map((app) => (
-                <div key={app.id} className="card">
-                  <div className="flex justify-between items-start">
+              applications.length === 0 ? (
+                <p className="text-gray-600">No applications assigned yet</p>
+              ) : (
+                applications.map((app) => (
+                  <div key={app.id} className="card">
+                    <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h4 className="text-lg font-bold text-gray-900">
                         {app.Candidate?.name}
@@ -1001,9 +1121,17 @@ const RecruiterDashboard = () => {
                   )}
 
                   {/* Direct Chat with Candidate */}
-                  <ChatPanel applicationId={app.id} />
+                  <button
+                    onClick={() => {
+                      setActiveChatAppId(app.id)
+                      setActiveChatCandidateName(app.Candidate?.name || 'Candidate')
+                    }}
+                    className="mt-4 w-full py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 border border-amber-200/40"
+                  >
+                    💬 Open Real-Time Chat Loop with Candidate & Client
+                  </button>
                 </div>
-              ))
+              )))
             )}
           </div>
         )}
@@ -1029,6 +1157,15 @@ const RecruiterDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Global Slide-out Chat Thread Panel */}
+      <ChatThreadPanel
+        isOpen={!!activeChatAppId}
+        onClose={() => setActiveChatAppId(null)}
+        applicationId={activeChatAppId}
+        candidateName={activeChatCandidateName}
+        currentUser={user}
+      />
     </div>
   )
 }
