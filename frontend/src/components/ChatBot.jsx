@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { candidateService, recruiterService } from '../services/api'
 
 const PRESET_QUERIES = [
   {
@@ -29,6 +31,7 @@ const PRESET_QUERIES = [
 ]
 
 const ChatBot = () => {
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     {
@@ -60,6 +63,83 @@ const ChatBot = () => {
         }
       ])
     }, 800)
+  }
+
+  const handleCheckStatus = async () => {
+    setMessages((prev) => [...prev, { sender: 'user', text: '🔍 Check my Application Status' }])
+    setIsTyping(true)
+    
+    try {
+      const res = await candidateService.getApplications()
+      const apps = res.data
+      setIsTyping(false)
+      if (apps.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: 'You do not have any active applications submitted at the moment. You can submit your resume on your candidate dashboard.'
+          }
+        ])
+      } else {
+        const app = apps[0]
+        const dateStr = app.interviewDate ? ` scheduled for ${new Date(app.interviewDate).toLocaleString()}` : ''
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: `Your active application status is: **${app.status.replace(/_/g, ' ')}**${dateStr}. Keep checking your candidate dashboard for live updates.`
+          }
+        ])
+      }
+    } catch (err) {
+      setIsTyping(false)
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: 'Unable to fetch your application details. Make sure you are logged in as a candidate.'
+        }
+      ])
+    }
+  }
+
+  const handleCheckRecruiterInterviews = async () => {
+    setMessages((prev) => [...prev, { sender: 'user', text: '🗓️ Check My Scheduled Interviews' }])
+    setIsTyping(true)
+    
+    try {
+      const res = await recruiterService.getApplications()
+      const apps = res.data || []
+      const activeInterviews = apps.filter(app => app.status === 'INTERVIEW_SCHEDULED')
+      setIsTyping(false)
+      if (activeInterviews.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: 'You have no upcoming scheduled interviews at the moment.'
+          }
+        ])
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: `You have **${activeInterviews.length}** upcoming interviews scheduled. Check your recruiter dashboard to launch meeting rooms or schedule status updates.`
+          }
+        ])
+      }
+    } catch (err) {
+      setIsTyping(false)
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: 'Unable to retrieve your interviews. Please verify your recruiter dashboard session.'
+        }
+      ])
+    }
   }
 
   return (
@@ -127,7 +207,7 @@ const ChatBot = () => {
                       : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-none'
                   }`}
                 >
-                  <p className="leading-relaxed">{msg.text}</p>
+                  <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                   {msg.link && (
                     <Link
                       to={msg.link}
@@ -156,6 +236,24 @@ const ChatBot = () => {
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
               Select a query:
             </span>
+            {user?.role === 'CANDIDATE' && (
+              <button
+                onClick={handleCheckStatus}
+                className="text-[10px] font-bold text-left bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs flex items-center justify-between"
+              >
+                <span>🔍 Check my Application Status</span>
+                <span className="text-[9px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold">Live Status</span>
+              </button>
+            )}
+            {user?.role === 'RECRUITER' && (
+              <button
+                onClick={handleCheckRecruiterInterviews}
+                className="text-[10px] font-bold text-left bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs flex items-center justify-between"
+              >
+                <span>🗓️ Check My Scheduled Interviews</span>
+                <span className="text-[9px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold">Live Count</span>
+              </button>
+            )}
             {PRESET_QUERIES.map((q) => (
               <button
                 key={q.id}

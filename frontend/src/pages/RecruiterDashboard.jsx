@@ -10,6 +10,62 @@ import {
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 
+export const InterviewCountdown = ({ date }) => {
+  const [timeLeft, setTimeLeft] = useState('')
+  const [isLive, setIsLive] = useState(false)
+
+  useEffect(() => {
+    const target = new Date(date).getTime()
+
+    const updateTimer = () => {
+      const now = new Date().getTime()
+      const diff = target - now
+
+      if (diff <= 0 && Math.abs(diff) < 90 * 60 * 1000) {
+        setIsLive(true)
+        setTimeLeft('LIVE - Happening Now')
+        return
+      }
+
+      if (diff < 0) {
+        setIsLive(false)
+        setTimeLeft('Passed')
+        return
+      }
+
+      setIsLive(false)
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+      let timeString = ''
+      if (days > 0) timeString += `${days}d `
+      if (hours > 0 || days > 0) timeString += `${hours}h `
+      timeString += `${minutes}m ${seconds}s`
+      
+      setTimeLeft(timeString)
+    }
+
+    updateTimer()
+    const timerId = setInterval(updateTimer, 1000)
+    return () => clearInterval(timerId)
+  }, [date])
+
+  if (timeLeft === 'Passed') return null
+
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${
+      isLive 
+        ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse' 
+        : 'bg-amber-50 text-amber-800 border border-amber-200'
+    }`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-red-600 animate-ping' : 'bg-amber-600 animate-pulse'}`} />
+      <span>{isLive ? '' : 'In: '}{timeLeft}</span>
+    </div>
+  )
+}
+
 const calculateAiMatch = (candidate) => {
   if (!candidate) return { score: 0, strengths: [] }
   let score = 65
@@ -144,7 +200,16 @@ const ChatPanel = ({ applicationId }) => {
   const loadMessages = async () => {
     try {
       const res = await messageService.getMessages(applicationId);
-      setMessages(res.data);
+      const incoming = res.data;
+      if (messages.length > 0 && incoming.length > messages.length) {
+        const newlyAdded = incoming.slice(messages.length);
+        newlyAdded.forEach((msg) => {
+          if (msg.senderId !== user?.id) {
+            triggerMessageNotification('Candidate', msg.message);
+          }
+        });
+      }
+      setMessages(incoming);
     } catch (err) {
       console.error('Error fetching chat messages:', err);
     }
@@ -248,6 +313,7 @@ const RecruiterDashboard = () => {
   const [scheduleData, setScheduleData] = useState({
     interviewDate: '',
     googleMeetLink: '',
+    interviewDuration: 60,
   })
   const [editingAppId, setEditingAppId] = useState(null)
   const [editingStatus, setEditingStatus] = useState('')
@@ -313,7 +379,7 @@ const RecruiterDashboard = () => {
       }
       await applicationService.scheduleInterview(applicationId, payload)
       setShowScheduleForm(false)
-      setScheduleData({ interviewDate: '', googleMeetLink: '' })
+      setScheduleData({ interviewDate: '', googleMeetLink: '', interviewDuration: 60 })
       fetchApplications()
       alert('Interview scheduled successfully!')
     } catch (error) {
@@ -418,9 +484,15 @@ const RecruiterDashboard = () => {
                       <h4 className="font-bold text-slate-800 dark:text-slate-100">
                         {app.Candidate?.name || 'Candidate'}
                       </h4>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
                         {new Date(app.interviewDate).toLocaleString()}
+                        <InterviewCountdown date={app.interviewDate} />
                       </p>
+                      {app.interviewDuration && (
+                        <p className="text-[10px] font-semibold text-slate-500 mt-0.5">
+                          ⏱️ Duration: {app.interviewDuration} Mins
+                        </p>
+                      )}
                       <p className="text-xs text-slate-600 mt-1 dark:text-slate-400">
                         Email: {app.Candidate?.User?.email || 'N/A'}
                       </p>
@@ -538,9 +610,15 @@ const RecruiterDashboard = () => {
                       <p className="font-semibold text-blue-900">
                         Interview Details
                       </p>
-                      <p className="text-sm text-blue-800">
+                      <p className="text-sm text-blue-800 flex items-center gap-2 flex-wrap">
                         Date: {new Date(app.interviewDate).toLocaleString()}
+                        <InterviewCountdown date={app.interviewDate} />
                       </p>
+                      {app.interviewDuration && (
+                        <p className="text-xs font-semibold text-blue-700 mt-1">
+                          ⏱️ Duration: {app.interviewDuration} Minutes ({app.interviewDuration >= 60 ? `${(app.interviewDuration / 60).toFixed(1)} hour(s)` : 'half-hour'})
+                        </p>
+                      )}
                       <p className="text-sm text-blue-800">
                         Meet Link:{' '}
                         <a
@@ -788,6 +866,26 @@ const RecruiterDashboard = () => {
                           }}
                           className="form-input"
                         />
+                      </div>
+                      <div className="form-group mb-4">
+                        <label className="form-label font-semibold text-slate-800">
+                          Interview Duration
+                        </label>
+                        <select
+                          value={scheduleData.interviewDuration}
+                          onChange={(e) =>
+                            setScheduleData({
+                              ...scheduleData,
+                              interviewDuration: parseInt(e.target.value),
+                            })
+                          }
+                          className="form-input bg-white"
+                        >
+                          <option value={30}>30 Minutes (Half-hour)</option>
+                          <option value={60}>60 Minutes (1 Hour)</option>
+                          <option value={90}>90 Minutes (1.5 Hours)</option>
+                          <option value={120}>120 Minutes (2 Hours)</option>
+                        </select>
                       </div>
                       <div className="form-group mb-4">
                         <div className="flex justify-between items-center mb-1">

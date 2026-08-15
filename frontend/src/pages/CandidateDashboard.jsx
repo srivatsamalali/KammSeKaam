@@ -5,6 +5,62 @@ import { candidateService, messageService } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 
+export const InterviewCountdown = ({ date }) => {
+  const [timeLeft, setTimeLeft] = useState('')
+  const [isLive, setIsLive] = useState(false)
+
+  useEffect(() => {
+    const target = new Date(date).getTime()
+
+    const updateTimer = () => {
+      const now = new Date().getTime()
+      const diff = target - now
+
+      if (diff <= 0 && Math.abs(diff) < 90 * 60 * 1000) {
+        setIsLive(true)
+        setTimeLeft('LIVE - Happening Now')
+        return
+      }
+
+      if (diff < 0) {
+        setIsLive(false)
+        setTimeLeft('Passed')
+        return
+      }
+
+      setIsLive(false)
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+      let timeString = ''
+      if (days > 0) timeString += `${days}d `
+      if (hours > 0 || days > 0) timeString += `${hours}h `
+      timeString += `${minutes}m ${seconds}s`
+      
+      setTimeLeft(timeString)
+    }
+
+    updateTimer()
+    const timerId = setInterval(updateTimer, 1000)
+    return () => clearInterval(timerId)
+  }, [date])
+
+  if (timeLeft === 'Passed') return null
+
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm ${
+      isLive 
+        ? 'bg-red-100 text-red-700 border border-red-200 animate-pulse' 
+        : 'bg-amber-50 text-amber-800 border border-amber-200'
+    }`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-red-600 animate-ping' : 'bg-amber-600 animate-pulse'}`} />
+      <span>{isLive ? '' : 'In: '}{timeLeft}</span>
+    </div>
+  )
+}
+
 const ApplicationStepper = ({ status }) => {
   const steps = [
     { label: 'Received', key: 'APPLICATION_RECEIVED' },
@@ -171,7 +227,7 @@ const ChatPanel = ({ applicationId }) => {
       if (messages.length > 0 && incoming.length > messages.length) {
         const newlyAdded = incoming.slice(messages.length);
         newlyAdded.forEach((msg) => {
-          if (msg.sender !== 'CANDIDATE') {
+          if (msg.senderId !== user?.id) {
             triggerMessageNotification('Recruiter', msg.message);
           }
         });
@@ -378,9 +434,15 @@ const CandidateDashboard = () => {
               <span className="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 uppercase tracking-wider mb-2">
                 Upcoming Interview
               </span>
-              <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex flex-wrap items-center gap-2">
                 Scheduled for {new Date(app.interviewDate).toLocaleString()}
+                <InterviewCountdown date={app.interviewDate} />
               </h4>
+              {app.interviewDuration && (
+                <p className="text-xs font-semibold text-slate-500 mt-1">
+                  ⏱️ Duration: {app.interviewDuration} Minutes ({app.interviewDuration >= 60 ? `${(app.interviewDuration / 60).toFixed(1)} hour(s)` : 'half-hour'})
+                </p>
+              )}
               {app.googleMeetLink && (
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
                   Meet Link:{' '}

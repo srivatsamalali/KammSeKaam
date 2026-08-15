@@ -29,7 +29,7 @@ const PublicHeader = () => {
           if (lastCount !== undefined && messages.length > lastCount) {
             const newlyAdded = messages.slice(lastCount)
             newlyAdded.forEach(msg => {
-              if (msg.sender !== 'CANDIDATE') {
+              if (msg.senderId !== user?.id) {
                 triggerMessageNotification('Recruiter', msg.message)
               }
             })
