@@ -838,3 +838,11 @@ a {
     display: none !important;
   }
 }
+
+.mobile-bottom-nav a:focus,
+.mobile-bottom-nav a:active,
+.mobile-bottom-nav div:focus,
+.mobile-bottom-nav div:active {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
