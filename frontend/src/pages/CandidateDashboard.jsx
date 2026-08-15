@@ -361,7 +361,42 @@ const companiesList = [
   'HSBC',
   'Google',
   'Microsoft',
-  'Amazon'
+  'Amazon',
+  'Meta',
+  'Apple',
+  'Netflix',
+  'Capgemini',
+  'Tech Mahindra',
+  'HCLTech',
+  'LTI-Mindtree',
+  'Oracle',
+  'Salesforce',
+  'IBM',
+  'Adobe',
+  'Intel',
+  'Cisco',
+  'NVIDIA',
+  'Dell Technologies',
+  'HP',
+  'JPMorgan Chase',
+  'Goldman Sachs',
+  'Morgan Stanley',
+  'Citi',
+  'Deutsche Bank',
+  'Standard Chartered',
+  'American Express',
+  'Flipkart',
+  'Paytm',
+  'Ola',
+  'Uber',
+  'Zomato',
+  'Swiggy',
+  'PhonePe',
+  'Razorpay',
+  'Cred',
+  'Meesho',
+  'Nykaa',
+  'TCS iON'
 ]
 
 const CandidateDashboard = () => {
@@ -373,6 +408,7 @@ const CandidateDashboard = () => {
   const [editMode, setEditMode] = useState(false)
   const [customSkill, setCustomSkill] = useState('')
   const [availableSkills, setAvailableSkills] = useState(['Java', 'Python', 'Javascript', 'React', 'Node.js', 'SQL', 'AWS', 'Docker'])
+  const [showCompanySuggestions, setShowCompanySuggestions] = useState(false)
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -692,44 +728,48 @@ const CandidateDashboard = () => {
                   </select>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group relative">
                   <label className="form-label">Current Company</label>
-                  {(() => {
-                    const isOther = formData.currentCompany && !companiesList.includes(formData.currentCompany)
-                    return (
-                      <div className="space-y-2">
-                        <select
-                          value={isOther ? 'Other' : (formData.currentCompany || '')}
-                          onChange={(e) => {
-                            const val = e.target.value
-                            if (val === 'Other') {
-                              setFormData(prev => ({ ...prev, currentCompany: '' }))
-                            } else {
-                              setFormData(prev => ({ ...prev, currentCompany: val }))
-                            }
-                          }}
-                          className="form-input"
-                        >
-                          <option value="">Select Company</option>
-                          {companiesList.map((c) => (
-                            <option key={c} value={c}>{c}</option>
+                  <input
+                    type="text"
+                    name="currentCompany"
+                    value={formData.currentCompany || ''}
+                    onChange={(e) => {
+                      handleChange(e)
+                      setShowCompanySuggestions(true)
+                    }}
+                    onFocus={() => setShowCompanySuggestions(true)}
+                    onBlur={() => {
+                      // Delay hiding suggestions list to let click registry trigger
+                      setTimeout(() => setShowCompanySuggestions(false), 200)
+                    }}
+                    placeholder="Search or type company manually..."
+                    className="form-input"
+                    autoComplete="off"
+                  />
+                  {showCompanySuggestions && (
+                    (() => {
+                      const query = (formData.currentCompany || '').toLowerCase()
+                      const filtered = companiesList.filter(c => c.toLowerCase().includes(query))
+                      if (filtered.length === 0) return null
+                      return (
+                        <ul className="absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg divide-y divide-slate-100 dark:divide-slate-800">
+                          {filtered.map(company => (
+                            <li
+                              key={company}
+                              onMouseDown={() => {
+                                setFormData(prev => ({ ...prev, currentCompany: company }))
+                                setShowCompanySuggestions(false)
+                              }}
+                              className="px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-amber-500/10 hover:text-amber-800 dark:hover:text-amber-400 cursor-pointer font-medium transition-colors text-left"
+                            >
+                              {company}
+                            </li>
                           ))}
-                          <option value="Other">Other (Type manually)</option>
-                        </select>
-                        {(isOther || formData.currentCompany === 'Other' || !companiesList.includes(formData.currentCompany)) && (
-                          <input
-                            type="text"
-                            name="currentCompany"
-                            placeholder="Type company name manually"
-                            value={formData.currentCompany === 'Other' ? '' : formData.currentCompany}
-                            onChange={handleChange}
-                            className="form-input"
-                            required
-                          />
-                        )}
-                      </div>
-                    )
-                  })()}
+                        </ul>
+                      )
+                    })()
+                  )}
                 </div>
 
                 <div className="form-group">
