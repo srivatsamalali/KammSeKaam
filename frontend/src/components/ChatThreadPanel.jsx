@@ -53,8 +53,8 @@ const ChatThreadPanel = ({ isOpen, onClose, applicationId, candidateName, curren
   }
 
   return (
-    <div className={`fixed inset-0 z-[9999] flex justify-end transition-all duration-500 ease-in-out ${
-      isOpen ? 'pointer-events-auto' : 'pointer-events-none'
+    <div className={`fixed inset-0 z-[9999] flex justify-end transition-all duration-550 ease-in-out ${
+      isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
     }`}>
       {/* Dark blur backdrop */}
       <div 
@@ -65,7 +65,7 @@ const ChatThreadPanel = ({ isOpen, onClose, applicationId, candidateName, curren
       />
 
       {/* Slide-out Sheet Panel */}
-      <div className={`relative w-full max-w-md h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transition-transform duration-500 ease-in-out ${
+      <div className={`relative w-full max-w-md h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col transform transition-transform duration-500 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
         
