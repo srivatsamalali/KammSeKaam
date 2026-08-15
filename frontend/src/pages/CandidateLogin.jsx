@@ -154,7 +154,7 @@ const CandidateLogin = () => {
           <p className="text-center text-gray-600 mt-4">
             Don't have an account?{' '}
             <Link
-              href="/candidate/register"
+              to="/candidate/register"
               className="text-blue-600 font-semibold hover:underline"
             >
               Register
