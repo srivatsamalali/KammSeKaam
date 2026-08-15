@@ -265,7 +265,7 @@ const MeetingRoom = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <a 
-                    href={`https://meet.jit.si/Aston-Recruitment-Interview-${roomId}`} 
+                    href={`https://meet.element.io/Aston-Recruitment-Interview-${roomId}`} 
                     target="_blank" 
                     rel="noreferrer" 
                     className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold transition shadow-sm"
@@ -288,6 +288,14 @@ const MeetingRoom = () => {
                   </a>
                 </div>
               </div>
+              {/Mobi|Android|iPhone/i.test(navigator.userAgent) && (
+                <div className="bg-amber-600 text-white px-4 py-2 text-[11px] flex items-start gap-2 border-b border-amber-700/50 z-10">
+                  <span className="text-sm">📱</span>
+                  <div>
+                    <span className="font-bold">Mobile Browser Notice:</span> Embedded frames block microphone/camera permissions on non-HTTPS origins. If your media fails to start, tap <strong className="underline">Jitsi (New Tab)</strong> above to open in a secure direct browser window.
+                  </div>
+                </div>
+              )}
               <div ref={containerRef} className="flex-1 w-full h-full" />
             </div>
           ) : (
