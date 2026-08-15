@@ -5,17 +5,13 @@ import { createPortal } from 'react-dom'
 const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null)
   const [showPreferenceModal, setShowPreferenceModal] = useState(() => {
-    const pref = localStorage.getItem('user_preference')
-    const timestamp = localStorage.getItem('user_preference_timestamp')
-    if (pref && timestamp) {
-      const elapsed = Date.now() - parseInt(timestamp, 10)
-      if (elapsed > 120000) { // 2 minutes in ms
-        localStorage.removeItem('user_preference')
-        localStorage.removeItem('user_preference_timestamp')
-        return true
-      }
+    // If user is already logged in, do not show the modal
+    if (localStorage.getItem('token')) {
       return false
     }
+    // If not logged in, clear any existing preferences on page mount to show modal immediately
+    localStorage.removeItem('user_preference')
+    localStorage.removeItem('user_preference_timestamp')
     return true
   })
   const [preferenceView, setPreferenceView] = useState('main')

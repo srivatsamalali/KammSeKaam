@@ -12,18 +12,17 @@ const PublicHeader = () => {
   const { user } = useAuth()
   const lastCheckedRef = useRef({})
   const userPref = (() => {
-    const pref = localStorage.getItem('user_preference')
-    const timestamp = localStorage.getItem('user_preference_timestamp')
-    if (pref && timestamp) {
-      const elapsed = Date.now() - parseInt(timestamp, 10)
-      if (elapsed > 120000) { // 2 minutes
-        localStorage.removeItem('user_preference')
-        localStorage.removeItem('user_preference_timestamp')
-        return ''
-      }
-      return pref
+    // If logged in, map preference to the active role
+    const token = localStorage.getItem('token')
+    if (token) {
+      try {
+        const userObj = JSON.parse(localStorage.getItem('user') || '{}')
+        if (userObj.role === 'CANDIDATE') return 'candidate'
+        if (userObj.role === 'RECRUITER' || userObj.role === 'ADMIN') return 'hiring'
+      } catch (e) {}
     }
-    return ''
+    // Else return saved user preference
+    return localStorage.getItem('user_preference') || ''
   })()
 
   useEffect(() => {
