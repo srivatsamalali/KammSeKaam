@@ -939,7 +939,7 @@ const AdminDashboard = () => {
           {/* Liquid glass moving pill */}
           <div
             ref={pillRef}
-            className="absolute top-1.5 bottom-1.5 rounded-[19px] pointer-events-none"
+            className="absolute top-1.5 bottom-1.5 left-0 rounded-[19px] pointer-events-none"
             style={{
               zIndex: 0,
               background:

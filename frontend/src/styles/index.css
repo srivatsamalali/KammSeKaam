@@ -828,15 +828,20 @@ a {
 }
 
 .mobile-bottom-nav a.active-mobile-tab {
-  background: rgba(184, 143, 63, 0.16) !important;
-  color: #b88f3f !important;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(184, 143, 63, 0.08) !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+  color: #0f172a !important;
+  transform: scale(1.03);
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 4px 16px rgba(31,38,135,0.06), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
 }
 
 .dark .mobile-bottom-nav a.active-mobile-tab {
-  background: rgba(184, 143, 63, 0.28) !important;
-  color: #e2a84a !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
 .dark .mobile-bottom-nav a:not(.active-mobile-tab),
