@@ -354,159 +354,246 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('recruiters')
 
   // iOS-style draggable Liquid Glass navigation
-  const dragRef = useRef({
-    active: false,
+  const navContainerRef = useRef(null)
+  const pillRef = useRef(null)
+  const tabRefs = useRef({})
+  const coordsRef = useRef({
+    isDragging: false,
+    hasDragged: false,
     startX: 0,
     startLeft: 0,
     currentLeft: 0,
-    moved: false,
+    currentWidth: 0
   })
 
-  const getTabMetrics = (tabId) => {
-    const el = tabRefs.current[tabId]
-    const container = navContainerRef.current
-    if (!el || !container) return null
-    const elRect = el.getBoundingClientRect()
-    const containerRect = container.getBoundingClientRect()
-    return {
-      left: elRect.left - containerRect.left,
-      width: elRect.width,
-    }
-  }
+  const tabs = [
+    { id: 'recruiters', label: 'Recruiters' },
+    { id: 'candidates', label: 'Candidates' },
+    { id: 'applications', label: 'Applications' },
+    { id: 'clients', label: 'Clients' }
+  ]
 
-  const movePillToTab = (tabId, animate = true) => {
-    const metrics = getTabMetrics(tabId)
+  useEffect(() => {
+    const container = navContainerRef.current
     const pill = pillRef.current
-    if (!metrics || !pill) return
+    const activeEl = tabRefs.current[activeTab]
 
-    pill.style.opacity = '1'
-    if (animate) {
-      pill.style.transition =
-        'transform 450ms cubic-bezier(0.22, 1, 0.36, 1), width 450ms cubic-bezier(0.22, 1, 0.36, 1)'
-    } else {
-      pill.style.transition = 'none'
+    if (!container || !pill || !activeEl) return
+
+    const updatePill = () => {
+      if (coordsRef.current.isDragging) return
+
+      const containerRect = container.getBoundingClientRect()
+      const activeRect = activeEl.getBoundingClientRect()
+
+      const left = activeRect.left - containerRect.left
+
+      pill.style.transform = `translate3d(${left}px, 0, 0)`
+      pill.style.width = `${activeRect.width}px`
+
+      coordsRef.current.currentLeft = left
+      coordsRef.current.currentWidth = activeRect.width
     }
-    pill.style.transform = `translate3d(${metrics.left}px, 0, 0)`
-    pill.style.width = `${metrics.width}px`
-  }
 
-  useEffect(() => {
-    movePillToTab(activeTab, false)
-  }, [activeTab])
+    requestAnimationFrame(updatePill)
 
-  useEffect(() => {
-    const container = navContainerRef.current
-    if (!container) return
     const observer = new ResizeObserver(() => {
-      movePillToTab(activeTab, false)
+      requestAnimationFrame(updatePill)
     })
     observer.observe(container)
-    
-    const handleResizeSync = () => movePillToTab(activeTab, false)
-    window.addEventListener('resize', handleResizeSync)
-    window.addEventListener('orientationchange', handleResizeSync)
+
+    window.addEventListener('resize', updatePill)
+
     return () => {
       observer.disconnect()
-      window.removeEventListener('resize', handleResizeSync)
-      window.removeEventListener('orientationchange', handleResizeSync)
+      window.removeEventListener('resize', updatePill)
     }
   }, [activeTab])
 
   const handlePointerDown = (e) => {
-    if (e.button !== 0 && e.pointerType === 'mouse') return
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+
     const container = navContainerRef.current
     const pill = pillRef.current
+
     if (!container || !pill) return
 
-    const metrics = getTabMetrics(activeTab)
-    const currentLeft = metrics ? metrics.left : 0
+    const activeEl = tabRefs.current[activeTab]
 
-    const drag = dragRef.current
-    drag.active = true
-    drag.moved = false
-    drag.startX = e.clientX
-    drag.startLeft = currentLeft
-    drag.currentLeft = currentLeft
+    if (!activeEl) return
+
+    const containerRect = container.getBoundingClientRect()
+    const activeRect = activeEl.getBoundingClientRect()
+
+    const left = activeRect.left - containerRect.left
+    const width = activeRect.width
+
+    coordsRef.current = {
+      isDragging: true,
+      hasDragged: false,
+      startX: e.clientX,
+      startLeft: left,
+      currentLeft: left,
+      currentWidth: width
+    }
 
     pill.style.transition = 'none'
+    pill.style.transform = `translate3d(${left}px, 0, 0)`
+    pill.style.width = `${width}px`
+
     container.setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e) => {
-    const drag = dragRef.current
-    if (!drag.active) return
+    const coords = coordsRef.current
+
+    if (!coords.isDragging) return
 
     const container = navContainerRef.current
     const pill = pillRef.current
+
     if (!container || !pill) return
 
-    const deltaX = e.clientX - drag.startX
+    const deltaX = e.clientX - coords.startX
+
     if (Math.abs(deltaX) > 5) {
-      drag.moved = true
+      coords.hasDragged = true
     }
 
-    const first = getTabMetrics(tabs[0].id)
-    const last = getTabMetrics(tabs[tabs.length - 1].id)
-    if (!first || !last) return
+    const containerRect = container.getBoundingClientRect()
 
-    const minLeft = first.left
-    const maxLeft = last.left
+    const firstTab = tabRefs.current[tabs[0].id]
+    const lastTab = tabRefs.current[tabs[tabs.length - 1].id]
 
-    let newLeft = drag.startLeft + deltaX
+    if (!firstTab || !lastTab) return
 
-    // Rubber-band resistance at edges
+    const firstRect = firstTab.getBoundingClientRect()
+    const lastRect = lastTab.getBoundingClientRect()
+
+    const minLeft = firstRect.left - containerRect.left
+    const maxLeft =
+      lastRect.right -
+      containerRect.left -
+      coords.currentWidth
+
+    let newLeft = coords.startLeft + deltaX
+
+    /* Elastic resistance at edges */
     if (newLeft < minLeft) {
       newLeft = minLeft + (newLeft - minLeft) * 0.25
     }
+
     if (newLeft > maxLeft) {
       newLeft = maxLeft + (newLeft - maxLeft) * 0.25
     }
 
-    drag.currentLeft = newLeft
-
-    // Dynamic stretching
-    const targetMetrics = getTabMetrics(activeTab)
-    const targetWidth = targetMetrics ? targetMetrics.width : 0
-    const stretchFactor = Math.min(Math.abs(deltaX) * 0.08, 16)
-    const finalWidth = targetWidth + stretchFactor
-
-    pill.style.transform = `translate3d(${newLeft - (deltaX > 0 ? 0 : stretchFactor)}px, 0, 0)`
-    pill.style.width = `${finalWidth}px`
-  }
-
-  const handlePointerUp = (e) => {
-    const drag = dragRef.current
-    if (!drag.active) return
-
-    const container = navContainerRef.current
-    drag.active = false
-
-    if (container?.hasPointerCapture?.(e.pointerId)) {
-      container.releasePointerCapture(e.pointerId)
-    }
+    coords.currentLeft = newLeft
 
     let closestTab = activeTab
-    let smallestDistance = Infinity
+    let minDistance = Infinity
 
     tabs.forEach((tab) => {
-      const metrics = getTabMetrics(tab.id)
-      if (!metrics) return
+      const el = tabRefs.current[tab.id]
 
-      const distance = Math.abs(metrics.left - drag.currentLeft)
-      if (distance < smallestDistance) {
-        smallestDistance = distance
+      if (!el) return
+
+      const rect = el.getBoundingClientRect()
+
+      const tabCenter =
+        rect.left -
+        containerRect.left +
+        rect.width / 2
+
+      const pillCenter =
+        newLeft +
+        coords.currentWidth / 2
+
+      const distance = Math.abs(tabCenter - pillCenter)
+
+      if (distance < minDistance) {
+        minDistance = distance
         closestTab = tab.id
       }
     })
 
-    setActiveTab(closestTab)
+    const closestEl = tabRefs.current[closestTab]
 
-    requestAnimationFrame(() => {
-      movePillToTab(closestTab, true)
+    if (!closestEl) return
+
+    const targetWidth = closestEl.getBoundingClientRect().width
+
+    /* Liquid stretching */
+    const stretch = Math.min(Math.abs(deltaX) * 0.12, 18)
+
+    let width = targetWidth
+
+    if (deltaX > 0) {
+      width += stretch
+    } else {
+      width += stretch
+      newLeft -= stretch
+    }
+
+    coords.currentWidth = width
+
+    pill.style.transform = `translate3d(${newLeft}px, 0, 0)`
+    pill.style.width = `${width}px`
+  }
+
+  const handlePointerUp = (e) => {
+    const coords = coordsRef.current
+
+    if (!coords.isDragging) return
+
+    const container = navContainerRef.current
+    const pill = pillRef.current
+
+    if (!container || !pill) return
+
+    try {
+      container.releasePointerCapture(e.pointerId)
+    } catch (error) {
+      // Pointer may already be released
+    }
+
+    coords.isDragging = false
+
+    const containerRect = container.getBoundingClientRect()
+
+    let closestTab = activeTab
+    let minDistance = Infinity
+
+    tabs.forEach((tab) => {
+      const el = tabRefs.current[tab.id]
+
+      if (!el) return
+
+      const rect = el.getBoundingClientRect()
+
+      const tabCenter =
+        rect.left -
+        containerRect.left +
+        rect.width / 2
+
+      const pillCenter =
+        coords.currentLeft +
+        coords.currentWidth / 2
+
+      const distance = Math.abs(tabCenter - pillCenter)
+
+      if (distance < minDistance) {
+        minDistance = distance
+        closestTab = tab.id
+      }
     })
 
+    pill.style.transition =
+      'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1)'
+
+    setActiveTab(closestTab)
+
     setTimeout(() => {
-      drag.moved = false
+      coords.hasDragged = false
     }, 100)
   }
 
@@ -807,86 +894,86 @@ const AdminDashboard = () => {
         </div>
 
         {/* Analytics SVG Charts */}
-        <DashboardCharts stats={stats} recruiters={recruiters} applications={applications} />
-
-        {/* iOS Liquid Glass Navigation */}
+        <DashboardCharts stats={stats} recruiters={recruiters} applications={applications} />        {/* iOS Liquid Glass Navigation */}
         <div
           ref={navContainerRef}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="relative flex w-full max-w-2xl items-center gap-1 p-1.5 mb-6 rounded-[22px] select-none overflow-hidden"
+          className="relative flex w-full max-w-2xl mx-auto items-center rounded-[24px] p-1.5 mb-6 overflow-hidden select-none"
           style={{
             touchAction: 'pan-y',
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
             background:
-              'linear-gradient(135deg, rgba(255,255,255,0.32), rgba(255,255,255,0.08))',
+              'linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08))',
             backdropFilter: 'blur(30px) saturate(180%)',
             WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-            border: '1px solid rgba(255,255,255,0.35)',
+            border: '1px solid rgba(255,255,255,0.28)',
             boxShadow:
-              '0 8px 32px rgba(31,38,135,0.10), inset 0 1px 1px rgba(255,255,255,0.35)',
+              'inset 0 1px 1px rgba(255,255,255,0.35), 0 12px 35px rgba(0,0,0,0.12)'
           }}
         >
-          {/* Liquid Glass moving pill */}
+          {/* Liquid glass moving pill */}
           <div
             ref={pillRef}
-            className="absolute top-1.5 bottom-1.5 left-0 rounded-[17px] pointer-events-none z-0 overflow-hidden"
+            className="absolute top-1.5 bottom-1.5 rounded-[19px] pointer-events-none"
             style={{
-              opacity: 0,
-              width: 0,
+              zIndex: 0,
               background:
-                'linear-gradient(135deg, rgba(255,255,255,0.58), rgba(255,255,255,0.20))',
-              backdropFilter: 'blur(35px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(35px) saturate(200%)',
-              border: '1px solid rgba(255,255,255,0.65)',
-              boxShadow:
-                '0 6px 18px rgba(31,38,135,0.13), inset 0 1px 2px rgba(255,255,255,0.75)',
+                'linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.16))',
+              backdropFilter: 'blur(40px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+              border: '1px solid rgba(255,255,255,0.55)',
+              boxShadow: `
+                inset 0 1px 1px rgba(255,255,255,0.75),
+                inset 0 -1px 1px rgba(255,255,255,0.15),
+                0 8px 25px rgba(31,38,135,0.18)
+              `,
+              willChange: 'transform, width',
+              transform: 'translate3d(0, 0, 0)',
+              width: 0,
+              transition:
+                'transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1)'
             }}
-          >
-            {/* Glass reflection */}
-            <div
-              className="absolute inset-x-1 top-1 h-[45%] rounded-[14px] pointer-events-none"
-              style={{
-                background:
-                  'linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0))',
+          />
+
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              ref={(el) => {
+                if (el) tabRefs.current[tab.id] = el
               }}
-            />
-          </div>
-
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id
-
-            return (
-              <button
-                key={tab.id}
-                ref={(el) => {
-                  tabRefs.current[tab.id] = el
-                }}
-                onClick={(e) => {
-                  if (dragRef.current.moved) {
-                    e.preventDefault()
-                    return
-                  }
-
+              type="button"
+              onClick={() => {
+                if (!coordsRef.current.hasDragged) {
                   setActiveTab(tab.id)
-                }}
-                className={`relative z-10 flex-1 min-w-0 px-3 py-3 rounded-[17px] text-xs sm:text-sm font-bold whitespace-nowrap transition-colors duration-300 ${
-                  isActive
+                }
+              }}
+              className={`
+                relative z-10 flex-1
+                px-3 py-3
+                rounded-[19px]
+                text-sm font-semibold
+                whitespace-nowrap
+                transition-colors duration-300
+                ${
+                  activeTab === tab.id
                     ? 'text-slate-900 dark:text-white font-extrabold'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
-                style={{
-                  WebkitTapHighlightColor: 'transparent',
-                  background: 'transparent',
-                  border: 'none',
-                  boxShadow: 'none'
-                }}
-              >
-                {tab.label}
-              </button>
-            )
-          })}
+                    : 'text-slate-550 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                }
+              `}
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                background: 'transparent',
+                border: 'none',
+                boxShadow: 'none'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Recruiters Tab */}
