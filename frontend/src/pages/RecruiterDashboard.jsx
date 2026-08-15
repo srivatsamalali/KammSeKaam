@@ -11,6 +11,7 @@ import {
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 import ChatThreadPanel from '../components/ChatThreadPanel'
+import AccentPicker from '../components/AccentPicker'
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -478,6 +479,7 @@ const RecruiterDashboard = () => {
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
           <div className="flex items-center gap-4">
+            <AccentPicker />
             <ThemeToggle />
             <button
               onClick={handleLogout}

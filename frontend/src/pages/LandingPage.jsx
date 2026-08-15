@@ -6,6 +6,33 @@ const LandingPage = () => {
   const [openFaq, setOpenFaq] = useState(null)
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [preferenceView, setPreferenceView] = useState('main')
+  const [chatbotOpen, setChatbotOpen] = useState(false)
+  const [chatMessages, setChatMessages] = useState([
+    { text: "Hello! Welcome to Aston Recruitment. How can I help you today?", isBot: true }
+  ])
+
+  const handleSendBotMessage = (text) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+
+    setChatMessages(prev => [...prev, { text: trimmed, isBot: false }])
+
+    // Generate responsive bot reply
+    setTimeout(() => {
+      let reply = "Thank you for reaching out! Aston Recruitment assists matching top tech talents with premier organizations. Contact us at contact@astonrecruitment.in for custom contracts."
+      
+      const query = trimmed.toLowerCase()
+      if (query.includes('register') || query.includes('apply')) {
+        reply = "To register, click 'Candidate Login' at the top right, then select 'Register' to upload your resume and checklist your techstacks."
+      } else if (query.includes('cities') || query.includes('location')) {
+        reply = "We operate in all major tech centers in India including Bengaluru, Mumbai, Pune, Hyderabad, Chennai, Kolkata, and Delhi NCR."
+      } else if (query.includes('hire') || query.includes('recruitor') || query.includes('client')) {
+        reply = "If you are looking to hire, select 'Are you hiring' from our welcome popup or log in as a Recruiter or Client partner from the top menu."
+      }
+
+      setChatMessages(prev => [...prev, { text: reply, isBot: true }])
+    }, 600)
+  }
 
   useEffect(() => {
     // If user is already logged in, do not show the modal
@@ -394,6 +421,101 @@ const LandingPage = () => {
         </div>,
         document.body
       )}
+      {/* Floating AI Chatbot Assistant Widget */}
+      <div className="fixed bottom-6 right-6 z-[9990]">
+        {!chatbotOpen ? (
+          <button
+            onClick={() => setChatbotOpen(true)}
+            className="w-14 h-14 rounded-full bg-amber-600 text-white shadow-xl hover:scale-105 hover:shadow-amber-500/20 active:scale-95 transition-all flex items-center justify-center relative cursor-pointer group border border-amber-500/30"
+          >
+            <span className="text-2xl group-hover:rotate-12 transition-transform">🤖</span>
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+            </span>
+          </button>
+        ) : (
+          <div className="w-80 sm:w-96 rounded-3xl bg-slate-950/95 backdrop-blur-md border border-slate-800 shadow-2xl overflow-hidden flex flex-col h-[400px] animate-slide-up text-left">
+            {/* Header */}
+            <div className="bg-slate-900 px-4 py-3.5 border-b border-slate-800 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🤖</span>
+                <div>
+                  <h4 className="text-xs font-bold text-white leading-none">Aston AI Assistant</h4>
+                  <span className="text-[9px] text-emerald-500 font-semibold flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
+                  </span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setChatbotOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Message Thread */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex flex-col ${msg.isBot ? 'items-start mr-8' : 'items-end ml-8'}`}>
+                  <div className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                    msg.isBot 
+                      ? 'bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none' 
+                      : 'bg-amber-600 text-white rounded-br-none font-semibold'
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick replies */}
+            <div className="px-4 py-2 flex flex-wrap gap-1.5 border-t border-slate-900 bg-slate-950/50">
+              {[
+                "How do I register?",
+                "What cities do you operate in?",
+                "I want to hire candidates"
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => handleSendBotMessage(chip)}
+                  className="text-[9px] font-bold text-slate-300 bg-slate-900/80 hover:bg-amber-600/10 hover:text-amber-400 border border-slate-800 hover:border-amber-500/30 px-2.5 py-1 rounded-full transition-all text-left"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+
+            {/* Footer input */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault()
+                const text = e.target.elements.botInput.value
+                if (!text.trim()) return
+                handleSendBotMessage(text)
+                e.target.reset()
+              }}
+              className="p-3 border-t border-slate-800 flex gap-2"
+            >
+              <input
+                type="text"
+                name="botInput"
+                placeholder="Ask something..."
+                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 flex-1 focus:outline-hidden focus:border-amber-500 transition-colors"
+                autoComplete="off"
+              />
+              <button 
+                type="submit"
+                className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-3 py-1.5 text-xs font-bold transition-colors"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

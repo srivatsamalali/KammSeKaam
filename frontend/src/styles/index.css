@@ -5,6 +5,9 @@
 :root {
   --bg-color: #faf8f2;
   --text-color: #0f172a;
+  --accent-color: #b88f3f;
+  --accent-color-hover: #9c762f;
+  --accent-bg-glow: rgba(184, 143, 63, 0.18);
 }
 
 .dark {
@@ -147,21 +150,35 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(
-    180deg,
-    rgba(220, 185, 111, 0.95),
-    rgba(184, 143, 63, 0.95)
-  );
+  background: var(--accent-color) !important;
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 10px;
-  box-shadow: 0 6px 12px rgba(184, 143, 63, 0.18);
+  box-shadow: 0 6px 12px var(--accent-bg-glow);
   transition:
+    background-color 0.3s ease,
     transform 0.12s ease,
-    box-shadow 0.12s ease;
+    box-shadow 0.12s ease !important;
 }
 .btn-primary:hover {
+  background: var(--accent-color-hover) !important;
   transform: translateY(-2px);
+}
+
+/* Page & Tab Slide-up transition animation */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .btn-secondary {

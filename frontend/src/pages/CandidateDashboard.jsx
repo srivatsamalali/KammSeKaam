@@ -5,6 +5,7 @@ import { candidateService, messageService } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 import ChatThreadPanel from '../components/ChatThreadPanel'
+import AccentPicker from '../components/AccentPicker'
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -412,6 +413,8 @@ const CandidateDashboard = () => {
   const [showCompanySuggestions, setShowCompanySuggestions] = useState(false)
   const [activeChatAppId, setActiveChatAppId] = useState(null)
   const [activeChatCandidateName, setActiveChatCandidateName] = useState('')
+  const [dragOver, setDragOver] = useState(false)
+  const [resumeFile, setResumeFile] = useState(null)
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -521,9 +524,13 @@ const CandidateDashboard = () => {
         }
       })
       form.append('technicalSkills', JSON.stringify(formData.technicalSkills))
+      if (resumeFile) {
+        form.append('resume', resumeFile)
+      }
 
       await candidateService.updateProfile(form)
       setEditMode(false)
+      setResumeFile(null)
       fetchProfile()
       alert('Profile updated successfully')
     } catch (error) {
@@ -548,6 +555,7 @@ const CandidateDashboard = () => {
             <p className="text-sm text-gray-600">{user?.email}</p>
           </div>
           <div className="flex items-center gap-4">
+            <AccentPicker />
             <ThemeToggle />
             <button
               onClick={handleLogout}
@@ -847,6 +855,57 @@ const CandidateDashboard = () => {
                 </div>
               </div>
 
+              {/* Premium Drag and Drop Resume Dropzone */}
+              <div className="form-group border-t border-slate-105 dark:border-slate-800 pt-4 mt-6">
+                <label className="form-label font-bold text-slate-850 dark:text-slate-200">
+                  Upload Resume PDF
+                </label>
+                <p className="text-[10px] text-slate-500 mb-2">
+                  Drop your latest resume to analyze technical matching and recalculate AI suitability indices.
+                </p>
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setDragOver(true)
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setDragOver(false)
+                    const file = e.dataTransfer.files[0]
+                    if (file && file.type === 'application/pdf') {
+                      setResumeFile(file)
+                    } else {
+                      alert('Only PDF files are allowed!')
+                    }
+                  }}
+                  onClick={() => document.getElementById('resume-file-input').click()}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-350 ${
+                    dragOver 
+                      ? 'border-amber-500 bg-amber-500/5 ring-4 ring-amber-500/15' 
+                      : 'border-slate-300 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-900/10 hover:border-amber-500 hover:bg-slate-50 dark:hover:bg-slate-900/30'
+                  }`}
+                >
+                  <input 
+                    id="resume-file-input"
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0]
+                      if (file) setResumeFile(file)
+                    }}
+                  />
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="text-3xl animate-bounce">📁</span>
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      {resumeFile ? `Selected: ${resumeFile.name}` : 'Drag and drop your Resume PDF here, or click to browse'}
+                    </p>
+                    <p className="text-[10px] text-slate-400">PDF formats under 5MB only</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Skill preference checkboxes and custom addition panel */}
               <div className="form-group border-t border-slate-100 dark:border-slate-800 pt-4 mt-6">
                 <label className="form-label font-bold text-slate-800 dark:text-slate-200">
@@ -929,6 +988,22 @@ const CandidateDashboard = () => {
                   {profile?.currentCompany || 'Not set'}
                 </p>
               </div>
+              {profile?.resumePath && (
+                <div className="md:col-span-2 mt-4 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-205/60 dark:border-slate-800/60 flex justify-between items-center flex-wrap gap-2 text-left">
+                  <div>
+                    <p className="text-slate-700 dark:text-slate-300 text-xs font-bold">Active Resume PDF Document</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5 font-semibold">Indexed and processed for candidate profile requirements</p>
+                  </div>
+                  <a 
+                    href={`http://localhost:5001${profile.resumePath}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="btn-primary text-xs font-bold py-1.5 px-4 rounded-lg flex items-center gap-1.5 shadow-sm"
+                  >
+                    📥 Download Resume PDF
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* AI Resume Analysis Panel */}
