@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
 import JobLoader from '../components/JobLoader'
+import { triggerMessageNotification } from '../utils/notification'
 
 const CandidateRegister = () => {
   const navigate = useNavigate()
@@ -103,6 +104,7 @@ const CandidateRegister = () => {
         return
       }
 
+      triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
       await authService.sendOtp({ phone, email })
       setOtpSent(true)
       setOtpTimer(60)
@@ -145,6 +147,7 @@ const CandidateRegister = () => {
     setLoading(true)
 
     try {
+      triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
       await authService.resendOtp({ phone, email })
       setOtpTimer(60)
     } catch (error) {

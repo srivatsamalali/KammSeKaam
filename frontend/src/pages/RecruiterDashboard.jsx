@@ -674,7 +674,7 @@ const RecruiterDashboard = () => {
                                         type="button"
                                         onClick={() => setTechnicalRating(num)}
                                         className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                                          technicalRating >= num
+                                          technicalRating === num
                                             ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
                                             : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                                         }`}
@@ -694,7 +694,7 @@ const RecruiterDashboard = () => {
                                         type="button"
                                         onClick={() => setCommunicationRating(num)}
                                         className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                                          communicationRating >= num
+                                          communicationRating === num
                                             ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
                                             : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                                         }`}
@@ -714,7 +714,7 @@ const RecruiterDashboard = () => {
                                         type="button"
                                         onClick={() => setCulturalRating(num)}
                                         className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                                          culturalRating >= num
+                                          culturalRating === num
                                             ? 'bg-amber-600 text-white scale-110 shadow-sm shadow-amber-500/50'
                                             : 'bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                                         }`}

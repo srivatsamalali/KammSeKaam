@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
 import JobLoader from '../components/JobLoader'
+import { triggerMessageNotification } from '../utils/notification'
 
 const ForgotPassword = () => {
   const navigate = useNavigate()
@@ -64,6 +65,7 @@ const ForgotPassword = () => {
         return
       }
 
+      triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
       await authService.forgotPassword(email)
       setOtpTimer(60)
       setStep(2)
@@ -105,6 +107,7 @@ const ForgotPassword = () => {
     setLoading(true)
 
     try {
+      triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
       await authService.forgotPassword(email)
       setOtpTimer(60)
     } catch (error) {
