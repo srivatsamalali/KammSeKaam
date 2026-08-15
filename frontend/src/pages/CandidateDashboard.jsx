@@ -936,24 +936,39 @@ const CandidateDashboard = () => {
                 </h4>
                 <div className="flex flex-col md:flex-row gap-5 items-center">
                   {/* Suitability Radial Indicator */}
-                  <div className="relative w-16 h-16 shrink-0">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                      <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="15.915"
-                        fill="none"
-                        stroke="#b88f3f"
-                        strokeWidth="3"
-                        strokeDasharray="85 15"
-                        className="transition-all duration-1000"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-amber-800 dark:text-amber-500">
-                      85%
-                    </div>
-                  </div>
+                  {(() => {
+                    let matchScore = 0;
+                    if (profile?.name) matchScore += 20;
+                    if (profile?.experience) matchScore += 20;
+                    if (profile?.currentLocation) matchScore += 10;
+                    if (profile?.preferredLocation) matchScore += 10;
+                    if (profile?.currentCompany) matchScore += 10;
+                    if (profile?.highestQualification) matchScore += 10;
+                    const skills = parseSkills(profile?.technicalSkills);
+                    matchScore += Math.min(skills.length * 10, 20);
+                    const finalScore = Math.min(matchScore, 100);
+
+                    return (
+                      <div className="relative w-16 h-16 shrink-0">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#e2e8f0" strokeWidth="3" />
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="15.915"
+                            fill="none"
+                            stroke="#b88f3f"
+                            strokeWidth="3"
+                            strokeDasharray={`${finalScore} ${100 - finalScore}`}
+                            className="transition-all duration-1000"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-amber-800 dark:text-amber-500">
+                          {finalScore}%
+                        </div>
+                      </div>
+                    )
+                  })()}
                   {/* Match Details */}
                   <div className="flex-1 w-full">
                     <span className="text-[10px] uppercase font-bold text-slate-400">Extracted Core Skills</span>
