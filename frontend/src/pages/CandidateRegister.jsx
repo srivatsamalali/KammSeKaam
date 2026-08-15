@@ -187,17 +187,17 @@ const CandidateRegister = () => {
           <div className="flex justify-center gap-2 mb-8">
             <div
               className={`h-2 w-2 rounded-full ${
-                step >= 1 ? 'bg-sky-700' : 'bg-gray-300'
+                step >= 1 ? 'bg-amber-600' : 'bg-gray-300'
               }`}
             ></div>
             <div
               className={`h-2 w-2 rounded-full ${
-                step >= 2 ? 'bg-sky-700' : 'bg-gray-300'
+                step >= 2 ? 'bg-amber-600' : 'bg-gray-300'
               }`}
             ></div>
             <div
               className={`h-2 w-2 rounded-full ${
-                step >= 3 ? 'bg-sky-700' : 'bg-gray-300'
+                step >= 3 ? 'bg-amber-600' : 'bg-gray-300'
               }`}
             ></div>
           </div>
@@ -256,7 +256,7 @@ const CandidateRegister = () => {
                 Already have an account?{' '}
                 <a
                   href="/candidate/login"
-                  className="text-blue-600 font-semibold hover:underline"
+                  className="text-amber-700 font-semibold hover:underline"
                 >
                   Login
                 </a>
@@ -312,7 +312,7 @@ const CandidateRegister = () => {
                   <button
                     onClick={handleResendOtp}
                     disabled={loading}
-                    className="text-blue-600 hover:underline font-semibold"
+                    className="text-amber-700 hover:underline font-semibold"
                   >
                     Resend OTP
                   </button>
@@ -508,7 +508,7 @@ const CandidateRegister = () => {
                 Already have an account?{' '}
                 <a
                   href="/candidate/login"
-                  className="text-blue-600 font-semibold hover:underline"
+                  className="text-amber-700 font-semibold hover:underline"
                 >
                   Login
                 </a>
