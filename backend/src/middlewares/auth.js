@@ -24,7 +24,7 @@ const authorizeRole = (...roles) => {
       return res.status(401).json({ message: 'Not authenticated' })
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role) && req.user.role !== 'ADMIN') {
       return res.status(403).json({ message: 'Insufficient permissions' })
     }
 

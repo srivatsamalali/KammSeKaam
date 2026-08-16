@@ -334,7 +334,7 @@ const AnimatedCounter = ({ value }) => {
 }
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth()
+  const { user, login, logout } = useAuth()
   const navigate = useNavigate()
 
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null })
@@ -348,6 +348,18 @@ const AdminDashboard = () => {
         navigate('/admin/login')
       }
     })
+  }
+
+  const handleImpersonate = async (userId, targetPath) => {
+    try {
+      const response = await adminService.impersonate(userId)
+      login(response.data.user, response.data.token)
+      navigate(targetPath)
+      alert(`Logged in as ${response.data.user.email} successfully!`)
+    } catch (err) {
+      console.error('Impersonation error', err)
+      alert(err.response?.data?.message || 'Impersonation failed')
+    }
   }
   const [stats, setStats] = useState(null)
   const [recruiters, setRecruiters] = useState([])
@@ -1216,7 +1228,13 @@ const AdminDashboard = () => {
                         </>
                       )}
                     </div>
-                    <div className="space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                      <button
+                        onClick={() => handleImpersonate(rec.userId, '/recruiter/dashboard')}
+                        className="btn-primary text-xs px-3 py-2"
+                      >
+                        Login As Recruiter
+                      </button>
                       {editingRecruiterId !== rec.id && (
                         <button
                           onClick={() => {
@@ -1228,14 +1246,14 @@ const AdminDashboard = () => {
                               ),
                             })
                           }}
-                          className="btn-warning px-4 py-2"
+                          className="btn-warning text-xs px-3 py-2"
                         >
                           Edit
                         </button>
                       )}
                       <button
                         onClick={() => handleDeleteRecruiter(rec.id)}
-                        className="btn-danger px-4 py-2"
+                        className="btn-danger text-xs px-3 py-2"
                       >
                         Delete
                       </button>
@@ -1274,10 +1292,16 @@ const AdminDashboard = () => {
                       </p>
                     )}
                   </div>
-                  <div>
+                  <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                    <button
+                      onClick={() => handleImpersonate(cand.userId, '/candidate/dashboard')}
+                      className="btn-primary text-xs px-3 py-2"
+                    >
+                      Login As Candidate
+                    </button>
                     <button
                       onClick={() => handleDeleteCandidate(cand.id)}
-                      className="btn-danger px-4 py-2"
+                      className="btn-danger text-xs px-3 py-2"
                     >
                       Delete
                     </button>

@@ -1,5 +1,6 @@
 const { Recruiter, Candidate, Application, User, Notification, Client } = require('../models')
 const { sendPushNotification } = require('../utils/pushService')
+const { generateToken } = require('../utils/tokenService')
 
 const syncCandidatesAndApplications = async () => {
   try {
@@ -257,6 +258,25 @@ const deleteClient = async (req, res) => {
   }
 }
 
+
+const impersonateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const targetUser = await User.findByPk(userId);
+    if (!targetUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const token = generateToken(targetUser);
+    res.json({
+      token,
+      user: { id: targetUser.id, email: targetUser.email, role: targetUser.role }
+    });
+  } catch (error) {
+    console.error('Impersonation error:', error);
+    res.status(500).json({ message: 'Error during impersonation', error: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getReports,
@@ -267,4 +287,5 @@ module.exports = {
   getClients,
   createClient,
   deleteClient,
+  impersonateUser,
 }

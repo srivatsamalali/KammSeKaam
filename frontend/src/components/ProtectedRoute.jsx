@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     if (!loading) {
       if (!user) {
         navigate('/')
-      } else if (requiredRole && user.role !== requiredRole) {
+      } else if (requiredRole && user.role !== requiredRole && user.role !== 'ADMIN') {
         navigate('/')
       }
     }
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <div className="text-center py-20">Loading...</div>
   }
 
-  return user && (!requiredRole || user.role === requiredRole) ? children : null
+  return user && (!requiredRole || user.role === requiredRole || user.role === 'ADMIN') ? children : null
 }
 
 export default ProtectedRoute

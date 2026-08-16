@@ -10,6 +10,7 @@ const {
   getClients,
   createClient,
   deleteClient,
+  impersonateUser,
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -50,5 +51,8 @@ router.delete(
 router.get('/clients', authenticateToken, getClients)
 router.post('/clients', authenticateToken, authorizeRole('ADMIN'), createClient)
 router.delete('/clients/:id', authenticateToken, authorizeRole('ADMIN'), deleteClient)
+
+// Impersonation route
+router.post('/impersonate/:userId', authenticateToken, authorizeRole('ADMIN'), impersonateUser)
 
 module.exports = router

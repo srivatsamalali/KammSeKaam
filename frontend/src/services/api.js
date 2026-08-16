@@ -65,6 +65,7 @@ export const adminService = {
     api.put(`/admin/applications/${applicationId}`, data),
   getCandidates: () => api.get('/admin/candidates'),
   deleteCandidate: (id) => api.delete(`/admin/candidates/${id}`),
+  impersonate: (userId) => api.post(`/admin/impersonate/${userId}`),
 }
 
 export const notificationService = {
