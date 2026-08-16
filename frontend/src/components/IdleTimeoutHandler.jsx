@@ -97,16 +97,41 @@ const IdleTimeoutHandler = () => {
   return createPortal(
     <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-[#2b2f3a] rounded-[24px] max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 text-center text-slate-800 dark:text-white">
-        <div className="w-16 h-16 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-bold animate-pulse">
-          ⏳
+        <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle
+              cx="48"
+              cy="48"
+              r="38"
+              fill="none"
+              stroke="rgba(217, 119, 6, 0.1)"
+              strokeWidth="5"
+            />
+            <circle
+              cx="48"
+              cy="48"
+              r="38"
+              fill="none"
+              stroke="#d97706"
+              strokeWidth="5"
+              strokeDasharray="238.76"
+              strokeDashoffset={238.76 - (countdown / 60) * 238.76}
+              strokeLinecap="round"
+              className="transition-all duration-1000 ease-linear"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter animate-in zoom-in duration-200" key={countdown}>
+              {countdown}
+            </span>
+            <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">secs</span>
+          </div>
         </div>
-        <h3 className="text-lg font-bold mb-2">Idle Timeout Warning</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
-          You have been idle for a while. For security reasons, you will be logged out automatically in:
+
+        <h3 className="text-lg font-bold mb-2 text-slate-900 dark:text-white">Idle Timeout Warning</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+          You have been idle for a while. For security reasons, you will be logged out automatically.
         </p>
-        <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mb-6 tracking-wide animate-pulse">
-          {countdown} seconds
-        </div>
         <div className="flex gap-3">
           <button
             onClick={handleStayLoggedIn}
