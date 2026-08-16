@@ -35,7 +35,9 @@ const LandingPage = () => {
   }
 
   useEffect(() => {
-    // Clear preferences initially to hide all header buttons
+    // Clear credentials, preferences and session cache initially on landing
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     localStorage.removeItem('user_preference')
     localStorage.removeItem('user_preference_timestamp')
     window.dispatchEvent(new Event('local-storage-pref'))
