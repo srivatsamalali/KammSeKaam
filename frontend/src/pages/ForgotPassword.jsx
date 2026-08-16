@@ -10,6 +10,7 @@ const ForgotPassword = () => {
   // Steps: 1 = Email, 2 = OTP, 3 = New Password
   const [step, setStep] = useState(1)
   const [email, setEmail] = useState('')
+  const [emailSuggestions, setEmailSuggestions] = useState([])
   const [otp, setOtp] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -184,19 +185,42 @@ const ForgotPassword = () => {
               {errors.form && <div className="alert-error">{errors.form}</div>}
 
               <form onSubmit={handleSendOtp} className="space-y-4">
-                <div className="form-group">
+                <div className="form-group text-left">
                   <label className="form-label">Email Address</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value)
+                      const val = e.target.value
+                      setEmail(val)
                       setErrors({})
+                      if (val && !val.includes('@') && /[a-zA-Z]/.test(val)) {
+                        setEmailSuggestions(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'].map(d => `${val}@${d}`))
+                      } else {
+                        setEmailSuggestions([])
+                      }
                     }}
                     className="form-input"
                     placeholder="your@email.com"
                     required
                   />
+                  {emailSuggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
+                      {emailSuggestions.map((sug, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setEmail(sug)
+                            setEmailSuggestions([])
+                          }}
+                          className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
+                        >
+                          {sug}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {errors.email && (
                     <p className="text-red-600 text-sm mt-1">{errors.email}</p>
                   )}

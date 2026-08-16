@@ -29,12 +29,41 @@ const CandidateLogin = () => {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [emailSuggestions, setEmailSuggestions] = useState([])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
+    let finalValue = type === 'checkbox' ? checked : value
+
+    if (name === 'identifier' && typeof finalValue === 'string') {
+      // If it looks like a phone number (i.e. starts with digit or +)
+      if (/^[+\d]+$/.test(finalValue)) {
+        let clean = finalValue.replace(/[^\d+]/g, '')
+        if (clean.startsWith('+91')) {
+          clean = clean.substring(3)
+        } else if (clean.startsWith('+1')) {
+          clean = clean.substring(2)
+        } else if (clean.startsWith('+44')) {
+          clean = clean.substring(3)
+        }
+        while (clean.startsWith('0')) {
+          clean = clean.substring(1)
+        }
+        clean = clean.substring(0, 10)
+        finalValue = clean
+      } else {
+        // If it looks like an email prefix
+        if (finalValue && !finalValue.includes('@') && /[a-zA-Z]/.test(finalValue)) {
+          setEmailSuggestions(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'].map(d => `${finalValue}@${d}`))
+        } else {
+          setEmailSuggestions([])
+        }
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: finalValue,
     }))
   }
 
@@ -92,7 +121,7 @@ const CandidateLogin = () => {
             {errors.form && <div className="alert-error">{errors.form}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="form-group">
+              <div className="form-group text-left">
                 <label className="form-label">Email or Phone</label>
                 <input
                   type="text"
@@ -103,6 +132,23 @@ const CandidateLogin = () => {
                   placeholder="Enter email or phone"
                   required
                 />
+                {emailSuggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
+                    {emailSuggestions.map((sug, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({ ...prev, identifier: sug }))
+                          setEmailSuggestions([])
+                        }}
+                        className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
+                      >
+                        {sug}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="form-group flex items-end gap-3 w-full">

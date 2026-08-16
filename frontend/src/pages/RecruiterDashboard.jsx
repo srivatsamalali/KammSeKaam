@@ -358,6 +358,8 @@ const RecruiterDashboard = () => {
     mobileNumber: '',
     specialization: [],
   })
+  const [recruiterEmailSuggestions, setRecruiterEmailSuggestions] = useState([])
+  const [recruiterSelectedCountryCode, setRecruiterSelectedCountryCode] = useState('+91')
 
   const handleCreateRecruiter = async (e) => {
     e.preventDefault()
@@ -639,15 +641,40 @@ const RecruiterDashboard = () => {
                     required
                   />
                 </div>
-                <div className="form-group">
+                <div className="form-group text-left">
                   <label className="form-label">Email</label>
                   <input
                     type="email"
                     value={recruiterForm.email}
-                    onChange={(e) => setRecruiterForm({ ...recruiterForm, email: e.target.value })}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setRecruiterForm({ ...recruiterForm, email: val })
+                      if (val && !val.includes('@') && /[a-zA-Z]/.test(val)) {
+                        setRecruiterEmailSuggestions(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'].map(d => `${val}@${d}`))
+                      } else {
+                        setRecruiterEmailSuggestions([])
+                      }
+                    }}
                     className="form-input"
                     required
                   />
+                  {recruiterEmailSuggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
+                      {recruiterEmailSuggestions.map((sug, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setRecruiterForm({ ...recruiterForm, email: sug })
+                            setRecruiterEmailSuggestions([])
+                          }}
+                          className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
+                        >
+                          {sug}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">Password</label>
@@ -659,15 +686,51 @@ const RecruiterDashboard = () => {
                     required
                   />
                 </div>
-                <div className="form-group">
+                <div className="form-group text-left">
                   <label className="form-label">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={recruiterForm.mobileNumber}
-                    onChange={(e) => setRecruiterForm({ ...recruiterForm, mobileNumber: e.target.value })}
-                    className="form-input"
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={recruiterSelectedCountryCode}
+                      onChange={(e) => setRecruiterSelectedCountryCode(e.target.value)}
+                      className="form-input w-24 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-xs rounded-xl"
+                    >
+                      <option value="+91">🇮🇳 +91</option>
+                      <option value="+1">🇺🇸 +1</option>
+                      <option value="+44">🇬🇧 +44</option>
+                      <option value="+61">🇦🇺 +61</option>
+                      <option value="+971">🇦🇪 +971</option>
+                      <option value="+65">🇸🇬 +65</option>
+                    </select>
+                    <input
+                      type="tel"
+                      value={recruiterForm.mobileNumber}
+                      onChange={(e) => {
+                        let val = e.target.value
+                        let clean = val.replace(/[^\d+]/g, '')
+                        if (clean.startsWith('+91')) {
+                          clean = clean.substring(3)
+                          setRecruiterSelectedCountryCode('+91')
+                        } else if (clean.startsWith('+1')) {
+                          clean = clean.substring(2)
+                          setRecruiterSelectedCountryCode('+1')
+                        } else if (clean.startsWith('+44')) {
+                          clean = clean.substring(3)
+                          setRecruiterSelectedCountryCode('+44')
+                        } else if (clean.startsWith('+61')) {
+                          clean = clean.substring(3)
+                          setRecruiterSelectedCountryCode('+61')
+                        }
+                        while (clean.startsWith('0')) {
+                          clean = clean.substring(1)
+                        }
+                        clean = clean.substring(0, 10)
+                        setRecruiterForm({ ...recruiterForm, mobileNumber: clean })
+                      }}
+                      className="form-input flex-1"
+                      placeholder="e.g. 9876543210"
+                      required
+                    />
+                  </div>
                 </div>
                 <div className="form-group md:col-span-2">
                   <label className="form-label">Specialization (comma separated)</label>

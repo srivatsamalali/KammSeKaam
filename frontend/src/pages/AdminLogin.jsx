@@ -26,10 +26,18 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [emailSuggestions, setEmailSuggestions] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    if (name === 'email' && typeof value === 'string') {
+      if (value && !value.includes('@') && /[a-zA-Z]/.test(value)) {
+        setEmailSuggestions(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'].map(d => `${value}@${d}`))
+      } else {
+        setEmailSuggestions([])
+      }
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -80,7 +88,7 @@ const AdminLogin = () => {
           {errors.form && <div className="alert-error">{errors.form}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-group">
+            <div className="form-group text-left">
               <label className="form-label">Email</label>
               <input
                 type="email"
@@ -90,6 +98,23 @@ const AdminLogin = () => {
                 className="form-input"
                 required
               />
+              {emailSuggestions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
+                  {emailSuggestions.map((sug, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, email: sug }))
+                        setEmailSuggestions([])
+                      }}
+                      className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
+                    >
+                      {sug}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="form-group flex items-end gap-3 w-full">
