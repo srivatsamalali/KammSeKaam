@@ -12,3 +12,6 @@ build/
 .vite/
 .cache/
 uploads/
+get-google-token.js
+backend/get-google-token.js
+

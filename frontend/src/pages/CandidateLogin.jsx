@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/api'
@@ -7,7 +7,20 @@ import MonkeyPasswordToggle from '../components/MonkeyPasswordToggle'
 
 const CandidateLogin = () => {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, user, loading: authLoading } = useAuth()
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (user.role === 'CANDIDATE') {
+        navigate('/candidate/dashboard')
+      } else if (user.role === 'RECRUITER') {
+        navigate('/recruiter/dashboard')
+      } else if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard')
+      }
+    }
+  }, [user, authLoading, navigate])
+
   const [formData, setFormData] = useState({
     identifier: '',
     password: '',
