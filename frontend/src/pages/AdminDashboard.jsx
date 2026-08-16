@@ -1134,11 +1134,12 @@ const AdminDashboard = () => {
                   </div>
                   <div className="form-group text-left">
                     <label className="form-label">Phone Number</label>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2 w-full">
                       <select
                         value={recruiterSelectedCountryCode}
                         onChange={(e) => setRecruiterSelectedCountryCode(e.target.value)}
-                        className="form-input w-24 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-xs rounded-xl"
+                        className="form-input bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-xs rounded-xl"
+                        style={{ width: '85px', minWidth: '85px', flexShrink: 0, paddingRight: '4px', paddingLeft: '8px' }}
                       >
                         <option value="+91">🇮🇳 +91</option>
                         <option value="+1">🇺🇸 +1</option>
@@ -1178,6 +1179,7 @@ const AdminDashboard = () => {
                         className="form-input flex-1"
                         placeholder="e.g. 9876543210"
                         required
+                        style={{ flexGrow: 1, minWidth: 0 }}
                       />
                     </div>
                   </div>
@@ -1715,11 +1717,12 @@ const AdminDashboard = () => {
                   </div>
                   <div className="text-left">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Client Phone Number</label>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2 w-full">
                       <select
                         value={clientSelectedCountryCode}
                         onChange={(e) => setClientSelectedCountryCode(e.target.value)}
-                        className="form-input w-24 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-xs rounded-xl"
+                        className="form-input bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-xs rounded-xl"
+                        style={{ width: '85px', minWidth: '85px', flexShrink: 0, paddingRight: '4px', paddingLeft: '8px' }}
                       >
                         <option value="+91">🇮🇳 +91</option>
                         <option value="+1">🇺🇸 +1</option>
@@ -1755,6 +1758,7 @@ const AdminDashboard = () => {
                           setClientForm({ ...clientForm, phone: clean })
                         }}
                         placeholder="e.g., 9876543210"
+                        style={{ flexGrow: 1, minWidth: 0 }}
                       />
                     </div>
                   </div>
