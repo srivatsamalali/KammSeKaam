@@ -42,7 +42,7 @@ const IdleTimeoutHandler = () => {
     // Set initial timer
     resetIdleTimer()
 
-    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart']
+    const events = ['keydown', 'click', 'scroll', 'touchstart']
     const handleActivity = () => resetIdleTimer()
 
     events.forEach((event) => {
