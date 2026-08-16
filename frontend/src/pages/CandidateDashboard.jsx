@@ -853,8 +853,8 @@ const CandidateDashboard = () => {
                 </div>
               </div>
 
-              {/* Premium Drag and Drop Resume Dropzone (Only visible for selected candidates in Round 2) */}
-              {applications.some(app => app.status === 'SENT_TO_CLIENT') ? (
+              {/* Premium Drag and Drop Resume Dropzone (Only visible for selected/referred candidates) */}
+              {applications.some(app => app.status === 'SENT_TO_CLIENT' || app.status === 'SELECTED') && (
                 <div className="form-group border-t border-slate-105 dark:border-slate-800 pt-4 mt-6">
                   <label className="form-label font-bold text-slate-850 dark:text-slate-200">
                     Upload Resume PDF
@@ -902,17 +902,6 @@ const CandidateDashboard = () => {
                       </p>
                       <p className="text-[10px] text-slate-400">PDF formats under 5MB only</p>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="form-group border-t border-slate-105 dark:border-slate-800 pt-4 mt-6 text-left">
-                  <label className="form-label font-bold text-slate-850 dark:text-slate-200">
-                    Upload Resume PDF
-                  </label>
-                  <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-750 p-4 rounded-xl text-xs text-slate-650 dark:text-slate-400 leading-relaxed">
-                    ℹ️ Resume uploads are not required at this stage. 
-                    If you are selected for Round 2 (Client Review), you will receive a notification email to update your resume in the portal. 
-                    At that point, please upload your resume on this screen (Path: <strong>Edit Profile &gt; Upload Resume PDF</strong>) or email it to support.
                   </div>
                 </div>
               )}
