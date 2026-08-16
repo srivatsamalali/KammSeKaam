@@ -1,4 +1,4 @@
-const { User, Candidate, Notification } = require('../models')
+const { User, Candidate, Recruiter, Notification } = require('../models')
 const { Op } = require('sequelize')
 const { generateToken, generateResetToken } = require('../utils/tokenService')
 const { validatePassword, validateEmail } = require('../utils/validators')
@@ -155,7 +155,7 @@ const register = async (req, res) => {
     res.status(201).json({
       message: 'Registration successful',
       token,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: user.role, name },
     })
   } catch (error) {
     console.error('Registration error:', error)
@@ -177,10 +177,34 @@ const login = async (req, res) => {
         .json({ message: 'Email/phone and password required' })
     }
 
-    const searchField = normalizedIdentifier.includes('@')
-      ? { email: normalizedIdentifier }
-      : { phone: normalizePhone(normalizedIdentifier) }
-    const user = await User.findOne({ where: searchField })
+    let user = null
+    if (normalizedIdentifier.includes('@')) {
+      user = await User.findOne({ where: { email: normalizedIdentifier } })
+    } else {
+      // 1. Try to find user by email first
+      user = await User.findOne({ where: { email: normalizedIdentifier } })
+      
+      // 2. Try to find by candidate name
+      if (!user) {
+        const cand = await Candidate.findOne({ where: { name: normalizedIdentifier } })
+        if (cand) {
+          user = await User.findByPk(cand.userId)
+        }
+      }
+
+      // 3. Try to find by recruiter name
+      if (!user) {
+        const rec = await Recruiter.findOne({ where: { name: normalizedIdentifier } })
+        if (rec) {
+          user = await User.findByPk(rec.userId)
+        }
+      }
+
+      // 4. Fallback to phone
+      if (!user) {
+        user = await User.findOne({ where: { phone: normalizePhone(normalizedIdentifier) } })
+      }
+    }
 
     if (!user) {
       return res.status(401).json({ message: 'User does not exist' })
@@ -194,10 +218,20 @@ const login = async (req, res) => {
 
     const token = generateToken(user)
 
+    // Fetch associated name
+    let name = 'Admin'
+    if (user.role === 'CANDIDATE') {
+      const cand = await Candidate.findOne({ where: { userId: user.id } })
+      if (cand) name = cand.name
+    } else if (user.role === 'RECRUITER') {
+      const rec = await Recruiter.findOne({ where: { userId: user.id } })
+      if (rec) name = rec.name
+    }
+
     res.json({
       message: 'Login successful',
       token,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: { id: user.id, email: user.email, role: user.role, name },
     })
   } catch (error) {
     console.error('Login error:', error)

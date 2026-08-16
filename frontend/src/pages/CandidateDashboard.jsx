@@ -607,19 +607,34 @@ const CandidateDashboard = () => {
   return (
     <div className="min-h-screen page-shell">
       {/* Header with Logout */}
-      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
-        <div className="w-full mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
+        <div className="w-full mx-auto px-6 py-3 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Candidate Dashboard
             </h1>
-            <p className="text-sm text-gray-600">{user?.email}</p>
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
+              Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
+            </p>
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Static Center Brand Logo */}
+          <div className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+            <img
+              src="/logo.jpeg"
+              alt="Aston Recruitment"
+              className="h-8 w-8 rounded-full object-cover shadow-md shadow-amber-200/30"
+            />
+            <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
+              Aston Recruitment
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 z-10">
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
             >
               Logout
             </button>
