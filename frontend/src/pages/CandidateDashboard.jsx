@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { candidateService, messageService } from '../services/api'
+import { candidateService, messageService, adminService } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 import ChatThreadPanel from '../components/ChatThreadPanel'
@@ -418,6 +418,37 @@ const CandidateDashboard = () => {
 
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null })
 
+  const [adminUsers, setAdminUsers] = useState([])
+
+  const fetchAdminUsers = async () => {
+    try {
+      const candidatesRes = await adminService.getCandidates()
+      setAdminUsers(candidatesRes.data || [])
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching candidates for admin:', error)
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async (id) => {
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to delete this candidate? This will delete their user profile and all applications.',
+      onConfirm: async () => {
+        try {
+          await adminService.deleteCandidate(id)
+          alert('Candidate deleted successfully')
+          fetchAdminUsers()
+        } catch (error) {
+          console.error('Error deleting candidate:', error)
+          alert('Error deleting candidate')
+        }
+      }
+    })
+  }
+
+
   const handleLogout = () => {
     setConfirmModal({
       isOpen: true,
@@ -469,9 +500,13 @@ const CandidateDashboard = () => {
   })
 
   useEffect(() => {
-    fetchProfile()
-    fetchApplications()
-  }, [])
+    if (user && user.role === 'ADMIN') {
+      fetchAdminUsers()
+    } else {
+      fetchProfile()
+      fetchApplications()
+    }
+  }, [user])
 
   useEffect(() => {
     window.history.pushState(null, null, window.location.pathname)
@@ -591,8 +626,78 @@ const CandidateDashboard = () => {
         </div>
       </div>
 
+
       {/* Main Content */}
-      <div className="w-full mx-auto px-4 py-8">
+      {user?.role === 'ADMIN' ? (
+        <div className="w-full mx-auto px-4 py-8 animate-slide-up">
+          <div className="flex justify-between items-center bg-slate-900 text-white p-6 rounded-2xl shadow-xl mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">Admin Sandbox: Candidate Portals view</h2>
+              <p className="text-xs text-slate-400">Viewing all candidates registered in the system (Edit is disabled; delete is enabled)</p>
+            </div>
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg"
+            >
+              ← Back to Admin Console
+            </button>
+          </div>
+
+          <div className="glass-card overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs uppercase font-bold border-b border-slate-250 dark:border-slate-750">
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Email</th>
+                    <th className="p-4">Phone</th>
+                    <th className="p-4">Skills</th>
+                    <th className="p-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {adminUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-slate-400">No candidates registered</td>
+                    </tr>
+                  ) : (
+                    adminUsers.map((cand, index) => (
+                      <tr
+                        key={cand.id}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors animate-in fade-in duration-300"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <td className="p-4 font-bold text-slate-900 dark:text-white">{cand.name || 'N/A'}</td>
+                        <td className="p-4 text-slate-600 dark:text-slate-400">{cand.User?.email || 'N/A'}</td>
+                        <td className="p-4 text-slate-600 dark:text-slate-400">{cand.mobileNumber || 'N/A'}</td>
+                        <td className="p-4">
+                          <div className="flex flex-wrap gap-1">
+                            {parseSkills(cand.technicalSkills).map((skill, sIdx) => (
+                              <span key={sIdx} className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 text-[10px] rounded font-bold border border-amber-200/20">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => handleDeleteUser(cand.id)}
+                            className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="w-full mx-auto px-4 py-8">
+
         {applications.filter(app => app.status === 'INTERVIEW_SCHEDULED').map((app) => (
           <div key={app.id} className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between dark:bg-amber-950/20 dark:border-amber-900/30">
             <div className="mb-4 md:mb-0">
@@ -1160,6 +1265,7 @@ const CandidateDashboard = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* Global Slide-out Chat Thread Panel */}
       <ChatThreadPanel

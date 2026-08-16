@@ -345,13 +345,69 @@ const RecruiterDashboard = () => {
 
   const [clients, setClients] = useState([])
   const [selectedClientId, setSelectedClientId] = useState('')
+
+  const [adminUsers, setAdminUsers] = useState([])
+  const [editingRecruiterId, setEditingRecruiterId] = useState(null)
+  const [editingForm, setEditingForm] = useState({ name: '', specialization: '' })
+
+  const fetchAdminUsers = async () => {
+    try {
+      const recruitersRes = await recruiterService.getAll()
+      setAdminUsers(recruitersRes.data || [])
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching recruiters for admin:', error)
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async (id) => {
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to delete this recruiter? This will delete their user profile.',
+      onConfirm: async () => {
+        try {
+          await recruiterService.delete(id)
+          alert('Recruiter deleted successfully')
+          fetchAdminUsers()
+        } catch (error) {
+          console.error('Error deleting recruiter:', error)
+          alert('Error deleting recruiter')
+        }
+      }
+    })
+  }
+
+  const handleUpdateRecruiter = async (id) => {
+    try {
+      const specArray = editingForm.specialization
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+      await recruiterService.update(id, {
+        name: editingForm.name,
+        specialization: specArray,
+      })
+      setEditingRecruiterId(null)
+      alert('Recruiter updated successfully')
+      fetchAdminUsers()
+    } catch (error) {
+      console.error('Error updating recruiter:', error)
+      alert('Update failed')
+    }
+  }
+
   const [selectedClientMap, setSelectedClientMap] = useState({})
 
   useEffect(() => {
-    fetchApplications()
-    fetchNotifications()
-    fetchClients()
-  }, [])
+    if (user && user.role === 'ADMIN') {
+      fetchAdminUsers()
+    } else {
+      fetchApplications()
+      fetchNotifications()
+      fetchClients()
+    }
+  }, [user])
 
   useEffect(() => {
     window.history.pushState(null, null, window.location.pathname)
@@ -515,8 +571,129 @@ const RecruiterDashboard = () => {
         </div>
       </div>
 
+
       {/* Main Content */}
-      <div className="w-full mx-auto px-4 py-8">
+      {user?.role === 'ADMIN' ? (
+        <div className="w-full mx-auto px-4 py-8 animate-slide-up">
+          <div className="flex justify-between items-center bg-slate-900 text-white p-6 rounded-2xl shadow-xl mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">Admin Sandbox: Recruiter Portals view</h2>
+              <p className="text-xs text-slate-400">Viewing all recruiters registered in the system (Edit and Delete options are enabled)</p>
+            </div>
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg"
+            >
+              ← Back to Admin Console
+            </button>
+          </div>
+
+          <div className="glass-card overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs uppercase font-bold border-b border-slate-250 dark:border-slate-750">
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Email</th>
+                    <th className="p-4">Specialization / Skills</th>
+                    <th className="p-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {adminUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="p-8 text-center text-slate-400">No recruiters registered</td>
+                    </tr>
+                  ) : (
+                    adminUsers.map((rec, index) => (
+                      <tr
+                        key={rec.id}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors animate-in fade-in duration-300"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <td className="p-4">
+                          {editingRecruiterId === rec.id ? (
+                            <input
+                              type="text"
+                              value={editingForm.name}
+                              onChange={(e) => setEditingForm({ ...editingForm, name: e.target.value })}
+                              className="form-input text-xs"
+                            />
+                          ) : (
+                            <span className="font-bold text-slate-900 dark:text-white">{rec.name || 'N/A'}</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-slate-600 dark:text-slate-400">{rec.User?.email || 'N/A'}</td>
+                        <td className="p-4">
+                          {editingRecruiterId === rec.id ? (
+                            <input
+                              type="text"
+                              value={editingForm.specialization}
+                              onChange={(e) => setEditingForm({ ...editingForm, specialization: e.target.value })}
+                              placeholder="comma separated specialization"
+                              className="form-input text-xs"
+                            />
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {(rec.specialization || []).map((spec, sIdx) => (
+                                <span key={sIdx} className="px-2 py-0.5 bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-400 text-[10px] rounded font-bold border border-blue-200/20">
+                                  {spec}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          {editingRecruiterId === rec.id ? (
+                            <div className="flex justify-center gap-2">
+                              <button
+                                  onClick={() => handleUpdateRecruiter(rec.id)}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingRecruiterId(null)}
+                                className="px-3 py-1.5 bg-slate-150 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-lg transition-all"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingRecruiterId(rec.id);
+                                  setEditingForm({
+                                    name: rec.name || '',
+                                    specialization: (rec.specialization || []).join(', ')
+                                  });
+                                }}
+                                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition-all"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(rec.id)}
+                                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="w-full mx-auto px-4 py-8">
+
         <h2 className="text-3xl font-bold text-gray-900 mb-6">
           Recruiter Dashboard
         </h2>
@@ -1273,6 +1450,9 @@ const RecruiterDashboard = () => {
           </div>
         )
       })()}
+        </>
+      )}
+
       {/* Custom Frosted Liquid Glass Confirm Dialog */}
       {confirmModal.isOpen && createPortal(
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
