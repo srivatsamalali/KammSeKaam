@@ -16,7 +16,7 @@ const CandidateLogin = () => {
       } else if (user.role === 'RECRUITER') {
         navigate('/recruiter/dashboard')
       } else if (user.role === 'ADMIN') {
-        navigate('/admin/dashboard')
+        navigate('/candidate/dashboard')
       }
     }
   }, [user, authLoading, navigate])

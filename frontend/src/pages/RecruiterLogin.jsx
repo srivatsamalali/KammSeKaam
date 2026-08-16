@@ -15,7 +15,7 @@ const RecruiterLogin = () => {
       } else if (user.role === 'RECRUITER') {
         navigate('/recruiter/dashboard')
       } else if (user.role === 'ADMIN') {
-        navigate('/admin/dashboard')
+        navigate('/recruiter/dashboard')
       }
     }
   }, [user, authLoading, navigate])
@@ -65,7 +65,7 @@ const RecruiterLogin = () => {
         password: formData.password,
       })
 
-      if (response.data.user.role !== 'RECRUITER') {
+      if (response.data.user.role !== 'RECRUITER' && response.data.user.role !== 'ADMIN') {
         setErrors({ form: 'Invalid recruiter credentials' })
         return
       }
