@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { authService } from '../services/api'
+import { authService, candidateService } from '../services/api'
+import MonkeyPasswordToggle from '../components/MonkeyPasswordToggle'
 import JobLoader from '../components/JobLoader'
 import { triggerMessageNotification } from '../utils/notification'
 
@@ -41,7 +42,28 @@ const CandidateRegister = () => {
     password: '',
     confirmPassword: '',
     technicalSkills: [],
+    dob: '',
+    experience: '',
+    highestQualification: '',
+    currentCompany: '',
+    currentCTC: '',
+    expectedCTC: '',
+    currentLocation: '',
+    preferredLocation: '',
+    noticePeriod: '',
   })
+  const qualifications = [
+    'B.Tech / B.E.',
+    'M.Tech',
+    'MCA',
+    'MBA',
+    'B.Sc',
+    'M.Sc',
+    'BCA',
+    'B.Com',
+    'Other',
+  ]
+  const majorCities = ['Bengaluru', 'Mumbai', 'Pune', 'Delhi NCR', 'Hyderabad', 'Chennai', 'Kolkata']
   const [passwordStrength, setPasswordStrength] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -232,13 +254,38 @@ const CandidateRegister = () => {
     setLoading(true)
 
     try {
-      const response = await authService.register(formData)
+      const response = await authService.register({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        technicalSkills: formData.technicalSkills,
+      })
       login(response.data.user, response.data.token)
       
-      // Show loader for 5 seconds before redirecting
+      // Save additional profile details
+      try {
+        await candidateService.updateProfile({
+          dob: formData.dob,
+          experience: formData.experience,
+          highestQualification: formData.highestQualification,
+          currentCompany: formData.currentCompany,
+          currentCTC: formData.currentCTC,
+          expectedCTC: formData.expectedCTC,
+          currentLocation: formData.currentLocation,
+          preferredLocation: formData.preferredLocation,
+          noticePeriod: formData.noticePeriod,
+          technicalSkills: formData.technicalSkills,
+        })
+      } catch (profErr) {
+        console.error('Error saving profile details during registration:', profErr)
+      }
+
+      // Show loader for 3 seconds before redirecting
       setTimeout(() => {
         navigate('/candidate/dashboard')
-      }, 5000)
+      }, 3000)
     } catch (error) {
       setLoading(false)
       setErrors({
@@ -266,6 +313,11 @@ const CandidateRegister = () => {
             <div
               className={`h-2 w-2 rounded-full ${
                 step >= 3 ? 'bg-amber-600' : 'bg-gray-300'
+              }`}
+            ></div>
+            <div
+              className={`h-2 w-2 rounded-full ${
+                step >= 4 ? 'bg-amber-600' : 'bg-gray-300'
               }`}
             ></div>
           </div>
@@ -362,6 +414,417 @@ const CandidateRegister = () => {
                   Login
                 </a>
               </p>
+            </>
+          )}
+
+          {/* Step 2: OTP Verification */}
+          {step === 2 && (
+            <>
+              <h2 className="text-3xl font-bold text-center text-slate-900 mb-2">
+                Verify OTP
+              </h2>
+              <p className="text-center text-gray-600 mb-6">
+                Enter the 6-digit OTP sent to {email}
+              </p>
+
+              {errors.form && <div className="alert-error">{errors.form}</div>}
+
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div className="form-group">
+                  <label className="form-label">Enter OTP</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength="6"
+                    value={otp}
+                    onChange={handleOtpChange}
+                    className="form-input text-center text-3xl tracking-widest"
+                    placeholder="000000"
+                    required
+                  />
+                  {errors.otp && (
+                    <p className="text-red-600 text-sm mt-1">{errors.otp}</p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || otp.length !== 6}
+                  className="btn-primary w-full"
+                >
+                  {loading ? 'Verifying...' : 'Verify OTP'}
+                </button>
+              </form>
+
+              <div className="mt-4 text-center">
+                {otpTimer > 0 ? (
+                  <p className="text-gray-600">
+                    Resend OTP in {otpTimer}s
+                  </p>
+                ) : (
+                  <button
+                    onClick={handleResendOtp}
+                    disabled={loading}
+                    className="text-amber-700 hover:underline font-semibold"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={() => {
+                  setStep(1)
+                  setOtp('')
+                  setOtpSent(false)
+                }}
+                className="text-gray-600 hover:text-gray-800 text-sm mt-4 w-full text-center"
+              >
+                Back
+              </button>
+            </>
+          )}
+
+          {/* Step 3: Registration Form */}
+          {step === 3 && (
+            <>
+              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+                Account Details
+              </h2>
+
+              {errors.form && <div className="alert-error">{errors.form}</div>}
+
+              <div className="space-y-4 text-left">
+                <div className="form-group">
+                  <label className="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    className="form-input bg-slate-50 dark:bg-slate-800"
+                    disabled
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Phone Number</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    className="form-input bg-slate-50 dark:bg-slate-800"
+                    disabled
+                  />
+                </div>
+
+                <div className="form-group">
+                  <div className="flex items-end gap-3 w-full">
+                    <div className="flex-1 text-left">
+                      <label className="form-label">Password</label>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleFormChange}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <MonkeyPasswordToggle 
+                      showPassword={showPassword} 
+                      onClick={() => setShowPassword((prev) => !prev)} 
+                    />
+                  </div>
+                  {passwordStrength && (
+                    <div className="mt-2">
+                      <div className="flex justify-between items-center text-xs mb-1">
+                        <span className="font-bold text-slate-500">Security Strength</span>
+                        <span className={`font-bold ${
+                          passwordStrength === 'Weak' ? 'text-red-500' : passwordStrength === 'Medium' ? 'text-amber-500' : 'text-emerald-500'
+                        }`}>
+                          {passwordStrength}
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-300 ${
+                            passwordStrength === 'Weak' ? 'bg-red-500 w-1/3' : passwordStrength === 'Medium' ? 'bg-amber-500 w-2/3' : 'bg-emerald-500 w-full'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-600 mt-2">
+                    Min 8 chars, uppercase, lowercase, number, special character
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <div className="flex items-end gap-3 w-full">
+                    <div className="flex-1 text-left">
+                      <label className="form-label">Confirm Password</label>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleFormChange}
+                        className="form-input"
+                        required
+                      />
+                    </div>
+                    <MonkeyPasswordToggle 
+                      showPassword={showConfirmPassword} 
+                      onClick={() => setShowConfirmPassword((prev) => !prev)} 
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group border-t border-slate-100 dark:border-slate-800 pt-4 mt-4">
+                  <label className="form-label font-bold text-slate-800 dark:text-slate-200">
+                    Select Technical Skills / Tech Stacks
+                  </label>
+                  <p className="text-[10px] text-slate-500 mb-3">
+                    Choose matching capabilities to power our automatic AI resume suitability index matcher.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-2 mb-4 bg-slate-50/30 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800/40 max-h-36 overflow-y-auto">
+                    {availableSkills.map((skill) => {
+                      const isChecked = formData.technicalSkills.includes(skill)
+                      return (
+                        <label 
+                          key={skill} 
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                            isChecked 
+                              ? 'bg-amber-500/10 text-amber-800 border-amber-500/35 dark:text-amber-400 dark:bg-amber-950/20' 
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-660 dark:text-slate-400 hover:bg-slate-50'
+                          }`}
+                        >
+                          <input 
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleSkill(skill)}
+                            className="w-3.5 h-3.5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                          />
+                          <span>{skill}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="text"
+                      placeholder="Add other skill (e.g. NextJS)"
+                      value={customSkill}
+                      onChange={(e) => setCustomSkill(e.target.value)}
+                      className="form-input text-xs h-9 py-1 flex-1"
+                    />
+                    <button 
+                      type="button"
+                      onClick={handleAddCustomSkill}
+                      className="btn-secondary text-xs h-9 px-4 shrink-0 font-bold"
+                    >
+                      ➕ Add
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!formData.name.trim()) {
+                      setErrors({ form: 'Full name is required' })
+                      return
+                    }
+                    if (!formData.password || !formData.confirmPassword) {
+                      setErrors({ form: 'Password fields are required' })
+                      return
+                    }
+                    if (formData.password !== formData.confirmPassword) {
+                      setErrors({ form: 'Passwords do not match' })
+                      return
+                    }
+                    setStep(4)
+                  }}
+                  className="btn-primary w-full"
+                >
+                  Next: Add Details
+                </button>
+              </div>
+
+              <p className="text-center text-gray-600 mt-4">
+                Already have an account?{' '}
+                <a
+                  href="/candidate/login"
+                  className="text-amber-700 font-semibold hover:underline"
+                >
+                  Login
+                </a>
+              </p>
+            </>
+          )}
+
+          {/* Step 4: Additional Profile Details Onboarding */}
+          {step === 4 && (
+            <>
+              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+                Onboarding Details
+              </h2>
+
+              {errors.form && <div className="alert-error">{errors.form}</div>}
+
+              <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                <div className="form-group">
+                  <label className="form-label">Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleFormChange}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Experience (years)</label>
+                  <input
+                    type="number"
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleFormChange}
+                    className="form-input"
+                    placeholder="e.g. 3"
+                    min="0"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Highest Qualification</label>
+                  <select
+                    name="highestQualification"
+                    value={formData.highestQualification}
+                    onChange={handleFormChange}
+                    className="form-input"
+                  >
+                    <option value="">Select Qualification</option>
+                    {qualifications.map((q) => (
+                      <option key={q} value={q}>{q}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Current Company</label>
+                  <input
+                    type="text"
+                    name="currentCompany"
+                    value={formData.currentCompany}
+                    onChange={handleFormChange}
+                    placeholder="e.g. Google"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group">
+                    <label className="form-label">Current CTC (LPA)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="currentCTC"
+                      value={formData.currentCTC}
+                      onChange={handleFormChange}
+                      placeholder="e.g. 7.5"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Expected CTC (LPA)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="expectedCTC"
+                      value={formData.expectedCTC}
+                      onChange={handleFormChange}
+                      placeholder="e.g. 11.5"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group">
+                    <label className="form-label">Current Location</label>
+                    <select
+                      name="currentLocation"
+                      value={formData.currentLocation}
+                      onChange={handleFormChange}
+                      className="form-input"
+                    >
+                      <option value="">Select Location</option>
+                      {majorCities.map((city) => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Preferred Location</label>
+                    <select
+                      name="preferredLocation"
+                      value={formData.preferredLocation}
+                      onChange={handleFormChange}
+                      className="form-input"
+                    >
+                      <option value="">Select Location</option>
+                      {majorCities.map((city) => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Notice Period (days)</label>
+                  <input
+                    type="number"
+                    name="noticePeriod"
+                    value={formData.noticePeriod}
+                    onChange={handleFormChange}
+                    placeholder="e.g. 30"
+                    className="form-input"
+                    min="0"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(3)}
+                    className="btn-secondary flex-1 py-2 font-bold"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary flex-1 py-2 font-bold"
+                  >
+                    {loading ? 'Registering...' : 'Register'}
+                  </button>
+                </div>
+              </form>
             </>
           )}
 

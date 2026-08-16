@@ -583,7 +583,7 @@ const RecruiterDashboard = () => {
     <div className="min-h-screen page-shell">
       {/* Header with Logout */}
       <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-        <div className="w-full mx-auto px-6 py-3 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Recruiter Dashboard
@@ -1170,7 +1170,7 @@ const RecruiterDashboard = () => {
                     </div>
                   )}
 
-                  <div className="mt-4 flex space-x-2">
+                  <div className="mt-4 flex flex-col sm:flex-row flex-wrap gap-2.5 items-stretch sm:items-center w-full">
                     {app.status === 'APPLICATION_RECEIVED' && (
                       <>
                         <button
@@ -1181,21 +1181,22 @@ const RecruiterDashboard = () => {
                               handleOpenScheduleForm(app)
                             }
                           }}
-                          className="btn-primary"
+                          className="btn-primary flex-1 sm:flex-initial text-center justify-center items-center h-9 px-4 rounded-xl text-xs font-bold"
                         >
                           Schedule Interview
                         </button>
                         <button
                           onClick={() => handleUpdateStatus(app.id, 'REJECTED')}
-                          className="btn-danger px-4 py-2"
+                          className="btn-danger flex-1 sm:flex-initial text-center justify-center items-center h-9 px-4 rounded-xl text-xs font-bold"
                         >
                           Reject
                         </button>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
                           <select
                             value={selectedClientMap[app.id] || ''}
                             onChange={(e) => setSelectedClientMap(prev => ({ ...prev, [app.id]: e.target.value }))}
-                            className="form-input text-xs max-w-[180px] bg-white inline-block h-9 py-1 px-2 border border-slate-300 rounded"
+                            className="form-input text-xs bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 font-medium rounded-xl h-9 py-1 px-2 flex-grow"
+                            style={{ minWidth: '120px' }}
                           >
                             <option value="">-- Choose Client --</option>
                             {clients.map(c => (
@@ -1205,7 +1206,7 @@ const RecruiterDashboard = () => {
                           <button
                             disabled={!selectedClientMap[app.id]}
                             onClick={() => handleUpdateStatus(app.id, 'SENT_TO_CLIENT', { clientId: selectedClientMap[app.id] })}
-                            className="btn-success px-3 py-2 text-xs font-bold disabled:opacity-50 h-9 whitespace-nowrap"
+                            className="btn-success px-3.5 py-2 text-xs font-bold disabled:opacity-50 h-9 rounded-xl whitespace-nowrap"
                           >
                             🚀 Send to Client
                           </button>
@@ -1218,7 +1219,7 @@ const RecruiterDashboard = () => {
                           onClick={() =>
                             handleUpdateStatus(app.id, 'INTERVIEW_COMPLETED')
                           }
-                          className="btn-primary"
+                          className="btn-primary flex-1 sm:flex-initial text-center justify-center items-center h-9 px-4 rounded-xl text-xs font-bold"
                         >
                           Mark Complete
                         </button>
@@ -1228,13 +1229,13 @@ const RecruiterDashboard = () => {
                       <>
                         <button
                           onClick={() => handleUpdateStatus(app.id, 'SELECTED')}
-                          className="btn-success px-4 py-2"
+                          className="btn-success flex-1 sm:flex-initial text-center justify-center items-center h-9 px-4 rounded-xl text-xs font-bold"
                         >
                           Select
                         </button>
                         <button
                           onClick={() => handleUpdateStatus(app.id, 'REJECTED')}
-                          className="btn-danger px-4 py-2"
+                          className="btn-danger flex-1 sm:flex-initial text-center justify-center items-center h-9 px-4 rounded-xl text-xs font-bold"
                         >
                           Reject
                         </button>

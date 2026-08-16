@@ -608,7 +608,7 @@ const CandidateDashboard = () => {
     <div className="min-h-screen page-shell">
       {/* Header with Logout */}
       <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-        <div className="w-full mx-auto px-6 py-3 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Candidate Dashboard
