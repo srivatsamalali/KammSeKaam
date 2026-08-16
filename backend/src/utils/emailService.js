@@ -259,6 +259,13 @@ const sendSelectionEmail = async (candidateEmail, candidateName) => {
             <p style="color: #334155; font-size: 15px;">We are thrilled to inform you that you have been <strong>Selected</strong> for the role you interviewed for through Aston Recruitment!</p>
             <p style="color: #334155; font-size: 15px;">Our onboarding team will contact you shortly with information regarding the next steps, contract details, and orientation schedules.</p>
             
+            <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 16px; border-radius: 4px; margin: 20px 0;">
+              <p style="margin: 0; color: #065f46; font-size: 14px; line-height: 1.6;">
+                <strong>Action Required:</strong> Please make sure your latest resume PDF is uploaded to the portal for onboarding records:<br/>
+                👉 <strong>Path to update in portal:</strong> Log in to your dashboard, click <strong>Edit Profile</strong>, and upload your resume PDF in the <strong>Upload Resume PDF</strong> section.
+              </p>
+            </div>
+
             <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions in the meantime, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #10b981;">Contact@astonrecruitment.in</a>.</p>
             <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
           </div>
