@@ -853,56 +853,69 @@ const CandidateDashboard = () => {
                 </div>
               </div>
 
-              {/* Premium Drag and Drop Resume Dropzone */}
-              <div className="form-group border-t border-slate-105 dark:border-slate-800 pt-4 mt-6">
-                <label className="form-label font-bold text-slate-850 dark:text-slate-200">
-                  Upload Resume PDF
-                </label>
-                <p className="text-[10px] text-slate-500 mb-2">
-                  Drop your latest resume to analyze technical matching and recalculate AI suitability indices.
-                </p>
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault()
-                    setDragOver(true)
-                  }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={(e) => {
-                    e.preventDefault()
-                    setDragOver(false)
-                    const file = e.dataTransfer.files[0]
-                    if (file && file.type === 'application/pdf') {
-                      setResumeFile(file)
-                    } else {
-                      alert('Only PDF files are allowed!')
-                    }
-                  }}
-                  onClick={() => document.getElementById('resume-file-input').click()}
-                  className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-350 ${
-                    dragOver 
-                      ? 'border-amber-500 bg-amber-500/5 ring-4 ring-amber-500/15' 
-                      : 'border-slate-300 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-900/10 hover:border-amber-500 hover:bg-slate-50 dark:hover:bg-slate-900/30'
-                  }`}
-                >
-                  <input 
-                    id="resume-file-input"
-                    type="file"
-                    accept=".pdf"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files[0]
-                      if (file) setResumeFile(file)
+              {/* Premium Drag and Drop Resume Dropzone (Only visible for selected candidates in Round 2) */}
+              {applications.some(app => app.status === 'SENT_TO_CLIENT') ? (
+                <div className="form-group border-t border-slate-105 dark:border-slate-800 pt-4 mt-6">
+                  <label className="form-label font-bold text-slate-850 dark:text-slate-200">
+                    Upload Resume PDF
+                  </label>
+                  <p className="text-[10px] text-slate-500 mb-2">
+                    Drop your latest resume to analyze technical matching and recalculate AI suitability indices.
+                  </p>
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      setDragOver(true)
                     }}
-                  />
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <span className="text-3xl animate-bounce">📁</span>
-                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                      {resumeFile ? `Selected: ${resumeFile.name}` : 'Drag and drop your Resume PDF here, or click to browse'}
-                    </p>
-                    <p className="text-[10px] text-slate-400">PDF formats under 5MB only</p>
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      setDragOver(false)
+                      const file = e.dataTransfer.files[0]
+                      if (file && file.type === 'application/pdf') {
+                        setResumeFile(file)
+                      } else {
+                        alert('Only PDF files are allowed!')
+                      }
+                    }}
+                    onClick={() => document.getElementById('resume-file-input').click()}
+                    className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-350 ${
+                      dragOver 
+                        ? 'border-amber-500 bg-amber-500/5 ring-4 ring-amber-500/15' 
+                        : 'border-slate-300 dark:border-slate-750 bg-slate-50/50 dark:bg-slate-900/10 hover:border-amber-500 hover:bg-slate-50 dark:hover:bg-slate-900/30'
+                    }`}
+                  >
+                    <input 
+                      id="resume-file-input"
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0]
+                        if (file) setResumeFile(file)
+                      }}
+                    />
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <span className="text-3xl animate-bounce">📁</span>
+                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                        {resumeFile ? `Selected: ${resumeFile.name}` : 'Drag and drop your Resume PDF here, or click to browse'}
+                      </p>
+                      <p className="text-[10px] text-slate-400">PDF formats under 5MB only</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="form-group border-t border-slate-105 dark:border-slate-800 pt-4 mt-6 text-left">
+                  <label className="form-label font-bold text-slate-850 dark:text-slate-200">
+                    Upload Resume PDF
+                  </label>
+                  <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-750 p-4 rounded-xl text-xs text-slate-650 dark:text-slate-400 leading-relaxed">
+                    ℹ️ Resume uploads are not required at this stage. 
+                    If you are selected for Round 2 (Client Review), you will receive a notification email to update your resume in the portal. 
+                    At that point, please upload your resume on this screen (Path: <strong>Edit Profile &gt; Upload Resume PDF</strong>) or email it to support.
+                  </div>
+                </div>
+              )}
 
               {/* Skill preference checkboxes and custom addition panel */}
               <div className="form-group border-t border-slate-100 dark:border-slate-800 pt-4 mt-6">

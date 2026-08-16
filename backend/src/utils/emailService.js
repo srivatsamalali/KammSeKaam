@@ -369,18 +369,22 @@ const sendSentToClientEmailToClient = async (clientEmail, clientName, candidateN
   }
 }
 
-const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, clientName, clientCompany, clientEmail) => {
+const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, clientName, clientCompany, clientEmail, recruiterEmail, adminEmail) => {
   try {
     if (!isSmtpConfigured()) {
       console.log('📧 [DEV MODE] SMTP not configured. Candidate referral update email skipped for:', candidateEmail)
       return
     }
 
+    const ccList = [clientEmail]
+    if (recruiterEmail) ccList.push(recruiterEmail)
+    if (adminEmail) ccList.push(adminEmail)
+
     const mailOptions = {
       from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
       to: candidateEmail,
-      cc: clientEmail || undefined,
-      subject: '🎉 Great News! 2nd Round Interview - Aston Recruitment',
+      cc: ccList.filter(Boolean),
+      subject: '🎉 Action Required: Update Resume for 2nd Round Review - Aston Recruitment',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
           <div style="background-color: #b88f3f; padding: 24px; text-align: center; color: #ffffff;">
@@ -393,12 +397,13 @@ const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, c
             
             <div style="background-color: #fffbeb; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 4px; margin: 20px 0;">
               <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.6;">
-                <strong>Client Contact (Looped In):</strong> ${clientName} (${clientEmail})<br/>
-                We have CC'd the client directly on this invitation. You may reply to this thread to align on availability or the client's scheduling link directly.
+                <strong>Action Required:</strong> Please update your latest resume PDF document in the portal so we can share it with the client.<br/>
+                👉 <strong>Path to update in portal:</strong> Log in to your candidate dashboard, click <strong>Edit Profile</strong>, and upload your resume PDF in the <strong>Upload Resume PDF</strong> section.<br/><br/>
+                <strong>Client Contact:</strong> ${clientName} (${clientEmail})
               </p>
             </div>
 
-            <p style="color: #334155; font-size: 15px;">The client's team will review your timeline and reach out shortly to lock in a time slot.</p>
+            <p style="color: #334155; font-size: 15px;">The client's team will review your timeline and reach out shortly to lock in a time slot. We have CC'd the assigned recruiter, client contact, and admin on this thread to keep everyone aligned.</p>
             <p style="color: #475569; font-size: 14px; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
           </div>
           <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">

@@ -1281,13 +1281,13 @@ const AdminDashboard = () => {
                   {unassignedCandidates.map((c) => (
                     <div
                       key={c.id}
-                      className="flex items-center justify-between"
+                      className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-850/40 rounded-xl text-left"
                     >
                       <div>
                         <p className="font-semibold">{c.name}</p>
                         <p className="text-sm text-gray-600">{c.User?.email}</p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                         {/* Recruiter Dropdown */}
                         <select
                           id={`rec-${c.id}`}
@@ -1372,7 +1372,7 @@ const AdminDashboard = () => {
             ) : (
               applications.map((app) => (
                 <div key={app.id} className="card">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-start text-left">
                     <div className="flex-1">
                       <h4 className="text-lg font-bold text-gray-900">
                         {app.Candidate?.name}
@@ -1433,7 +1433,7 @@ const AdminDashboard = () => {
                         </div>
                       )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right mt-3 sm:mt-0 flex flex-col items-start sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-3 sm:pt-0">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${app.status === 'SELECTED'
                           ? 'bg-emerald-100 text-emerald-800'

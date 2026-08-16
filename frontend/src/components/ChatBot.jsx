@@ -36,7 +36,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Hello! I am the Aston Recruitment Assistant. How can I help you navigate the KaamSeKaam portal today?'
+      text: 'Hello! I am the Aston Recruitment Assistant. How can I help you navigate the Aston Recruitment portal today?'
     }
   ])
   const [isTyping, setIsTyping] = useState(false)

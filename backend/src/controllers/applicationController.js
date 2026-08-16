@@ -157,13 +157,26 @@ const updateApplicationStatus = async (req, res) => {
           } else if (status === 'SENT_TO_CLIENT') {
             const finalClientId = clientId || application.clientId
             if (finalClientId) {
-              const { Client } = require('../models')
+              const { Client, Recruiter, User: UserModel } = require('../models')
               const client = await Client.findByPk(finalClientId)
+              const recruiter = await Recruiter.findByPk(application.recruiterId, {
+                include: [{ model: UserModel }]
+              })
+              const recruiterEmail = recruiter?.User?.email
+              const adminEmail = process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in'
               if (client) {
                 // Email 1: Send to client
                 await emailService.sendSentToClientEmailToClient(client.email, client.name, candidate.name, candidate.resumePath)
-                // Email 2: Send to candidate with client cc'd
-                await emailService.sendSentToClientEmailToCandidate(candidate.User.email, candidate.name, client.name, client.company, client.email)
+                // Email 2: Send to candidate with client, recruiter and admin cc'd
+                await emailService.sendSentToClientEmailToCandidate(
+                  candidate.User.email,
+                  candidate.name,
+                  client.name,
+                  client.company,
+                  client.email,
+                  recruiterEmail,
+                  adminEmail
+                )
               }
             }
           }
