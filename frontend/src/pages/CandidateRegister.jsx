@@ -67,6 +67,50 @@ const CandidateRegister = () => {
   const [passwordStrength, setPasswordStrength] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showCompanySuggestions, setShowCompanySuggestions] = useState(false)
+  const companiesList = [
+    'Tata Consultancy Services (TCS)',
+    'Infosys',
+    'Wipro',
+    'Cognizant',
+    'Accenture',
+    'HDFC Bank',
+    'ICICI Bank',
+    'State Bank of India (SBI)',
+    'Axis Bank',
+    'HSBC',
+    'Google',
+    'Microsoft',
+    'Amazon',
+    'Meta',
+    'Apple',
+    'Netflix',
+    'Capgemini',
+    'Tech Mahindra',
+    'HCLTech',
+    'LTI-Mindtree',
+    'Oracle',
+    'Salesforce',
+    'IBM',
+    'Adobe',
+    'Intel',
+    'Cisco',
+    'NVIDIA',
+    'Dell Technologies',
+    'HP',
+    'JPMorgan Chase',
+    'Goldman Sachs',
+    'Morgan Stanley',
+    'Citi',
+    'Deutsche Bank',
+    'Standard Chartered',
+    'American Express',
+    'Flipkart',
+    'Paytm',
+    'Ola',
+    'Uber',
+    'Zomato',
+  ]
   const [customSkill, setCustomSkill] = useState('')
   const [availableSkills, setAvailableSkills] = useState(['React', 'Node.js', 'Python', 'Java', 'SQL', 'AWS', 'Docker', 'TypeScript'])
 
@@ -725,16 +769,47 @@ const CandidateRegister = () => {
                   </select>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group relative">
                   <label className="form-label">Current Company</label>
                   <input
                     type="text"
                     name="currentCompany"
                     value={formData.currentCompany}
-                    onChange={handleFormChange}
-                    placeholder="e.g. Google"
+                    onChange={(e) => {
+                      handleFormChange(e)
+                      setShowCompanySuggestions(true)
+                    }}
+                    onFocus={() => setShowCompanySuggestions(true)}
+                    onBlur={() => {
+                      setTimeout(() => setShowCompanySuggestions(false), 200)
+                    }}
+                    placeholder="Search or type company manually..."
                     className="form-input"
+                    autoComplete="off"
                   />
+                  {showCompanySuggestions && (
+                    (() => {
+                      const query = (formData.currentCompany || '').toLowerCase()
+                      const filtered = companiesList.filter(c => c.toLowerCase().includes(query))
+                      if (filtered.length === 0) return null
+                      return (
+                        <ul className="absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg divide-y divide-slate-100 dark:divide-slate-800">
+                          {filtered.map(company => (
+                            <li
+                              key={company}
+                              onMouseDown={() => {
+                                setFormData(prev => ({ ...prev, currentCompany: company }))
+                                setShowCompanySuggestions(false)
+                              }}
+                              className="px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-amber-500/10 hover:text-amber-800 dark:hover:text-amber-400 cursor-pointer font-medium transition-colors text-left"
+                            >
+                              {company}
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    })()
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
