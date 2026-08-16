@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { recruiterService, applicationService, candidateService, messageService } from '../services/api'
 import { playSoftChime } from '../utils/notification'
+import { showToast } from '../utils/notification';
 
 const calculateAiMatch = (candidate) => {
   if (!candidate) return { score: 0, strengths: [] }
@@ -117,7 +118,7 @@ const MeetingRoom = () => {
       apiRef.current = new window.JitsiMeetExternalAPI(domain, options)
 
       apiRef.current.addEventListener('videoConferenceLeft', () => {
-        alert('You have left the meeting.')
+        showToast('You have left the meeting.', 'success')
         navigate('/')
       })
     }
@@ -249,10 +250,10 @@ const MeetingRoom = () => {
         message: `[CODE_SUBMISSION] [Language: ${language}]\n${codeText}`,
       }
       await messageService.sendMessage(appDetails.id, payload)
-      alert('Code snippet submitted successfully to the Recruiter!')
+      showToast('Code snippet submitted successfully to the Recruiter!', 'success')
     } catch (err) {
       console.error('Error submitting code snippet:', err)
-      alert('Failed to submit code snippet.')
+      showToast('Failed to submit code snippet.', 'error')
     }
   }
 
@@ -267,10 +268,10 @@ const MeetingRoom = () => {
           feedbackComments: notes,
         }
       )
-      alert('Interview notes saved successfully!')
+      showToast('Interview notes saved successfully!', 'success')
     } catch (err) {
       console.error('Error saving interview notes:', err)
-      alert('Failed to save interview notes.')
+      showToast('Failed to save interview notes.', 'error')
     } finally {
       setSaving(false)
     }
@@ -542,7 +543,7 @@ const MeetingRoom = () => {
                                 if (langInfo.includes('java')) setLanguage('java');
                                 if (langInfo.includes('cpp')) setLanguage('cpp');
                                 setActiveTab('code');
-                                alert('Code loaded into playground sandbox!');
+                                showToast('Code loaded into playground sandbox!', 'success');
                               }}
                               className="text-amber-700 hover:text-amber-800 dark:text-amber-500 underline"
                             >

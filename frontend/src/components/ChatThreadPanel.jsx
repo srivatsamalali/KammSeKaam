@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { messageService } from '../services/api'
+import { showToast } from '../utils/notification';
 
 const ChatThreadPanel = ({ isOpen, onClose, applicationId, candidateName, currentUser }) => {
   const [messages, setMessages] = useState([])
@@ -59,7 +60,7 @@ const ChatThreadPanel = ({ isOpen, onClose, applicationId, candidateName, curren
       setInputText('')
     } catch (err) {
       console.error('Error sending message:', err)
-      alert('Failed to deliver message. Please try again.')
+      showToast('Failed to deliver message. Please try again.', 'error')
     } finally {
       setLoading(false)
     }

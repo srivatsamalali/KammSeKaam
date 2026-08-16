@@ -6,6 +6,7 @@ import { candidateService, messageService, adminService } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 import ChatThreadPanel from '../components/ChatThreadPanel'
+import { showToast } from '../utils/notification';
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -438,11 +439,11 @@ const CandidateDashboard = () => {
       onConfirm: async () => {
         try {
           await adminService.deleteCandidate(id)
-          alert('Candidate deleted successfully')
+          showToast('Candidate deleted successfully', 'success')
           fetchAdminUsers()
         } catch (error) {
           console.error('Error deleting candidate:', error)
-          alert('Error deleting candidate')
+          showToast('Error deleting candidate', 'error')
         }
       }
     })
@@ -592,10 +593,10 @@ const CandidateDashboard = () => {
       setEditMode(false)
       setResumeFile(null)
       fetchProfile()
-      alert('Profile updated successfully')
+      showToast('Profile updated successfully', 'success')
     } catch (error) {
       console.error('Error updating profile:', error)
-      alert('Error updating profile')
+      showToast('Error updating profile', 'error')
     }
   }
 
@@ -1006,7 +1007,7 @@ const CandidateDashboard = () => {
                       if (file && file.type === 'application/pdf') {
                         setResumeFile(file)
                       } else {
-                        alert('Only PDF files are allowed!')
+                        showToast('Only PDF files are allowed!', 'error')
                       }
                     }}
                     onClick={() => document.getElementById('resume-file-input').click()}

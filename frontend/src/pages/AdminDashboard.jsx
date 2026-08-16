@@ -9,6 +9,7 @@ import {
   clientService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
+import { showToast } from '../utils/notification';
 
 const DashboardCharts = ({ stats, recruiters, applications }) => {
   if (!stats) return null;
@@ -355,10 +356,10 @@ const AdminDashboard = () => {
       const response = await adminService.impersonate(userId)
       login(response.data.user, response.data.token)
       navigate(targetPath)
-      alert(`Logged in as ${response.data.user.email} successfully!`)
+      showToast(`Logged in as ${response.data.user.email} successfully!`, 'success')
     } catch (err) {
       console.error('Impersonation error', err)
-      alert(err.response?.data?.message || 'Impersonation failed')
+      showToast(err.response?.data?.message || 'Impersonation failed', 'error')
     }
   }
   const [stats, setStats] = useState(null)
@@ -730,10 +731,10 @@ const AdminDashboard = () => {
       setClientForm({ name: '', company: '', phone: '', email: '' })
       setShowCreateClient(false)
       fetchData()
-      alert('Client created successfully')
+      showToast('Client created successfully', 'success')
     } catch (error) {
       console.error('Error creating client:', error)
-      alert(error.response?.data?.message || 'Error creating client')
+      showToast(error.response?.data?.message || 'Error creating client', 'error')
     }
   }
 
@@ -745,10 +746,10 @@ const AdminDashboard = () => {
         try {
           await clientService.delete(id)
           fetchData()
-          alert('Client deleted successfully')
+          showToast('Client deleted successfully', 'success')
         } catch (error) {
           console.error('Error deleting client:', error)
-          alert(error.response?.data?.message || 'Error deleting client')
+          showToast(error.response?.data?.message || 'Error deleting client', 'error')
         }
       }
     })
@@ -767,11 +768,11 @@ const AdminDashboard = () => {
       })
       setShowCreateRecruiter(false)
       fetchData()
-      alert('Recruiter created successfully')
+      showToast('Recruiter created successfully', 'success')
     } catch (error) {
       console.error('Error creating recruiter:', error)
       const msg = error.response?.data?.message || error.message || 'Error creating recruiter'
-      alert(msg)
+      showToast(msg, 'success')
     }
   }
 
@@ -783,10 +784,10 @@ const AdminDashboard = () => {
         try {
           await recruiterService.delete(id)
           fetchData()
-          alert('Recruiter deleted successfully')
+          showToast('Recruiter deleted successfully', 'success')
         } catch (error) {
           console.error('Error deleting recruiter:', error)
-          alert('Error deleting recruiter')
+          showToast('Error deleting recruiter', 'error')
         }
       }
     })
@@ -800,10 +801,10 @@ const AdminDashboard = () => {
         try {
           await adminService.deleteCandidate(id)
           fetchData()
-          alert('Candidate deleted successfully')
+          showToast('Candidate deleted successfully', 'success')
         } catch (error) {
           console.error('Error deleting candidate:', error)
-          alert('Error deleting candidate')
+          showToast('Error deleting candidate', 'error')
         }
       }
     })
@@ -839,7 +840,7 @@ const AdminDashboard = () => {
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      alert('Failed to export CSV report');
+      showToast('Failed to export CSV report', 'error');
     }
   };
 
@@ -876,7 +877,7 @@ const AdminDashboard = () => {
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error exporting Excel:', error);
-      alert('Failed to export Excel report');
+      showToast('Failed to export Excel report', 'error');
     }
   };
 
@@ -1197,10 +1198,10 @@ const AdminDashboard = () => {
                                   })
                                   setEditingRecruiterId(null)
                                   fetchData()
-                                  alert('Recruiter updated')
+                                  showToast('Recruiter updated', 'success')
                                 } catch (e) {
                                   console.error('Error updating recruiter', e)
-                                  alert('Update failed')
+                                  showToast('Update failed', 'error')
                                 }
                               }}
                               className="btn-primary"
@@ -1381,11 +1382,11 @@ const AdminDashboard = () => {
                             const clientId = clientSelect.value
 
                             if (!recruiterId) {
-                              return alert('Select a recruiter')
+                              return showToast('Select a recruiter', 'warning')
                             }
 
                             if (!clientId) {
-                              return alert('Select a client')
+                              return showToast('Select a client', 'warning')
                             }
 
                             try {
@@ -1395,7 +1396,7 @@ const AdminDashboard = () => {
                                 clientId,
                               })
 
-                              alert('Assigned successfully!')
+                              showToast('Assigned successfully!', 'success')
                               fetchData()
                             } catch (err) {
                               console.error('Assign error', err)
@@ -1405,7 +1406,7 @@ const AdminDashboard = () => {
                                 err.message ||
                                 'Assign failed'
 
-                              alert(msg)
+                              showToast(msg, 'success')
                             }
                           }}
                           className="btn-primary w-full sm:w-auto h-10 flex items-center justify-center shrink-0"
@@ -1542,14 +1543,14 @@ const AdminDashboard = () => {
                               const status = editingStatusMap[app.id]
                               const reason = editingReasonMap[app.id]
                               if (!status)
-                                return alert('Select a status to override')
+                                return showToast('Select a status to override', 'warning')
                               try {
                                 await adminService.overrideStatus(app.id, {
                                   status,
                                   rejectionReason:
                                     status === 'REJECTED' ? reason : undefined,
                                 })
-                                alert('Status overridden')
+                                showToast('Status overridden', 'success')
                                 setEditingStatusMap((s) => ({
                                   ...s,
                                   [app.id]: '',
@@ -1561,10 +1562,8 @@ const AdminDashboard = () => {
                                 fetchData()
                               } catch (err) {
                                 console.error('Override error', err)
-                                alert(
-                                  err.response?.data?.message ||
-                                  'Error overriding status',
-                                )
+                                showToast(err.response?.data?.message ||
+                                  'Error overriding status', 'error')
                               }
                             }}
                             className="btn-primary w-full sm:w-auto h-9 flex items-center justify-center shrink-0"

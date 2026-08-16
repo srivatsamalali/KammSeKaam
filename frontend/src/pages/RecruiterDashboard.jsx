@@ -12,6 +12,7 @@ import {
 import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 import ChatThreadPanel from '../components/ChatThreadPanel'
+import { showToast } from '../utils/notification';
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -371,10 +372,10 @@ const RecruiterDashboard = () => {
       })
       setShowCreateRecruiter(false)
       fetchAdminUsers()
-      alert('Recruiter created successfully')
+      showToast('Recruiter created successfully', 'success')
     } catch (error) {
       console.error('Error creating recruiter:', error)
-      alert(error.response?.data?.message || 'Error creating recruiter')
+      showToast(error.response?.data?.message || 'Error creating recruiter', 'error')
     }
   }
 
@@ -396,11 +397,11 @@ const RecruiterDashboard = () => {
       onConfirm: async () => {
         try {
           await recruiterService.delete(id)
-          alert('Recruiter deleted successfully')
+          showToast('Recruiter deleted successfully', 'success')
           fetchAdminUsers()
         } catch (error) {
           console.error('Error deleting recruiter:', error)
-          alert('Error deleting recruiter')
+          showToast('Error deleting recruiter', 'error')
         }
       }
     })
@@ -417,11 +418,11 @@ const RecruiterDashboard = () => {
         specialization: specArray,
       })
       setEditingRecruiterId(null)
-      alert('Recruiter updated successfully')
+      showToast('Recruiter updated successfully', 'success')
       fetchAdminUsers()
     } catch (error) {
       console.error('Error updating recruiter:', error)
-      alert('Update failed')
+      showToast('Update failed', 'error')
     }
   }
 
@@ -517,10 +518,10 @@ const RecruiterDashboard = () => {
       setShowScheduleForm(false)
       setScheduleData({ interviewDate: '', googleMeetLink: '', interviewDuration: 60 })
       fetchApplications()
-      alert('Interview scheduled successfully!')
+      showToast('Interview scheduled successfully!', 'success')
     } catch (error) {
       console.error('Error scheduling interview:', error)
-      alert(error.response?.data?.message || 'Error scheduling interview')
+      showToast(error.response?.data?.message || 'Error scheduling interview', 'error')
     }
   }
   const handleUpdateStatus = async (applicationId, status, extraData = {}) => {
@@ -548,14 +549,14 @@ const RecruiterDashboard = () => {
         setFeedbackComments('')
       }
       fetchApplications()
-      alert('Status updated successfully')
+      showToast('Status updated successfully', 'success')
     } catch (error) {
       console.error('Error updating status:', error)
       const msg =
         error.response?.data?.message ||
         error.message ||
         'Error updating status'
-      alert(msg)
+      showToast(msg, 'success')
     }
   }
 
