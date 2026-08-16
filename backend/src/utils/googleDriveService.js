@@ -3,86 +3,143 @@ const fs = require('fs')
 
 /**
  * Google Drive API Service for uploading candidate resumes
- * 
- * Required environment variables in backend/.env:
- * 
- * GOOGLE_SERVICE_ACCOUNT_EMAIL=your-service-account@your-project-id.iam.gserviceaccount.com
- * GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\n-----END PRIVATE KEY-----\n"
- * GOOGLE_DRIVE_FOLDER_ID=1a2b3c4d5e6f7g8h9i0j-klmnopqrstuvwxyz
+ *
+ * Required environment variables:
+ *
+ * GOOGLE_APPLICATION_CREDENTIALS=/path/to/google-drive-service-account.json
+ * GOOGLE_DRIVE_FOLDER_ID=your-google-drive-folder-id
  */
 
 const getDriveClient = () => {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY
+  const credentialsPath =
+    process.env.GOOGLE_APPLICATION_CREDENTIALS
 
-  if (!email || !privateKey) {
-    console.warn('⚠️ Google Drive credentials missing in environment variables. Falling back to local storage.')
+  if (!credentialsPath) {
+    console.warn(
+      '⚠️ Google Drive credentials path is missing.'
+    )
     return null
   }
 
   try {
-    const auth = new google.auth.JWT(
-      email,
-      null,
-      privateKey.replace(/\\n/g, '\n'), // Replace escaped newlines
-      ['https://www.googleapis.com/auth/drive.file']
+    if (!fs.existsSync(credentialsPath)) {
+      console.error(
+        `❌ Google credentials file not found: ${credentialsPath}`
+      )
+      return null
+    }
+
+    const credentials = JSON.parse(
+      fs.readFileSync(credentialsPath, 'utf8')
     )
-    return google.drive({ version: 'v3', auth })
+
+    const auth = new google.auth.JWT({
+      email: credentials.client_email,
+      key: credentials.private_key,
+      scopes: [
+        'https://www.googleapis.com/auth/drive'
+      ],
+    })
+
+    return google.drive({
+      version: 'v3',
+      auth,
+    })
   } catch (error) {
-    console.error('❌ Failed to initialize Google Drive client:', error.message)
+    console.error(
+      '❌ Failed to initialize Google Drive client:',
+      error.message
+    )
     return null
   }
 }
 
 /**
- * Uploads a local file to Google Drive and returns the file web view link and file ID
- * @param {string} localFilePath Path to the local file
- * @param {string} fileName Name of the file on Google Drive
- * @returns {Promise<{fileId: string, webViewLink: string}>}
+ * Uploads a resume to Google Drive
+ *
+ * @param {string} localFilePath
+ * @param {string} fileName
+ *
+ * @returns {Promise<{
+ *   fileId: string,
+ *   webViewLink: string
+ * }>}
  */
-const uploadToGoogleDrive = async (localFilePath, fileName) => {
+const uploadToGoogleDrive = async (
+  localFilePath,
+  fileName
+) => {
   const drive = getDriveClient()
+
   if (!drive) {
-    throw new Error('Google Drive API client is not configured.')
+    throw new Error(
+      'Google Drive API client is not configured.'
+    )
   }
 
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID
+  const folderId =
+    process.env.GOOGLE_DRIVE_FOLDER_ID
+
+  if (!folderId) {
+    throw new Error(
+      'Google Drive Folder ID is not configured.'
+    )
+  }
+
+  if (!fs.existsSync(localFilePath)) {
+    throw new Error(
+      `Local resume file not found: ${localFilePath}`
+    )
+  }
+
   const fileMetadata = {
     name: fileName,
-    parents: folderId ? [folderId] : []
+    parents: [folderId],
   }
 
   const media = {
     mimeType: 'application/pdf',
-    body: fs.createReadStream(localFilePath)
+    body: fs.createReadStream(localFilePath),
   }
 
   try {
+    console.log(
+      `Uploading ${fileName} to Google Drive...`
+    )
+
     const response = await drive.files.create({
       resource: fileMetadata,
-      media: media,
-      fields: 'id, webViewLink'
+      media,
+      fields: 'id, name, webViewLink',
     })
 
-    // Optional: Share the file publicly so recruiters/clients can view it directly
+    // Allow the generated link to be viewed by anyone
     await drive.permissions.create({
       fileId: response.data.id,
       requestBody: {
         role: 'reader',
-        type: 'anyone'
-      }
+        type: 'anyone',
+      },
     })
+
+    console.log(
+      `Resume uploaded successfully. File ID: ${response.data.id}`
+    )
 
     return {
       fileId: response.data.id,
-      webViewLink: response.data.webViewLink
+      webViewLink: response.data.webViewLink,
     }
   } catch (error) {
-    console.error('❌ Google Drive upload failed:', error.message)
+    console.error(
+      '❌ Google Drive upload failed:',
+      error.message
+    )
+
     throw error
   }
 }
 
 module.exports = {
-  uploadToGoogleDrive
+  uploadToGoogleDrive,
 }

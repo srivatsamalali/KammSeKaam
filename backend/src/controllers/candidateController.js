@@ -1,6 +1,7 @@
 const { Candidate, User, Application, Recruiter } = require('../models')
 const pdfParse = require('pdf-parse')
 const fs = require('fs')
+const { uploadToGoogleDrive } = require('../utils/googleDriveService')
 
 const getProfile = async (req, res) => {
   try {
@@ -27,6 +28,7 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const candidateId = req.user.id
+
     const {
       name,
       dob,
@@ -41,7 +43,9 @@ const updateProfile = async (req, res) => {
       noticePeriod,
     } = req.body
 
-    let candidate = await Candidate.findOne({ where: { userId: candidateId } })
+    let candidate = await Candidate.findOne({
+      where: { userId: candidateId },
+    })
 
     if (!candidate) {
       return res.status(404).json({ message: 'Candidate not found' })
@@ -52,8 +56,9 @@ const updateProfile = async (req, res) => {
     if (dob) candidate.dob = dob
     if (experience) candidate.experience = experience
     if (technicalSkills) candidate.technicalSkills = technicalSkills
-    if (highestQualification)
+    if (highestQualification) {
       candidate.highestQualification = highestQualification
+    }
     if (currentCompany) candidate.currentCompany = currentCompany
     if (currentCTC) candidate.currentCTC = currentCTC
     if (expectedCTC) candidate.expectedCTC = expectedCTC
@@ -63,63 +68,137 @@ const updateProfile = async (req, res) => {
 
     // Handle resume upload
     if (req.file) {
-      candidate.resumePath = `/uploads/resumes/${req.file.filename}`
-      
+      try {
+        console.log(
+          'Uploading resume to Google Drive:',
+          req.file.filename
+        )
+
+        const googleDriveFile = await uploadToGoogleDrive(
+          req.file.path,
+          req.file.filename
+        )
+
+        candidate.resumePath = googleDriveFile.webViewLink
+
+        console.log(
+          'Resume uploaded successfully to Google Drive:',
+          googleDriveFile.webViewLink
+        )
+      } catch (uploadError) {
+        console.error(
+          'Failed to upload resume to Google Drive:',
+          uploadError.message
+        )
+
+        // Fallback to local storage if Google Drive upload fails
+        candidate.resumePath = `/uploads/resumes/${req.file.filename}`
+      }
+
       // Auto parsing resume if PDF
-      if (req.file.mimetype === 'application/pdf' || req.file.filename.toLowerCase().endsWith('.pdf')) {
+      if (
+        req.file.mimetype === 'application/pdf' ||
+        req.file.filename.toLowerCase().endsWith('.pdf')
+      ) {
         try {
           const filePath = req.file.path
           const dataBuffer = fs.readFileSync(filePath)
           const pdfData = await pdfParse(dataBuffer)
           const text = pdfData.text || ''
-          
+
           // 1. Parse Skills
           const skillsList = [
-            'JavaScript', 'Python', 'Java', 'C++', 'React', 'Node', 'SQL', 
-            'AWS', 'HTML', 'CSS', 'Angular', 'Go', 'Rust', 'Ruby', 'PHP', 
-            'Docker', 'Kubernetes', 'MongoDB', 'PostgreSQL', 'Express', 'TypeScript'
+            'JavaScript',
+            'Python',
+            'Java',
+            'C++',
+            'React',
+            'Node',
+            'SQL',
+            'AWS',
+            'HTML',
+            'CSS',
+            'Angular',
+            'Go',
+            'Rust',
+            'Ruby',
+            'PHP',
+            'Docker',
+            'Kubernetes',
+            'MongoDB',
+            'PostgreSQL',
+            'Express',
+            'TypeScript',
           ]
+
           const matchedSkills = []
+
           for (const skill of skillsList) {
             const regex = new RegExp(`\\b${skill}\\b`, 'i')
+
             if (regex.test(text)) {
               matchedSkills.push(skill)
             }
           }
+
           if (matchedSkills.length > 0) {
             // Merge with existing skills if any
-            const existingSkills = candidate.technicalSkills || []
-            const merged = Array.from(new Set([...existingSkills, ...matchedSkills]))
+            const existingSkills =
+              candidate.technicalSkills || []
+
+            const merged = Array.from(
+              new Set([
+                ...existingSkills,
+                ...matchedSkills,
+              ])
+            )
+
             candidate.technicalSkills = merged
           }
 
-          // 2. Parse Experience (look for a number before "years experience" or similar)
-          const expRegex = /\b(\d+)\+?\s*(years?|yrs?)\s*(of\s*)?experience\b/i
+          // 2. Parse Experience
+          const expRegex =
+            /\b(\d+)\+?\s*(years?|yrs?)\s*(of\s*)?experience\b/i
+
           const match = text.match(expRegex)
+
           if (match && match[1]) {
             const years = parseInt(match[1], 10)
-            if (!isNaN(years) && (!candidate.experience || candidate.experience === 0)) {
+
+            if (
+              !isNaN(years) &&
+              (!candidate.experience ||
+                candidate.experience === 0)
+            ) {
               candidate.experience = years
             }
           }
         } catch (parseError) {
-          console.error('Failed to parse resume PDF:', parseError.message)
+          console.error(
+            'Failed to parse resume PDF:',
+            parseError.message
+          )
         }
       }
     }
 
     await candidate.save()
 
-    res.json({ message: 'Profile updated successfully', candidate })
+    res.json({
+      message: 'Profile updated successfully',
+      candidate,
+    })
   } catch (error) {
     console.error('Update profile error:', error)
+
     res
       .status(500)
-      .json({ message: 'Error updating profile', error: error.message })
+      .json({
+        message: 'Error updating profile',
+        error: error.message,
+      })
   }
 }
-
-module.exports = { getProfile, updateProfile }
 
 const getCandidateApplications = async (req, res) => {
   try {
@@ -128,8 +207,12 @@ const getCandidateApplications = async (req, res) => {
     const candidate = await Candidate.findOne({
       where: { userId: candidateUserId },
     })
-    if (!candidate)
-      return res.status(404).json({ message: 'Candidate not found' })
+
+    if (!candidate) {
+      return res
+        .status(404)
+        .json({ message: 'Candidate not found' })
+    }
 
     const applications = await Application.findAll({
       where: { candidateId: candidate.id },
@@ -138,11 +221,22 @@ const getCandidateApplications = async (req, res) => {
 
     res.json(applications)
   } catch (error) {
-    console.error('Get candidate applications error:', error)
+    console.error(
+      'Get candidate applications error:',
+      error
+    )
+
     res
       .status(500)
-      .json({ message: 'Error fetching applications', error: error.message })
+      .json({
+        message: 'Error fetching applications',
+        error: error.message,
+      })
   }
 }
 
-module.exports.getCandidateApplications = getCandidateApplications
+module.exports = {
+  getProfile,
+  updateProfile,
+  getCandidateApplications,
+}
