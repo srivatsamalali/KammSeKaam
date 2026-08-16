@@ -1,4 +1,3 @@
-const { google } = require('googleapis')
 const fs = require('fs')
 
 /**
@@ -28,6 +27,8 @@ const getDriveClient = () => {
       )
       return null
     }
+
+    const { google } = require('googleapis')
 
     const credentials = JSON.parse(
       fs.readFileSync(credentialsPath, 'utf8')
