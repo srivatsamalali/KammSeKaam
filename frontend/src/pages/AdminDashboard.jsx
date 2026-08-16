@@ -336,11 +336,17 @@ const AdminDashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null })
+
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout()
-      navigate('/admin/login')
-    }
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to logout?',
+      onConfirm: () => {
+        logout()
+        navigate('/admin/login')
+      }
+    })
   }
   const [stats, setStats] = useState(null)
   const [recruiters, setRecruiters] = useState([])
@@ -700,15 +706,20 @@ const AdminDashboard = () => {
   }
 
   const handleDeleteClient = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this client?')) return
-    try {
-      await clientService.delete(id)
-      fetchData()
-      alert('Client deleted successfully')
-    } catch (error) {
-      console.error('Error deleting client:', error)
-      alert(error.response?.data?.message || 'Error deleting client')
-    }
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to delete this client?',
+      onConfirm: async () => {
+        try {
+          await clientService.delete(id)
+          fetchData()
+          alert('Client deleted successfully')
+        } catch (error) {
+          console.error('Error deleting client:', error)
+          alert(error.response?.data?.message || 'Error deleting client')
+        }
+      }
+    })
   }
 
   const handleCreateRecruiter = async (e) => {
@@ -733,29 +744,37 @@ const AdminDashboard = () => {
   }
 
   const handleDeleteRecruiter = async (id) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await recruiterService.delete(id)
-        fetchData()
-        alert('Recruiter deleted successfully')
-      } catch (error) {
-        console.error('Error deleting recruiter:', error)
-        alert('Error deleting recruiter')
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to delete this recruiter?',
+      onConfirm: async () => {
+        try {
+          await recruiterService.delete(id)
+          fetchData()
+          alert('Recruiter deleted successfully')
+        } catch (error) {
+          console.error('Error deleting recruiter:', error)
+          alert('Error deleting recruiter')
+        }
       }
-    }
+    })
   }
 
   const handleDeleteCandidate = async (id) => {
-    if (window.confirm('Are you sure you want to delete this candidate? This will delete their user profile and all applications.')) {
-      try {
-        await adminService.deleteCandidate(id)
-        fetchData()
-        alert('Candidate deleted successfully')
-      } catch (error) {
-        console.error('Error deleting candidate:', error)
-        alert('Error deleting candidate')
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to delete this candidate? This will delete their user profile and all applications.',
+      onConfirm: async () => {
+        try {
+          await adminService.deleteCandidate(id)
+          fetchData()
+          alert('Candidate deleted successfully')
+        } catch (error) {
+          console.error('Error deleting candidate:', error)
+          alert('Error deleting candidate')
+        }
       }
-    }
+    })
   }
 
   const exportApplicationsToCSV = () => {
@@ -1622,6 +1641,40 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+      {/* Custom Frosted Liquid Glass Confirm Dialog */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#2b2f3a] rounded-[24px] max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 text-center text-slate-800 dark:text-white">
+            <div className="w-12 h-12 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xl mx-auto mb-4 font-bold">
+              ❓
+            </div>
+            <h3 className="text-base font-bold mb-2">Confirm Action</h3>
+            <p className="text-sm text-slate-655 dark:text-slate-300 mb-6 leading-relaxed">{confirmModal.message}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmModal({ isOpen: false, message: '', onConfirm: null })}
+                className="flex-1 py-2.5 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm()
+                  setConfirmModal({ isOpen: false, message: '', onConfirm: null })
+                }}
+                className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white transition-all cursor-pointer shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, #d97706, #b45309)',
+                  boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.4), 0 4px 15px rgba(217,119,6,0.4)',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
