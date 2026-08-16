@@ -577,7 +577,62 @@ const RecruiterDashboard = () => {
     }
   }
 
-  if (loading) return <div className="text-center py-20">Loading...</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen page-shell">
+        {/* Header with Logout */}
+        <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                Recruiter Dashboard
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
+                Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
+              </p>
+            </div>
+
+            {/* Static Center Brand Logo */}
+            <div className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+              <img
+                src="/logo.jpeg"
+                alt="Aston Recruitment"
+                className="h-8 w-8 rounded-full object-cover shadow-md shadow-amber-200/30"
+              />
+              <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
+                Aston Recruitment
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 z-10">
+              <ThemeToggle />
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Pulse Skeleton Content Area */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-2xl p-6 h-24 border border-slate-200/50 dark:border-slate-800/40"></div>
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-2xl p-6 h-24 border border-slate-200/50 dark:border-slate-800/40"></div>
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-2xl p-6 h-24 border border-slate-200/50 dark:border-slate-800/40"></div>
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-2xl p-6 h-24 border border-slate-200/50 dark:border-slate-800/40"></div>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-3xl p-6 h-48 border border-slate-200/50 dark:border-slate-800/40"></div>
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-3xl p-6 h-48 border border-slate-200/50 dark:border-slate-800/40"></div>
+            <div className="bg-slate-100 dark:bg-slate-800/40 rounded-3xl p-6 h-48 border border-slate-200/50 dark:border-slate-800/40"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen page-shell">
