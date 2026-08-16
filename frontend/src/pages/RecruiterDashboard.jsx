@@ -352,6 +352,25 @@ const RecruiterDashboard = () => {
     fetchClients()
   }, [])
 
+  useEffect(() => {
+    window.history.pushState(null, null, window.location.pathname)
+
+    const handlePopState = () => {
+      window.history.pushState(null, null, window.location.pathname)
+      setConfirmModal({
+        isOpen: true,
+        message: 'You are about to logout. Are you sure you want to leave?',
+        onConfirm: () => {
+          logout()
+          navigate('/recruiter/login')
+        }
+      })
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [logout, navigate])
+
   const fetchClients = async () => {
     try {
       const response = await clientService.getAll()
