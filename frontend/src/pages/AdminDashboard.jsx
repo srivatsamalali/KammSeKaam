@@ -1287,11 +1287,11 @@ const AdminDashboard = () => {
                         <p className="font-semibold">{c.name}</p>
                         <p className="text-sm text-gray-600">{c.User?.email}</p>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                         {/* Recruiter Dropdown */}
                         <select
                           id={`rec-${c.id}`}
-                          className="form-input"
+                          className="form-input w-full sm:w-[180px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         >
                           <option value="">Select recruiter</option>
 
@@ -1305,7 +1305,7 @@ const AdminDashboard = () => {
                         {/* Client Dropdown */}
                         <select
                           id={`client-${c.id}`}
-                          className="form-input"
+                          className="form-input w-full sm:w-[180px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         >
                           <option value="">Select client</option>
 
@@ -1357,7 +1357,7 @@ const AdminDashboard = () => {
                               alert(msg)
                             }
                           }}
-                          className="btn-primary"
+                          className="btn-primary w-full sm:w-auto h-10 flex items-center justify-center shrink-0"
                         >
                           Assign
                         </button>
@@ -1445,7 +1445,7 @@ const AdminDashboard = () => {
                         {app.status}
                       </span>
 
-                      <div className="mt-3">
+                      <div className="mt-3 w-full sm:w-auto text-left sm:text-right">
                         <select
                           value={editingStatusMap[app.id] ?? ''}
                           onChange={(e) =>
@@ -1454,7 +1454,7 @@ const AdminDashboard = () => {
                               [app.id]: e.target.value,
                             }))
                           }
-                          className="form-input mb-2"
+                          className="form-input mb-2 w-full sm:w-[220px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         >
                           <option value="">-- Override status --</option>
                           <option value="APPLICATION_RECEIVED">
@@ -1481,11 +1481,11 @@ const AdminDashboard = () => {
                                 [app.id]: e.target.value,
                               }))
                             }
-                            className="form-input mb-2 h-20"
+                            className="form-input mb-2 h-20 w-full sm:w-[220px]"
                           />
                         )}
 
-                        <div className="space-x-2">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full justify-start sm:justify-end">
                           <button
                             onClick={async () => {
                               const status = editingStatusMap[app.id]
@@ -1516,7 +1516,7 @@ const AdminDashboard = () => {
                                 )
                               }
                             }}
-                            className="btn-primary"
+                            className="btn-primary w-full sm:w-auto h-9 flex items-center justify-center shrink-0"
                           >
                             Save
                           </button>
