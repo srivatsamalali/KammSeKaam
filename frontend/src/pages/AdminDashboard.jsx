@@ -1229,12 +1229,6 @@ const AdminDashboard = () => {
                       )}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-                      <button
-                        onClick={() => handleImpersonate(rec.userId, '/recruiter/dashboard')}
-                        className="btn-primary text-xs px-3 py-2"
-                      >
-                        Login As Recruiter
-                      </button>
                       {editingRecruiterId !== rec.id && (
                         <button
                           onClick={() => {
@@ -1293,12 +1287,6 @@ const AdminDashboard = () => {
                     )}
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-                    <button
-                      onClick={() => handleImpersonate(cand.userId, '/candidate/dashboard')}
-                      className="btn-primary text-xs px-3 py-2"
-                    >
-                      Login As Candidate
-                    </button>
                     <button
                       onClick={() => handleDeleteCandidate(cand.id)}
                       className="btn-danger text-xs px-3 py-2"

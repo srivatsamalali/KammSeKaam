@@ -349,6 +349,34 @@ const RecruiterDashboard = () => {
   const [adminUsers, setAdminUsers] = useState([])
   const [editingRecruiterId, setEditingRecruiterId] = useState(null)
   const [editingForm, setEditingForm] = useState({ name: '', specialization: '' })
+  const [showCreateRecruiter, setShowCreateRecruiter] = useState(false)
+  const [recruiterForm, setRecruiterForm] = useState({
+    email: '',
+    password: '',
+    name: '',
+    mobileNumber: '',
+    specialization: [],
+  })
+
+  const handleCreateRecruiter = async (e) => {
+    e.preventDefault()
+    try {
+      await recruiterService.create(recruiterForm)
+      setRecruiterForm({
+        email: '',
+        password: '',
+        name: '',
+        mobileNumber: '',
+        specialization: [],
+      })
+      setShowCreateRecruiter(false)
+      fetchAdminUsers()
+      alert('Recruiter created successfully')
+    } catch (error) {
+      console.error('Error creating recruiter:', error)
+      alert(error.response?.data?.message || 'Error creating recruiter')
+    }
+  }
 
   const fetchAdminUsers = async () => {
     try {
@@ -578,15 +606,87 @@ const RecruiterDashboard = () => {
           <div className="flex justify-between items-center bg-slate-900 text-white p-6 rounded-2xl shadow-xl mb-6">
             <div>
               <h2 className="text-2xl font-bold">Admin Sandbox: Recruiter Portals view</h2>
-              <p className="text-xs text-slate-400">Viewing all recruiters registered in the system (Edit and Delete options are enabled)</p>
+              <p className="text-xs text-slate-400">Viewing and managing recruiters registered in the system</p>
             </div>
-            <button
-              onClick={() => navigate('/admin/dashboard')}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg"
-            >
-              ← Back to Admin Console
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCreateRecruiter(!showCreateRecruiter)}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg"
+              >
+                {showCreateRecruiter ? 'Cancel' : 'Create New Recruiter'}
+              </button>
+              <button
+                onClick={() => navigate('/admin/dashboard')}
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg"
+              >
+                ← Back to Admin Console
+              </button>
+            </div>
           </div>
+
+          {showCreateRecruiter && (
+            <form onSubmit={handleCreateRecruiter} className="glass-card p-6 mb-6 text-left border border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-4 duration-300">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Create New Recruiter</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-group">
+                  <label className="form-label">Name</label>
+                  <input
+                    type="text"
+                    value={recruiterForm.name}
+                    onChange={(e) => setRecruiterForm({ ...recruiterForm, name: e.target.value })}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    value={recruiterForm.email}
+                    onChange={(e) => setRecruiterForm({ ...recruiterForm, email: e.target.value })}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    value={recruiterForm.password}
+                    onChange={(e) => setRecruiterForm({ ...recruiterForm, password: e.target.value })}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={recruiterForm.mobileNumber}
+                    onChange={(e) => setRecruiterForm({ ...recruiterForm, mobileNumber: e.target.value })}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-group md:col-span-2">
+                  <label className="form-label">Specialization (comma separated)</label>
+                  <input
+                    type="text"
+                    value={recruiterForm.specialization.join(', ')}
+                    onChange={(e) => setRecruiterForm({
+                      ...recruiterForm,
+                      specialization: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    })}
+                    className="form-input"
+                    placeholder="React, Java, Node.js"
+                  />
+                </div>
+              </div>
+              <button type="submit" className="btn-primary mt-4">
+                Create Recruiter
+              </button>
+            </form>
+          )}
 
           <div className="glass-card overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800">
             <div className="overflow-x-auto">
