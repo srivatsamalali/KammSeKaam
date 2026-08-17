@@ -260,7 +260,11 @@ const CandidateRegister = () => {
       triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
       const response = await authService.sendOtp({ phone: normalizedPhone, email })
       
-      if (response.data && response.data.skipOtp) {
+      if (response.data && response.data.resume) {
+        setFormData((prev) => ({ ...prev, phone: normalizedPhone, email }))
+        setStep(3)
+        triggerMessageNotification('System', 'We found your incomplete registration. Please complete your password below.')
+      } else if (response.data && response.data.skipOtp) {
         setFormData((prev) => ({ ...prev, phone: normalizedPhone, email }))
         setStep(3)
         triggerMessageNotification('System', 'OTP delivery failed. You can complete your details below.')

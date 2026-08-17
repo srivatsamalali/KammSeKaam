@@ -464,15 +464,31 @@ const sendOtp = async (req, res) => {
         .json({ message: 'This phone number is already registered' })
     }
 
+    if (verifiedUser && !isUserFullyRegistered(verifiedUser)) {
+      return res.json({
+        message: 'We found your incomplete registration. Please complete your details below.',
+        phone: normalizedPhone,
+        resume: true,
+      })
+    }
+
     // Check if email already exists in a fully registered user
     const verifiedEmailUser = await User.findOne({
       where: { email },
     })
 
-    if (verifiedEmailUser && isUserFullyRegistered(verifiedEmailUser) && verifiedEmailUser.phone !== normalizedPhone) {
+    if (verifiedEmailUser && isUserFullyRegistered(verifiedEmailUser)) {
       return res
         .status(400)
         .json({ message: 'This email is already registered' })
+    }
+
+    if (verifiedEmailUser && !isUserFullyRegistered(verifiedEmailUser)) {
+      return res.json({
+        message: 'We found your incomplete registration. Please complete your details below.',
+        phone: normalizedPhone,
+        resume: true,
+      })
     }
 
     // Find or create a temporary user
