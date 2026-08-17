@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService, candidateService } from '../services/api'
 import MonkeyPasswordToggle from '../components/MonkeyPasswordToggle'
@@ -9,6 +9,52 @@ import { triggerMessageNotification } from '../utils/notification'
 const CandidateRegister = () => {
   const navigate = useNavigate()
   const { login, user, loading: authLoading } = useAuth()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state && location.state.email && location.state.phone) {
+      setEmail(location.state.email)
+      
+      let rawPhone = location.state.phone
+      let code = '+91'
+      if (rawPhone.startsWith('+1')) {
+        code = '+1'
+        rawPhone = rawPhone.substring(2)
+      } else if (rawPhone.startsWith('+44')) {
+        code = '+44'
+        rawPhone = rawPhone.substring(3)
+      } else if (rawPhone.startsWith('+61')) {
+        code = '+61'
+        rawPhone = rawPhone.substring(3)
+      } else if (rawPhone.startsWith('+971')) {
+        code = '+971'
+        rawPhone = rawPhone.substring(4)
+      } else if (rawPhone.startsWith('+65')) {
+        code = '+65'
+        rawPhone = rawPhone.substring(3)
+      } else if (rawPhone.startsWith('+91')) {
+        code = '+91'
+        rawPhone = rawPhone.substring(3)
+      }
+      setSelectedCountryCode(code)
+      setPhone(rawPhone)
+
+      setFormData((prev) => ({
+        ...prev,
+        email: location.state.email,
+        phone: location.state.phone,
+      }))
+
+      if (location.state.step) {
+        setStep(location.state.step)
+      }
+      if (location.state.resume) {
+        setOtpSent(true)
+        setOtpTimer(60)
+        setErrors({ form: 'We found an incomplete registration. A new OTP has been sent to your email.' })
+      }
+    }
+  }, [location])
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -212,8 +258,9 @@ const CandidateRegister = () => {
         return
       }
 
+      const normalizedPhone = selectedCountryCode + phone
       triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
-      await authService.sendOtp({ phone, email })
+      await authService.sendOtp({ phone: normalizedPhone, email })
       setOtpSent(true)
       setOtpTimer(60)
       setStep(2)
@@ -237,8 +284,9 @@ const CandidateRegister = () => {
         return
       }
 
-      await authService.verifyOtp({ phone, otp })
-      setFormData((prev) => ({ ...prev, phone, email }))
+      const normalizedPhone = selectedCountryCode + phone
+      await authService.verifyOtp({ phone: normalizedPhone, otp })
+      setFormData((prev) => ({ ...prev, phone: normalizedPhone, email }))
       setStep(3)
     } catch (error) {
       setErrors({
@@ -255,8 +303,9 @@ const CandidateRegister = () => {
     setLoading(true)
 
     try {
+      const normalizedPhone = selectedCountryCode + phone
       triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
-      await authService.resendOtp({ phone, email })
+      await authService.resendOtp({ phone: normalizedPhone, email })
       setOtpTimer(60)
     } catch (error) {
       setErrors({

@@ -85,7 +85,24 @@ const CandidateLogin = () => {
 
       navigate('/candidate/dashboard')
     } catch (error) {
-      setErrors({ form: error.response?.data?.message || 'Login failed' })
+      const data = error.response?.data
+      if (data && data.isIncomplete) {
+        try {
+          await authService.sendOtp({ phone: data.phone, email: data.email })
+        } catch (otpErr) {
+          console.error('Failed to trigger automatic OTP resend:', otpErr)
+        }
+        navigate('/candidate/register', { 
+          state: { 
+            resume: true, 
+            email: data.email, 
+            phone: data.phone, 
+            step: 2 
+          } 
+        })
+      } else {
+        setErrors({ form: data?.message || 'Login failed' })
+      }
     } finally {
       setLoading(false)
     }

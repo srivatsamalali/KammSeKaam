@@ -210,6 +210,15 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'User does not exist' })
     }
 
+    if (user && user.password === 'temp') {
+      return res.status(400).json({
+        message: 'Your registration is incomplete. Please complete your registration.',
+        isIncomplete: true,
+        email: user.email,
+        phone: user.phone,
+      })
+    }
+
     const isPasswordValid = await user.comparePassword(password)
 
     if (!isPasswordValid) {
@@ -434,23 +443,23 @@ const sendOtp = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email format' })
     }
 
-    // Check if phone already exists in a verified user
+    // Check if phone already exists in a fully registered user
     const verifiedUser = await User.findOne({
-      where: { phone: normalizedPhone, isPhoneVerified: true },
+      where: { phone: normalizedPhone },
     })
 
-    if (verifiedUser) {
+    if (verifiedUser && verifiedUser.password !== 'temp') {
       return res
         .status(400)
         .json({ message: 'This phone number is already registered' })
     }
 
-    // Check if email already exists in a verified user
+    // Check if email already exists in a fully registered user
     const verifiedEmailUser = await User.findOne({
-      where: { email, isPhoneVerified: true },
+      where: { email },
     })
 
-    if (verifiedEmailUser && verifiedEmailUser.phone !== normalizedPhone) {
+    if (verifiedEmailUser && verifiedEmailUser.password !== 'temp' && verifiedEmailUser.phone !== normalizedPhone) {
       return res
         .status(400)
         .json({ message: 'This email is already registered' })
@@ -464,27 +473,35 @@ const sendOtp = async (req, res) => {
     if (user) {
       // Update email if different (for retry scenarios)
       if (user.email !== email) {
-        // Check if this email is used elsewhere
+        // Check if this email is used elsewhere by a fully registered user
         const emailExists = await User.findOne({ where: { email } })
-        if (emailExists && emailExists.id !== user.id) {
+        if (emailExists && emailExists.password !== 'temp' && emailExists.id !== user.id) {
           return res.status(400).json({ message: 'This email is already registered' })
         }
         user.email = email
         await user.save()
       }
     } else {
-      // Check if email exists before creating new user
+      // Check if email exists by fully registered user before creating new user
       const emailExists = await User.findOne({ where: { email } })
-      if (emailExists) {
+      if (emailExists && emailExists.password !== 'temp') {
         return res.status(400).json({ message: 'This email is already registered' })
       }
 
-      user = await User.create({
-        phone: normalizedPhone,
-        email,
-        password: 'temp', // Temporary placeholder, will be set during registration
-        role: 'CANDIDATE',
-      })
+      // If a temp user exists with this email but different phone, reuse or update it
+      const tempEmailUser = await User.findOne({ where: { email } })
+      if (tempEmailUser && tempEmailUser.password === 'temp') {
+        user = tempEmailUser
+        user.phone = normalizedPhone
+        await user.save()
+      } else {
+        user = await User.create({
+          phone: normalizedPhone,
+          email,
+          password: 'temp', // Temporary placeholder, will be set during registration
+          role: 'CANDIDATE',
+        })
+      }
     }
 
     // Send OTP
