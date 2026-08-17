@@ -76,6 +76,7 @@ const CandidateLogin = () => {
       const response = await authService.login({
         identifier: formData.identifier,
         password: formData.password,
+        role: 'CANDIDATE',
       })
       login(response.data.user, response.data.token)
 

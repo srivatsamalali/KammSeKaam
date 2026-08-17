@@ -71,6 +71,7 @@ const RecruiterLogin = () => {
         identifier: formData.email,
         email: formData.email,
         password: formData.password,
+        role: 'RECRUITER',
       })
 
       if (response.data.user.role !== 'RECRUITER' && response.data.user.role !== 'ADMIN') {

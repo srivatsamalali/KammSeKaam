@@ -167,7 +167,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { identifier, email, phone, password } = req.body
+    const { identifier, email, phone, password, role } = req.body
     const rawIdentifier = identifier || email || phone
     const normalizedIdentifier = rawIdentifier?.toString().trim()
 
@@ -208,6 +208,16 @@ const login = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ message: 'User does not exist' })
+    }
+
+    if (role) {
+      if (role === 'RECRUITER') {
+        if (user.role !== 'RECRUITER' && user.role !== 'ADMIN') {
+          return res.status(401).json({ message: 'Invalid recruiter credentials' })
+        }
+      } else if (user.role !== role) {
+        return res.status(401).json({ message: `Invalid ${role.toLowerCase()} credentials` })
+      }
     }
 
     if (user && !isUserFullyRegistered(user)) {

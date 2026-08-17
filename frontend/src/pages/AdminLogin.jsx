@@ -50,6 +50,7 @@ const AdminLogin = () => {
         identifier: formData.email,
         email: formData.email,
         password: formData.password,
+        role: 'ADMIN',
       })
 
       if (response.data.user.role !== 'ADMIN') {
