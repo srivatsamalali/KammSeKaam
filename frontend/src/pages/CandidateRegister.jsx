@@ -49,9 +49,7 @@ const CandidateRegister = () => {
         setStep(location.state.step)
       }
       if (location.state.resume) {
-        setOtpSent(true)
-        setOtpTimer(60)
-        setErrors({ form: 'We found an incomplete registration. A new OTP has been sent to your email.' })
+        setErrors({ form: 'We found your incomplete registration. Please set your password and complete your profile below.' })
       }
     }
   }, [location])
