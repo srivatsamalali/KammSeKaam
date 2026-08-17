@@ -515,7 +515,16 @@ const sendOtp = async (req, res) => {
     }
 
     // Send OTP
-    await sendOtpToPhone(normalizedPhone, email)
+    try {
+      await sendOtpToPhone(normalizedPhone, email)
+    } catch (otpError) {
+      console.error('Failed to send OTP, allowing user to proceed anyway:', otpError)
+      return res.json({ 
+        message: 'We had trouble sending the verification OTP, but you can proceed anyway.', 
+        phone: normalizedPhone, 
+        skipOtp: true 
+      })
+    }
 
     res.json({ message: 'OTP sent to your email', phone: normalizedPhone })
   } catch (error) {

@@ -258,10 +258,17 @@ const CandidateRegister = () => {
 
       const normalizedPhone = selectedCountryCode + phone
       triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
-      await authService.sendOtp({ phone: normalizedPhone, email })
-      setOtpSent(true)
-      setOtpTimer(60)
-      setStep(2)
+      const response = await authService.sendOtp({ phone: normalizedPhone, email })
+      
+      if (response.data && response.data.skipOtp) {
+        setFormData((prev) => ({ ...prev, phone: normalizedPhone, email }))
+        setStep(3)
+        triggerMessageNotification('System', 'OTP delivery failed. You can complete your details below.')
+      } else {
+        setOtpSent(true)
+        setOtpTimer(60)
+        setStep(2)
+      }
     } catch (error) {
       setErrors({
         form: error.response?.data?.message || 'Failed to send OTP',
