@@ -12,14 +12,14 @@ const sendOtpToPhone = async (phone, email) => {
     const otp = generateOtp()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes expiry
 
-    // Update user with OTP
+    // Update user with OTP by email
     await User.update(
       {
         emailOtp: otp,
         emailOtpExpiresAt: expiresAt,
       },
       {
-        where: { phone },
+        where: { email },
       }
     )
 
@@ -49,9 +49,9 @@ const sendOtpToPhone = async (phone, email) => {
 }
 
 // Verify OTP
-const verifyOtp = async (phone, otp) => {
+const verifyOtp = async (phone, email, otp) => {
   try {
-    const user = await User.findOne({ where: { phone } })
+    const user = await User.findOne({ where: { email } })
 
     if (!user) {
       return { success: false, message: 'User not found' }

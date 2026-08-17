@@ -294,7 +294,7 @@ const CandidateRegister = () => {
       }
 
       const normalizedPhone = selectedCountryCode + phone
-      await authService.verifyOtp({ phone: normalizedPhone, otp })
+      await authService.verifyOtp({ phone: normalizedPhone, email, otp })
       setFormData((prev) => ({ ...prev, phone: normalizedPhone, email }))
       setStep(3)
     } catch (error) {

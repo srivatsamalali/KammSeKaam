@@ -64,17 +64,7 @@ const register = async (req, res) => {
         .json({ message: 'Email already registered. Please login.' })
     }
 
-    // If a completed user with a real password already exists with this phone (not temp)
-    if (
-      existingPhoneUser &&
-      existingPhoneUser.password &&
-      isUserFullyRegistered(existingPhoneUser) &&
-      existingPhoneUser.email !== email
-    ) {
-      return res
-        .status(400)
-        .json({ message: 'Phone number already registered with another account.' })
-    }
+
 
     // Target user to update (e.g. created during send-otp step) or create new
     let user = existingEmailUser || existingPhoneUser
@@ -453,82 +443,33 @@ const sendOtp = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email format' })
     }
 
-    // Check if phone already exists in a fully registered user
-    const verifiedUser = await User.findOne({
-      where: { phone: normalizedPhone },
+    // Locate user by unique Email identifier
+    const existingUser = await User.findOne({
+      where: { email }
     })
 
-    if (verifiedUser && isUserFullyRegistered(verifiedUser)) {
-      return res
-        .status(400)
-        .json({ message: 'This phone number is already registered' })
-    }
-
-    if (verifiedUser && !isUserFullyRegistered(verifiedUser)) {
-      return res.json({
-        message: 'We found your incomplete registration. Please complete your details below.',
-        phone: normalizedPhone,
-        resume: true,
-      })
-    }
-
-    // Check if email already exists in a fully registered user
-    const verifiedEmailUser = await User.findOne({
-      where: { email },
-    })
-
-    if (verifiedEmailUser && isUserFullyRegistered(verifiedEmailUser)) {
-      return res
-        .status(400)
-        .json({ message: 'This email is already registered' })
-    }
-
-    if (verifiedEmailUser && !isUserFullyRegistered(verifiedEmailUser)) {
-      return res.json({
-        message: 'We found your incomplete registration. Please complete your details below.',
-        phone: normalizedPhone,
-        resume: true,
-      })
-    }
-
-    // Find or create a temporary user
-    let user = await User.findOne({ 
-      where: { phone: normalizedPhone }
-    })
-
-    if (user) {
-      // Update email if different (for retry scenarios)
-      if (user.email !== email) {
-        // Check if this email is used elsewhere by a fully registered user
-        const emailExists = await User.findOne({ where: { email } })
-        if (emailExists && isUserFullyRegistered(emailExists) && emailExists.id !== user.id) {
-          return res.status(400).json({ message: 'This email is already registered' })
-        }
-        user.email = email
-        await user.save()
-      }
-    } else {
-      // Check if email exists by fully registered user before creating new user
-      const emailExists = await User.findOne({ where: { email } })
-      if (emailExists && isUserFullyRegistered(emailExists)) {
+    if (existingUser) {
+      if (isUserFullyRegistered(existingUser)) {
         return res.status(400).json({ message: 'This email is already registered' })
-      }
-
-      // If a temp user exists with this email but different phone, reuse or update it
-      const tempEmailUser = await User.findOne({ where: { email } })
-      if (tempEmailUser && !isUserFullyRegistered(tempEmailUser)) {
-        user = tempEmailUser
-        user.phone = normalizedPhone
-        await user.save()
       } else {
-        user = await User.create({
+        // Temp user exists: update phone to incoming number and allow resume
+        existingUser.phone = normalizedPhone
+        await existingUser.save()
+        return res.json({
+          message: 'We found your incomplete registration. Please complete your details below.',
           phone: normalizedPhone,
-          email,
-          password: 'temp', // Temporary placeholder, will be set during registration
-          role: 'CANDIDATE',
+          resume: true,
         })
       }
     }
+
+    // Email not registered: create temporary user record
+    const user = await User.create({
+      phone: normalizedPhone,
+      email,
+      password: 'temp',
+      role: 'CANDIDATE',
+    })
 
     // Send OTP
     try {
@@ -562,16 +503,16 @@ const sendOtp = async (req, res) => {
 
 const verifyPhoneOtp = async (req, res) => {
   try {
-    const { phone, otp } = req.body
+    const { phone, email, otp } = req.body
     const normalizedPhone = normalizePhone(phone)
 
-    if (!normalizedPhone || !otp) {
+    if (!normalizedPhone || !email || !otp) {
       return res
         .status(400)
-        .json({ message: 'Phone number and OTP are required' })
+        .json({ message: 'Phone, email and OTP are required' })
     }
 
-    const result = await verifyOtp(normalizedPhone, otp)
+    const result = await verifyOtp(normalizedPhone, email, otp)
 
     if (!result.success) {
       return res.status(400).json({ message: result.message })
