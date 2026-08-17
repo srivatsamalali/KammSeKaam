@@ -1,4 +1,14 @@
 const { User, Candidate, Recruiter, Notification } = require('../models')
+const bcrypt = require('bcryptjs')
+
+const isUserFullyRegistered = (user) => {
+  if (!user || !user.password) return false;
+  try {
+    return !bcrypt.compareSync('temp', user.password);
+  } catch (e) {
+    return true;
+  }
+}
 const { Op } = require('sequelize')
 const { generateToken, generateResetToken } = require('../utils/tokenService')
 const { validatePassword, validateEmail } = require('../utils/validators')
@@ -46,7 +56,7 @@ const register = async (req, res) => {
     if (
       existingEmailUser &&
       existingEmailUser.password &&
-      existingEmailUser.password !== 'temp' &&
+      isUserFullyRegistered(existingEmailUser) &&
       existingEmailUser.phone !== normalizedPhone
     ) {
       return res
@@ -58,7 +68,7 @@ const register = async (req, res) => {
     if (
       existingPhoneUser &&
       existingPhoneUser.password &&
-      existingPhoneUser.password !== 'temp' &&
+      isUserFullyRegistered(existingPhoneUser) &&
       existingPhoneUser.email !== email
     ) {
       return res
@@ -210,7 +220,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'User does not exist' })
     }
 
-    if (user && user.password === 'temp') {
+    if (user && !isUserFullyRegistered(user)) {
       return res.status(400).json({
         message: 'Your registration is incomplete. Please complete your registration.',
         isIncomplete: true,
@@ -448,7 +458,7 @@ const sendOtp = async (req, res) => {
       where: { phone: normalizedPhone },
     })
 
-    if (verifiedUser && verifiedUser.password !== 'temp') {
+    if (verifiedUser && isUserFullyRegistered(verifiedUser)) {
       return res
         .status(400)
         .json({ message: 'This phone number is already registered' })
@@ -459,7 +469,7 @@ const sendOtp = async (req, res) => {
       where: { email },
     })
 
-    if (verifiedEmailUser && verifiedEmailUser.password !== 'temp' && verifiedEmailUser.phone !== normalizedPhone) {
+    if (verifiedEmailUser && isUserFullyRegistered(verifiedEmailUser) && verifiedEmailUser.phone !== normalizedPhone) {
       return res
         .status(400)
         .json({ message: 'This email is already registered' })
@@ -475,7 +485,7 @@ const sendOtp = async (req, res) => {
       if (user.email !== email) {
         // Check if this email is used elsewhere by a fully registered user
         const emailExists = await User.findOne({ where: { email } })
-        if (emailExists && emailExists.password !== 'temp' && emailExists.id !== user.id) {
+        if (emailExists && isUserFullyRegistered(emailExists) && emailExists.id !== user.id) {
           return res.status(400).json({ message: 'This email is already registered' })
         }
         user.email = email
@@ -484,13 +494,13 @@ const sendOtp = async (req, res) => {
     } else {
       // Check if email exists by fully registered user before creating new user
       const emailExists = await User.findOne({ where: { email } })
-      if (emailExists && emailExists.password !== 'temp') {
+      if (emailExists && isUserFullyRegistered(emailExists)) {
         return res.status(400).json({ message: 'This email is already registered' })
       }
 
       // If a temp user exists with this email but different phone, reuse or update it
       const tempEmailUser = await User.findOne({ where: { email } })
-      if (tempEmailUser && tempEmailUser.password === 'temp') {
+      if (tempEmailUser && !isUserFullyRegistered(tempEmailUser)) {
         user = tempEmailUser
         user.phone = normalizedPhone
         await user.save()
