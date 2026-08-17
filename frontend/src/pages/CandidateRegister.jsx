@@ -257,7 +257,6 @@ const CandidateRegister = () => {
       }
 
       const normalizedPhone = selectedCountryCode + phone
-      triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
       const response = await authService.sendOtp({ phone: normalizedPhone, email })
       
       if (response.data && response.data.resume) {
@@ -269,6 +268,7 @@ const CandidateRegister = () => {
         setStep(3)
         triggerMessageNotification('System', 'OTP delivery failed. You can complete your details below.')
       } else {
+        triggerMessageNotification('System', 'Please check your mailbox for the OTP!')
         setOtpSent(true)
         setOtpTimer(60)
         setStep(2)
