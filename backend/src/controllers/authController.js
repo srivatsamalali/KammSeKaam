@@ -215,6 +215,10 @@ const login = async (req, res) => {
         if (user.role !== 'RECRUITER' && user.role !== 'ADMIN') {
           return res.status(401).json({ message: 'Invalid recruiter credentials' })
         }
+      } else if (role === 'CANDIDATE') {
+        if (user.role !== 'CANDIDATE' && user.role !== 'ADMIN') {
+          return res.status(401).json({ message: 'Invalid candidate credentials' })
+        }
       } else if (user.role !== role) {
         return res.status(401).json({ message: `Invalid ${role.toLowerCase()} credentials` })
       }
