@@ -16,6 +16,7 @@ const PublicHeader = () => {
   const [clientForm, setClientForm] = useState({
     from: '',
     company: '',
+    subject: '',
     body: ''
   })
 
@@ -338,9 +339,10 @@ const PublicHeader = () => {
                 <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Subject</label>
                 <input 
                   type="text" 
-                  value={`Register yourself as ${clientForm.company || '[Company]'}`}
-                  className="w-full bg-slate-950/50 border border-slate-850 rounded-lg px-3 py-2 text-xs text-slate-500"
-                  disabled
+                  placeholder={`Register yourself as ${clientForm.company || '[Company]'}`}
+                  value={clientForm.subject}
+                  onChange={(e) => setClientForm(prev => ({ ...prev, subject: e.target.value }))}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
                 />
               </div>
               <div>

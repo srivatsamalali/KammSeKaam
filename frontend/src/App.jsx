@@ -23,6 +23,15 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import MeetingRoom from './pages/MeetingRoom'
 
+// Scroll to top on route change helper
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 function AnimatedRoutes() {
   const location = useLocation()
 
@@ -89,6 +98,7 @@ function App() {
       <div className="min-h-screen w-full bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300">
         <div className="w-full">
           <BrowserRouter>
+            <ScrollToTop />
             <PublicHeader />
             <IdleTimeoutHandler />
             <AnimatedRoutes />
