@@ -76,7 +76,6 @@ const CandidateLogin = () => {
       const response = await authService.login({
         identifier: formData.identifier,
         password: formData.password,
-        role: 'CANDIDATE',
       })
       login(response.data.user, response.data.token)
 
@@ -88,13 +87,13 @@ const CandidateLogin = () => {
     } catch (error) {
       const data = error.response?.data
       if (data && data.isIncomplete) {
-        navigate('/candidate/register', { 
-          state: { 
-            resume: true, 
-            email: data.email, 
-            phone: data.phone, 
-            step: 3 
-          } 
+        navigate('/candidate/register', {
+          state: {
+            resume: true,
+            email: data.email,
+            phone: data.phone,
+            step: 3
+          }
         })
       } else {
         setErrors({ form: data?.message || 'Login failed' })
@@ -177,9 +176,9 @@ const CandidateLogin = () => {
                     required
                   />
                 </div>
-                <MonkeyPasswordToggle 
-                  showPassword={showPassword} 
-                  onClick={() => setShowPassword(!showPassword)} 
+                <MonkeyPasswordToggle
+                  showPassword={showPassword}
+                  onClick={() => setShowPassword(!showPassword)}
                 />
               </div>
 
