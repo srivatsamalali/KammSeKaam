@@ -8,6 +8,7 @@ const LandingPage = () => {
   const [chatMessages, setChatMessages] = useState([
     { text: "Hello! Welcome to Aston Recruitment. How can I help you today?", isBot: true }
   ])
+  const [flippedCardIndex, setFlippedCardIndex] = useState(null)
 
   const handleSendBotMessage = (text) => {
     const trimmed = text.trim()
@@ -48,14 +49,14 @@ const LandingPage = () => {
   }, [])
 
   const industries = [
-    { name: 'Technology & IT', icon: '💻', img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60' },
-    { name: 'GCCs', icon: '🏢', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Banking & Financial Services', icon: '🏦', img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Sales & Marketing', icon: '🤝', img: 'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Operations', icon: '⚙️', img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Manufacturing', icon: '🏭', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Healthcare', icon: '🩺', img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Corporate Functions', icon: '📊', img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&auto=format&fit=crop&q=60' },
+    { name: 'Technology & IT', icon: '💻', img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing top-tier developers, systems architects, and engineering leaders for high-growth tech platforms.' },
+    { name: 'GCCs', icon: '🏢', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500&auto=format&fit=crop&q=60', desc: 'Building premium global capability centers with technical, financial, operational, and leadership hubs.' },
+    { name: 'Banking & Financial Services', icon: '🏦', img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&auto=format&fit=crop&q=60', desc: 'Placing seasoned investment bankers, credit risk analysts, and modern fintech disruptors.' },
+    { name: 'Sales & Marketing', icon: '🤝', img: 'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=500&auto=format&fit=crop&q=60', desc: 'Acquiring high-velocity revenue leaders, growth marketers, and global brand strategists.' },
+    { name: 'Operations', icon: '⚙️', img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&auto=format&fit=crop&q=60', desc: 'Optimizing supply chains and logistics with strategic facilities and operational directors.' },
+    { name: 'Manufacturing', icon: '🏭', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&auto=format&fit=crop&q=60', desc: 'Recruiting precise plant managers, industrial engineers, and quality assurance leads.' },
+    { name: 'Healthcare', icon: '🩺', img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=60', desc: 'Connecting top medical centers with licensed practitioners, nurses, and laboratory researchers.' },
+    { name: 'Corporate Functions', icon: '📊', img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing strategic human resources, legal advisors, accountants, and executive administrators.' },
   ]
 
   return (
@@ -151,13 +152,26 @@ const LandingPage = () => {
             {industries.map((ind, idx) => (
               <div 
                 key={idx} 
-                className="relative h-44 rounded-xl overflow-hidden shadow-md group cursor-pointer transition-all duration-300 hover:scale-[1.03] hover:shadow-lg"
+                className="h-44 [perspective:1000px] cursor-pointer"
+                onClick={() => setFlippedCardIndex(flippedCardIndex === idx ? null : idx)}
               >
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url('${ind.img}')` }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#090f19]/90 via-[#090f19]/60 to-[#090f19]/30" />
-                <div className="absolute inset-0 p-5 flex flex-col justify-end items-start text-left z-10">
-                  <span className="text-2xl mb-2 group-hover:-translate-y-1.5 transition-transform">{ind.icon}</span>
-                  <h3 className="text-white font-bold text-sm tracking-tight leading-tight">{ind.name}</h3>
+                <div className={`relative w-full h-full duration-500 [transform-style:preserve-3d] ${flippedCardIndex === idx ? '[transform:rotateY(180deg)]' : ''}`}>
+                  {/* Front Side */}
+                  <div className="absolute inset-0 w-full h-full rounded-xl overflow-hidden shadow-md [backface-visibility:hidden]">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${ind.img}')` }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#090f19]/90 via-[#090f19]/60 to-[#090f19]/30" />
+                    <div className="absolute inset-0 p-5 flex flex-col justify-end items-start text-left z-10">
+                      <span className="text-2xl mb-2">{ind.icon}</span>
+                      <h3 className="text-white font-bold text-sm tracking-tight leading-tight">{ind.name}</h3>
+                    </div>
+                  </div>
+
+                  {/* Back Side */}
+                  <div className="absolute inset-0 w-full h-full rounded-xl p-5 bg-[#090f19] border border-slate-800/80 flex flex-col justify-center items-center text-center [backface-visibility:hidden] [transform:rotateY(180deg)] shadow-lg">
+                    <span className="text-2xl mb-1">{ind.icon}</span>
+                    <h4 className="text-[#b88f3f] font-bold text-xs mb-2 uppercase tracking-wider">{ind.name}</h4>
+                    <p className="text-slate-300 text-[10px] leading-relaxed font-medium">{ind.desc}</p>
+                  </div>
                 </div>
               </div>
             ))}
