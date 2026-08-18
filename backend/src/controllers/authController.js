@@ -462,14 +462,20 @@ const sendOtp = async (req, res) => {
       if (isUserFullyRegistered(existingUser)) {
         return res.status(400).json({ message: 'This email is already registered' })
       } else {
-        // Temp user exists: update phone to incoming number and allow resume
+        // Temp user exists: check if they have already verified their email via OTP
+        if (existingUser.isEmailVerified) {
+          existingUser.phone = normalizedPhone
+          await existingUser.save()
+          return res.json({
+            message: 'We found your incomplete registration. Please complete your details below.',
+            phone: normalizedPhone,
+            resume: true,
+          })
+        }
+        
+        // Email is not verified yet: update phone and fall through to send a new OTP!
         existingUser.phone = normalizedPhone
         await existingUser.save()
-        return res.json({
-          message: 'We found your incomplete registration. Please complete your details below.',
-          phone: normalizedPhone,
-          resume: true,
-        })
       }
     }
 
@@ -526,6 +532,13 @@ const verifyPhoneOtp = async (req, res) => {
 
     if (!result.success) {
       return res.status(400).json({ message: result.message })
+    }
+
+    // Set isEmailVerified to true on database user record
+    const user = await User.findOne({ where: { email } })
+    if (user) {
+      user.isEmailVerified = true
+      await user.save()
     }
 
     res.json({ message: result.message, verified: true })

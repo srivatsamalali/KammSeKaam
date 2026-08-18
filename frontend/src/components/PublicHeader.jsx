@@ -1,18 +1,49 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/api'
 import { triggerMessageNotification, playSoftChime } from '../utils/notification'
 
 const PublicHeader = () => {
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
   const { user } = useAuth()
   const lastCheckedRef = useRef({})
+
+  const [clientModalOpen, setClientModalOpen] = useState(false)
+  const [clientForm, setClientForm] = useState({
+    from: '',
+    company: '',
+    body: ''
+  })
+
+  // State to handle hovered nav menus
+  const [activeDropdown, setActiveDropdown] = useState(null)
+
+  useEffect(() => {
+    const handleOpenModal = () => setClientModalOpen(true)
+    window.addEventListener('aston-open-client-modal', handleOpenModal)
+    return () => window.removeEventListener('aston-open-client-modal', handleOpenModal)
+  }, [])
+
+  const handleSendClientEmail = (e) => {
+    e.preventDefault()
+    if (!clientForm.company.trim()) {
+      alert('Company Name is required')
+      return
+    }
+    triggerMessageNotification('System', 'Registration request sent successfully to Aston Recruitment!')
+    setClientModalOpen(false)
+    setClientForm({
+      from: 'sender@companymail.com',
+      company: '',
+      body: ''
+    })
+  }
+
   const getInitialPref = () => {
-    // If logged in, map preference to the active role
     const token = localStorage.getItem('token')
     if (token) {
       try {
@@ -21,7 +52,6 @@ const PublicHeader = () => {
         if (userObj.role === 'RECRUITER' || userObj.role === 'ADMIN') return 'hiring'
       } catch (e) {}
     }
-    // Else return saved user preference
     return localStorage.getItem('user_preference') || ''
   }
 
@@ -34,40 +64,6 @@ const PublicHeader = () => {
     window.addEventListener('local-storage-pref', handlePrefChange)
     return () => window.removeEventListener('local-storage-pref', handlePrefChange)
   }, [])
-
-  useEffect(() => {
-    if (user?.role !== 'CANDIDATE') return
-
-    const checkNewMessages = async () => {
-      try {
-        const cachedIdsStr = localStorage.getItem('candidate_app_ids')
-        if (!cachedIdsStr) return
-        const appIds = JSON.parse(cachedIdsStr)
-
-        for (const appId of appIds) {
-          const res = await messageService.getMessages(appId)
-          const messages = res.data
-          const lastCount = lastCheckedRef.current[appId]
-
-          if (lastCount !== undefined && messages.length > lastCount) {
-            const newlyAdded = messages.slice(lastCount)
-            newlyAdded.forEach(msg => {
-              if (msg.senderId !== user?.id) {
-                triggerMessageNotification('Recruiter', msg.message)
-              }
-            })
-          }
-          lastCheckedRef.current[appId] = messages.length
-        }
-      } catch (err) {
-        console.error('Background message check error:', err)
-      }
-    }
-
-    checkNewMessages()
-    const interval = setInterval(checkNewMessages, 8000)
-    return () => clearInterval(interval)
-  }, [user])
 
   const [darkMode, setDarkMode] = useState(() => {
     const isDark = localStorage.getItem('theme') === 'dark' || 
@@ -95,7 +91,6 @@ const PublicHeader = () => {
   const isDashboard = window.location.pathname.includes('/dashboard') || window.location.pathname.includes('/meeting')
   if (isDashboard) return null
 
-  // Calculate active index and metrics for mobile bottom nav sliding glass pill
   let activeIndex = 0
   let totalTabs = 1
 
@@ -115,111 +110,269 @@ const PublicHeader = () => {
 
   return (
     <>
-      <nav className="glass sticky top-0 z-50 mx-4 my-4 rounded-[32px] border border-white/70 shadow-2xl bg-white/80 backdrop-blur-xl">
-        <div className="w-full mx-auto px-6 sm:px-8 lg:px-10">
-          <div className="flex justify-between items-center h-20">
-          {/* Logo & Brand */}
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src="/logo.jpeg"
-              alt="Aston Recruitment"
-              className="h-11 w-11 rounded-3xl object-cover shadow-lg shadow-amber-200/50"
-            />
-            <h1 className="text-sm sm:text-2xl font-bold truncate max-w-[150px] sm:max-w-none" style={{ color: '#8c6a23' }}>
-              Aston Recruitment
-            </h1>
-          </Link>
-
-          {/* Mobile Theme Toggle Button */}
-          <div className="flex md:hidden items-center">
-            <button
-              onClick={toggleTheme}
-              type="button"
-              className="p-2 w-9 h-9 rounded-full bg-amber-50 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-amber-400 font-bold border border-amber-200/50 dark:border-slate-700 flex items-center justify-center"
-              title="Toggle Theme"
-            >
-              {darkMode ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.94-8.94h-2.25M4.14 12H1.89m17.91-6.84l-1.59 1.59m-11.83 11.83l-1.59 1.59m15.91 0l-1.59-1.59m-11.83-11.83l-1.59-1.59M12 7.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9z" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link to="/#home" className="nav-link">
-              Home
+      <nav className="sticky top-0 z-50 bg-[#090f19] border-b border-slate-800/60 px-6 sm:px-12 py-2.5 shadow-2xl transition-all duration-300">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14">
+            {/* Logo & Brand */}
+            <Link to="/" className="flex items-center gap-3.5 hover:opacity-90 transition-opacity">
+              <img
+                src="/logo.jpeg"
+                alt="Aston Recruitment"
+                className="h-10 w-10 rounded-xl object-cover border border-slate-700/60 shadow-lg"
+              />
+              <span className="text-lg font-bold tracking-tight text-white font-serif">
+                Aston Recruitment
+              </span>
             </Link>
-            <Link to="/#about" className="nav-link">
-              About
-            </Link>
-            <Link to="/#services" className="nav-link">
-              Services
-            </Link>
-          </div>
 
-          {/* Desktop Action Buttons */}
-          <div className="hidden md:flex items-center gap-3 relative">
-            <button
-              onClick={toggleTheme}
-              type="button"
-              className="p-2.5 rounded-full bg-amber-50 hover:bg-amber-100 transition-colors text-slate-700 font-bold border border-amber-200/50"
-              title="Toggle Theme"
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-            {userPref === 'candidate' && (
-              <Link to="/candidate/login" className="nav-link">
-                Candidate Login
-              </Link>
-            )}
-            {userPref === 'hiring' && (
-              <div
-                className="relative"
-                onMouseEnter={() => setMoreMenuOpen(true)}
-                onMouseLeave={() => setMoreMenuOpen(false)}
+            {/* Desktop Navigation Links with Dropdowns */}
+            <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-white select-none">
+              
+              {/* Clients Dropdown */}
+              <div 
+                className="relative py-3.5 cursor-pointer"
+                onMouseEnter={() => setActiveDropdown('clients')}
+                onMouseLeave={() => setActiveDropdown(null)}
               >
-                <button
-                  type="button"
-                  onClick={() => setMoreMenuOpen((prev) => !prev)}
-                  className="nav-link inline-flex items-center gap-2"
+                <div 
+                  onClick={() => setClientModalOpen(true)}
+                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                 >
-                  <span>More</span>
-                  <span className="text-slate-500">▾</span>
-                </button>
-                <div
-                  className={`dropdown-menu absolute right-0 top-full mt-3 w-48 overflow-hidden transition-all duration-200 ${
-                    moreMenuOpen
-                      ? 'opacity-100 visible translate-y-0'
-                      : 'opacity-0 invisible -translate-y-2'
-                  }`}
-                >
-                  <Link
-                    to="/recruiter/login"
-                    className="dropdown-item"
-                    onClick={() => setMoreMenuOpen(false)}
-                  >
-                    Recruiter Login
-                  </Link>
-                  <Link
-                    to="/admin/login"
-                    className="dropdown-item"
-                    onClick={() => setMoreMenuOpen(false)}
-                  >
-                    Admin Login
-                  </Link>
+                  <span>For Clients</span>
+                  <span className="text-[9px] opacity-80">▼</span>
                 </div>
+                {activeDropdown === 'clients' && (
+                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div 
+                      onClick={() => setClientModalOpen(true)} 
+                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                    >
+                      💼 Register Company Request
+                    </div>
+                    <Link 
+                      to="/recruiter/login" 
+                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                    >
+                      🛡️ Expert Portal Login
+                    </Link>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Candidates Dropdown */}
+              <div 
+                className="relative py-3.5 cursor-pointer"
+                onMouseEnter={() => setActiveDropdown('candidates')}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <div 
+                  onClick={() => navigate('/candidate/login')}
+                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
+                >
+                  <span>For Candidates</span>
+                  <span className="text-[9px] opacity-80">▼</span>
+                </div>
+                {activeDropdown === 'candidates' && (
+                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Link 
+                      to="/candidate/login" 
+                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                    >
+                      🔑 Candidate Login
+                    </Link>
+                    <Link 
+                      to="/candidate/register" 
+                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                    >
+                      ✍️ Candidate Registration
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Our Process Dropdown */}
+              <div 
+                className="relative py-3.5 cursor-pointer"
+                onMouseEnter={() => setActiveDropdown('process')}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <div 
+                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
+                >
+                  <span>Our Process</span>
+                  <span className="text-[9px] opacity-80">▼</span>
+                </div>
+                {activeDropdown === 'process' && (
+                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <a href="/#process" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🔍 Manual Review</a>
+                    <a href="/#process" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🗣️ Expert Interview</a>
+                    <a href="/#process" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">📈 Recommendations</a>
+                  </div>
+                )}
+              </div>
+
+              {/* Industries Dropdown */}
+              <div 
+                className="relative py-3.5 cursor-pointer"
+                onMouseEnter={() => setActiveDropdown('industries')}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <div 
+                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
+                >
+                  <span>Industries</span>
+                  <span className="text-[9px] opacity-80">▼</span>
+                </div>
+                {activeDropdown === 'industries' && (
+                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">💻 Tech & IT</a>
+                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🏢 GCCs</a>
+                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🏦 Banking & Finance</a>
+                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🩺 Healthcare</a>
+                  </div>
+                )}
+              </div>
+
+              {/* About Us Dropdown */}
+              <div 
+                className="relative py-3.5 cursor-pointer"
+                onMouseEnter={() => setActiveDropdown('about')}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <div 
+                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
+                >
+                  <span>About Us</span>
+                  <span className="text-[9px] opacity-80">▼</span>
+                </div>
+                {activeDropdown === 'about' && (
+                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">👥 Who We Are</a>
+                    <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">✍️ Founder Note</a>
+                  </div>
+                )}
+              </div>
+
+              <a 
+                href="https://www.linkedin.com/company/aston-recruitment-india/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-[#b88f3f] transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link 
+                to="/candidate/register" 
+                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-lg hover:shadow-amber-500/10 transition-all duration-300 uppercase tracking-wider transform hover:scale-[1.02]"
+              >
+                Candidate Registration
+              </Link>
+            </div>
+
+            {/* Mobile Actions Menu toggle */}
+            <div className="flex md:hidden items-center gap-3">
+              <Link to="/candidate/register" className="bg-[#b88f3f] text-white font-semibold text-xs px-3.5 py-2 rounded-md">
+                Register
+              </Link>
+            </div>
+
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Premium Clients Registration Email Modal */}
+      {clientModalOpen && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-2xl max-w-lg w-full p-8 shadow-2xl flex flex-col relative animate-in slide-in-from-bottom-4 duration-300">
+            <button 
+              onClick={() => setClientModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold"
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-bold tracking-tight mb-2 font-serif text-[#b88f3f]">
+              Register Company Request
+            </h3>
+            <p className="text-xs text-slate-400 mb-6">
+              Send a request to register your company. Aston Recruitment will contact you shortly.
+            </p>
+            <form onSubmit={handleSendClientEmail} className="space-y-4 text-left">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">From</label>
+                <input 
+                  type="email" 
+                  placeholder="sender@companymail.com"
+                  value={clientForm.from}
+                  onChange={(e) => setClientForm(prev => ({ ...prev, from: e.target.value }))}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">To</label>
+                <input 
+                  type="email" 
+                  placeholder="contact@astonrecruitment.in" 
+                  className="w-full bg-slate-950/50 border border-slate-850 rounded-lg px-3 py-2 text-xs text-slate-550 cursor-not-allowed"
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Company Name</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Acme Corp"
+                  value={clientForm.company}
+                  onChange={(e) => setClientForm(prev => ({ ...prev, company: e.target.value }))}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Subject</label>
+                <input 
+                  type="text" 
+                  value={`Register yourself as ${clientForm.company || '[Company]'}`}
+                  className="w-full bg-slate-950/50 border border-slate-850 rounded-lg px-3 py-2 text-xs text-slate-500"
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Body</label>
+                <textarea 
+                  rows={4}
+                  placeholder="Describe your hiring requirements..."
+                  value={clientForm.body}
+                  onChange={(e) => setClientForm(prev => ({ ...prev, body: e.target.value }))}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setClientModalOpen(false)}
+                  className="px-4 py-2 border border-slate-800 hover:bg-slate-800 text-slate-350 text-xs font-bold rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white px-5 py-2 text-xs font-bold rounded-lg transition-colors shadow-lg"
+                >
+                  Send Request
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Bottom Navigation Bar (Rendered outside to prevent fixed placement container constraint bugs) */}
       {createPortal(
@@ -268,7 +421,7 @@ const PublicHeader = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                 </svg>
-                <span className="text-[10px] font-bold">Recruiter</span>
+                <span className="text-[10px] font-bold">Expert</span>
               </Link>
               <Link to="/admin/login" onClick={playSoftChime} className={`flex flex-col items-center gap-1 hover:text-amber-700 dark:hover:text-amber-500 ${location.pathname.startsWith('/admin') ? 'active-mobile-tab' : ''}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">

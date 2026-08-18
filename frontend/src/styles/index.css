@@ -861,3 +861,214 @@ a {
     right: 16px !important;
   }
 }
+
+/* Custom styled chatbot button overriding global button style */
+.chatbot-toggle-button {
+  background: #b88f3f !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(184, 143, 63, 0.2) !important;
+  box-shadow: 0 8px 30px rgba(184, 143, 63, 0.35) !important;
+}
+
+.chatbot-toggle-button:hover {
+  background: #a67d2f !important;
+}
+
+/* Instagram Reel inspired Orbital OTP Verification Animation */
+.otp-box-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  height: 80px;
+  align-items: center;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.otp-box-container.orbiting {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.otp-digit-box {
+  width: 46px;
+  height: 52px;
+  border-radius: 12px;
+  border: 2px solid rgba(15, 23, 42, 0.1);
+  background: white;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dark .otp-digit-box {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.otp-digit-box:focus {
+  border-color: #b88f3f;
+  box-shadow: 0 0 10px rgba(184, 143, 63, 0.2);
+}
+
+/* Positioning boxes into orbit when orbiting starts */
+.otp-box-container.orbiting .otp-digit-box {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0px; /* Hide text */
+  padding: 0;
+  border-color: #b88f3f;
+  background: #b88f3f;
+  box-shadow: 0 0 15px rgba(184, 143, 63, 0.4);
+}
+
+/* Distribute 6 boxes around a 360-degree circle */
+.otp-box-container.orbiting .otp-digit-box:nth-child(1) { transform: rotate(0deg) translate(40px) rotate(0deg); }
+.otp-box-container.orbiting .otp-digit-box:nth-child(2) { transform: rotate(60deg) translate(40px) rotate(-60deg); }
+.otp-box-container.orbiting .otp-digit-box:nth-child(3) { transform: rotate(120deg) translate(40px) rotate(-120deg); }
+.otp-box-container.orbiting .otp-digit-box:nth-child(4) { transform: rotate(180deg) translate(40px) rotate(-180deg); }
+.otp-box-container.orbiting .otp-digit-box:nth-child(5) { transform: rotate(240deg) translate(40px) rotate(-240deg); }
+.otp-box-container.orbiting .otp-digit-box:nth-child(6) { transform: rotate(300deg) translate(40px) rotate(-300deg); }
+
+/* Orbit spinning animation */
+.otp-box-container.orbiting {
+  animation: spin-orbit 1.2s cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
+}
+
+@keyframes spin-orbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(450deg); /* 1 turn (360) + a quarter (90) = 450 degrees */
+  }
+}
+
+/* Success Verified Tile State */
+.otp-box-container.verified {
+  animation: shrink-to-tile 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.otp-box-container.verified .otp-digit-box {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.verified-success-badge {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: bold;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  animation: pop-verify-badge 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 20;
+}
+
+@keyframes pop-verify-badge {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Custom styled chatbot button overriding global button style */
+.chatbot-toggle-button {
+  background: #b88f3f !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(184, 143, 63, 0.2) !important;
+  box-shadow: 0 8px 30px rgba(184, 143, 63, 0.35) !important;
+}
+
+.chatbot-toggle-button:hover {
+  background: #a67d2f !important;
+}
+
+.chatbot-toggle-button span, .chatbot-toggle-button div {
+  color: #ffffff !important;
+}
+
+/* Shimmering background progress filling button loading animation */
+.btn-loading-fill {
+  position: relative !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.btn-loading-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.15) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: button-shimmer 1.5s infinite linear;
+  z-index: 2;
+}
+
+.btn-loading-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.12); /* transient progress overlay */
+  width: 100%;
+  animation: button-fill-width 2s infinite ease-in-out;
+  z-index: 1;
+}
+
+@keyframes button-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes button-fill-width {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Mobile viewport optimization overrides */
+@media (max-width: 767px) {
+  /* Shift custom chatbot widget upward to avoid overlapping mobile bottom nav bar */
+  .fixed.bottom-6.right-6 {
+    bottom: 92px !important;
+    right: 16px !important;
+  }
+}

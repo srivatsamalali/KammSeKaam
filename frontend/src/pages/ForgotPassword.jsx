@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
 import JobLoader from '../components/JobLoader'
@@ -12,6 +12,12 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('')
   const [emailSuggestions, setEmailSuggestions] = useState([])
   const [otp, setOtp] = useState('')
+  const [otpArray, setOtpArray] = useState(['', '', '', '', '', ''])
+  const [isOrbiting, setIsOrbiting] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
+
+  // Ref to digit input elements for programmatic focus control
+  const otpInputRefs = useRef([])
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [errors, setErrors] = useState({})
@@ -100,6 +106,79 @@ const ForgotPassword = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleOtpDigitChange = (index, value) => {
+    const cleanValue = value.replace(/[^0-9]/g, '')
+    if (!cleanValue) return
+
+    const newOtpArray = [...otpArray]
+    newOtpArray[index] = cleanValue.substring(cleanValue.length - 1)
+    setOtpArray(newOtpArray)
+    setErrors({})
+
+    const combinedOtp = newOtpArray.join('')
+    setOtp(combinedOtp)
+
+    // Auto-focus next box
+    if (index < 5 && cleanValue) {
+      otpInputRefs.current[index + 1]?.focus()
+    }
+
+    // Trigger orbital verification check if fully filled
+    if (newOtpArray.every(d => d !== '')) {
+      triggerOrbitalVerification(combinedOtp)
+    }
+  }
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace') {
+      const newOtpArray = [...otpArray]
+      
+      // If active field is empty, clear preceding and shift focus back
+      if (!newOtpArray[index] && index > 0) {
+        newOtpArray[index - 1] = ''
+        setOtpArray(newOtpArray)
+        setOtp(newOtpArray.join(''))
+        otpInputRefs.current[index - 1]?.focus()
+      } else {
+        newOtpArray[index] = ''
+        setOtpArray(newOtpArray)
+        setOtp(newOtpArray.join(''))
+      }
+      setErrors({})
+    }
+  }
+
+  const triggerOrbitalVerification = async (finalOtp) => {
+    setIsOrbiting(true)
+    setErrors({})
+
+    // Wait 1.2s for orbital spin to complete
+    setTimeout(async () => {
+      try {
+        await authService.verifyForgotPasswordOtp({ email, otp: finalOtp })
+        
+        setIsVerified(true)
+        
+        // Wait 850ms for verified checkmark pop animation before moving to step 3
+        setTimeout(() => {
+          setStep(3)
+          setIsOrbiting(false)
+          setIsVerified(false)
+          setOtpArray(['', '', '', '', '', ''])
+          setOtp('')
+        }, 850)
+
+      } catch (error) {
+        setIsOrbiting(false)
+        setOtpArray(['', '', '', '', '', ''])
+        setOtp('')
+        setErrors({
+          form: error.response?.data?.message || 'Invalid OTP. Please try again.',
+        })
+      }
+    }, 1200)
   }
 
   const handleResendOtp = async (e) => {
@@ -229,9 +308,9 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full"
+                  className={`btn-primary w-full ${loading ? 'btn-loading-fill' : ''}`}
                 >
-                  {loading ? 'Sending OTP...' : 'Send OTP'}
+                  Send OTP
                 </button>
               </form>
 
@@ -259,35 +338,35 @@ const ForgotPassword = () => {
 
               {errors.form && <div className="alert-error">{errors.form}</div>}
 
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Enter OTP</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength="6"
-                    value={otp}
-                    onChange={(e) => {
-                      setOtp(e.target.value.replace(/[^0-9]/g, ''))
-                      setErrors({})
-                    }}
-                    className="form-input text-center text-3xl tracking-widest"
-                    placeholder="000000"
-                    required
-                  />
-                  {errors.otp && (
-                    <p className="text-red-600 text-sm mt-1">{errors.otp}</p>
-                  )}
-                </div>
+              <div className="space-y-6">
+                {/* Custom Orbital Verification Container */}
+                <div className="py-4 relative flex justify-center items-center">
+                  <div className={`otp-box-container ${isOrbiting ? 'orbiting' : ''} ${isVerified ? 'verified' : ''}`}>
+                    {otpArray.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        maxLength={1}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={digit}
+                        onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className="otp-digit-box focus:border-[#b88f3f]"
+                        disabled={isOrbiting}
+                        autoFocus={index === 0}
+                      />
+                    ))}
 
-                <button
-                  type="submit"
-                  disabled={loading || otp.length !== 6}
-                  className="btn-primary w-full"
-                >
-                  {loading ? 'Verifying...' : 'Verify OTP'}
-                </button>
-              </form>
+                    {isVerified && (
+                      <div className="verified-success-badge">
+                        ✓
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <div className="mt-4 text-center">
                 {otpTimer > 0 ? (
@@ -450,9 +529,9 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full"
+                  className={`btn-primary w-full ${loading ? 'btn-loading-fill' : ''}`}
                 >
-                  {loading ? 'Resetting Password...' : 'Reset Password'}
+                  Reset Password
                 </button>
               </form>
 

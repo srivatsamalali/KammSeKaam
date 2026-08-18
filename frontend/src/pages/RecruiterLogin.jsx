@@ -280,9 +280,9 @@ const RecruiterLogin = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full"
+              className={`btn-primary w-full ${loading ? 'btn-loading-fill' : ''}`}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              Login
             </button>
           </form>
 
@@ -376,9 +376,9 @@ const RecruiterLogin = () => {
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="btn-primary w-full"
+                  className={`btn-primary w-full ${resetLoading ? 'btn-loading-fill' : ''}`}
                 >
-                  {resetLoading ? 'Verifying DB & Sending OTP...' : 'Send OTP'}
+                  Send OTP
                 </button>
               </form>
             )}
@@ -404,9 +404,9 @@ const RecruiterLogin = () => {
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="btn-primary w-full"
+                  className={`btn-primary w-full ${resetLoading ? 'btn-loading-fill' : ''}`}
                 >
-                  {resetLoading ? 'Verifying OTP...' : 'Verify OTP'}
+                  Verify OTP
                 </button>
                 <div className="flex justify-between items-center text-xs mt-2">
                   <button
@@ -459,9 +459,9 @@ const RecruiterLogin = () => {
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="btn-primary w-full"
+                  className={`btn-primary w-full ${resetLoading ? 'btn-loading-fill' : ''}`}
                 >
-                  {resetLoading ? 'Resetting Password...' : 'Reset Password'}
+                  Reset Password
                 </button>
               </form>
             )}

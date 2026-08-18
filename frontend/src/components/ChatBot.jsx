@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { candidateService, recruiterService } from '../services/api'
 
@@ -32,6 +32,11 @@ const PRESET_QUERIES = [
 
 const ChatBot = () => {
   const { user } = useAuth()
+  const location = useLocation()
+
+  if (location.pathname === '/' || window.location.pathname === '/') {
+    return null
+  }
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     {
