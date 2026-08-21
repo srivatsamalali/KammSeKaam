@@ -1,10 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { 
+  FileSearch, 
+  MessageSquare, 
+  UserCheck, 
+  TrendingUp, 
+  ShieldCheck, 
+  Star, 
+  Users, 
+  Handshake, 
+  UserPlus, 
+  Briefcase, 
+  ArrowRight,
+  FileCode,
+  Building2,
+  CreditCard,
+  Megaphone,
+  Settings,
+  Factory,
+  Stethoscope,
+  FileText
+} from 'lucide-react'
+import ViewOpenRolesModal from '../components/ViewOpenRolesModal'
 
 const LandingPage = () => {
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [chatbotOpen, setChatbotOpen] = useState(false)
+  const [openRolesModalOpen, setOpenRolesModalOpen] = useState(false)
   const [chatMessages, setChatMessages] = useState([
     { text: "Hello! Welcome to Aston Recruitment. How can I help you today?", isBot: true }
   ])
@@ -49,14 +72,14 @@ const LandingPage = () => {
   }, [])
 
   const industries = [
-    { name: 'Technology & IT', icon: '💻', img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing top-tier developers, systems architects, and engineering leaders for high-growth tech platforms.' },
-    { name: 'GCCs', icon: '🏢', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500&auto=format&fit=crop&q=60', desc: 'Building premium global capability centers with technical, financial, operational, and leadership hubs.' },
-    { name: 'Banking & Financial Services', icon: '🏦', img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&auto=format&fit=crop&q=60', desc: 'Placing seasoned investment bankers, credit risk analysts, and modern fintech disruptors.' },
-    { name: 'Sales & Marketing', icon: '🤝', img: 'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=500&auto=format&fit=crop&q=60', desc: 'Acquiring high-velocity revenue leaders, growth marketers, and global brand strategists.' },
-    { name: 'Operations', icon: '⚙️', img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&auto=format&fit=crop&q=60', desc: 'Optimizing supply chains and logistics with strategic facilities and operational directors.' },
-    { name: 'Manufacturing', icon: '🏭', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&auto=format&fit=crop&q=60', desc: 'Recruiting precise plant managers, industrial engineers, and quality assurance leads.' },
-    { name: 'Healthcare', icon: '🩺', img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=60', desc: 'Connecting top medical centers with licensed practitioners, nurses, and laboratory researchers.' },
-    { name: 'Corporate Functions', icon: '📊', img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing strategic human resources, legal advisors, accountants, and executive administrators.' },
+    { name: 'Technology & IT', icon: <FileCode className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing top-tier developers, systems architects, and engineering leaders for high-growth tech platforms.' },
+    { name: 'GCCs', icon: <Building2 className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500&auto=format&fit=crop&q=60', desc: 'Building premium global capability centers with technical, financial, operational, and leadership hubs.' },
+    { name: 'Banking & Financial Services', icon: <CreditCard className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&auto=format&fit=crop&q=60', desc: 'Placing seasoned investment bankers, credit risk analysts, and modern fintech disruptors.' },
+    { name: 'Sales & Marketing', icon: <Megaphone className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=500&auto=format&fit=crop&q=60', desc: 'Acquiring high-velocity revenue leaders, growth marketers, and global brand strategists.' },
+    { name: 'Operations', icon: <Settings className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&auto=format&fit=crop&q=60', desc: 'Optimizing supply chains and logistics with strategic facilities and operational directors.' },
+    { name: 'Manufacturing', icon: <Factory className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&auto=format&fit=crop&q=60', desc: 'Recruiting precise plant managers, industrial engineers, and quality assurance leads.' },
+    { name: 'Healthcare', icon: <Stethoscope className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=60', desc: 'Connecting top medical centers with licensed practitioners, nurses, and laboratory researchers.' },
+    { name: 'Corporate Functions', icon: <FileText className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing strategic human resources, legal advisors, accountants, and executive administrators.' },
   ]
 
   return (
@@ -76,8 +99,8 @@ const LandingPage = () => {
             <span className="text-[#b88f3f]">BETTER FUTURES.</span>
           </h1>
           <p className="text-slate-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium">
-            We find, assess, and recommend professionals who create real impact. <br/>
-            Better conversations. Better hires.
+            We don’t just fill positions. We find people who make a difference. <br/>
+            Better talent. Better decisions. Better hires.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button 
@@ -116,18 +139,24 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { num: '01', title: 'Every Resume, Manually Reviewed', text: 'Our team reads and understands every resume against your requirements.', icon: '🔍' },
-              { num: '02', title: 'First Interview', text: 'We connect personally to assess communication, motivation and role fit.', icon: '👥' },
-              { num: '03', title: 'Domain Expert Interview', text: 'An expert in the relevant domain evaluates skills, experience and potential.', icon: '👨‍💻' },
-              { num: '04', title: 'Scored. Shortlisted. Recommended.', text: 'We score each candidate and share only the best profiles worth your time.', icon: '📈' }
+              { num: '01', title: 'Every Resume, Manually Reviewed', text: 'Our team reads and understands every resume against your requirements.', icon: <FileSearch className="w-6 h-6 text-[#b88f3f]" /> },
+              { num: '02', title: 'First Interview', text: 'We connect personally to assess communication, motivation and role fit.', icon: <MessageSquare className="w-6 h-6 text-[#b88f3f]" /> },
+              { num: '03', title: 'Domain Expert Interview', text: 'An expert in the relevant domain evaluates skills, experience and potential.', icon: <UserCheck className="w-6 h-6 text-[#b88f3f]" /> },
+              { num: '04', title: 'Scored. Shortlisted. Recommended.', text: 'We score each candidate and share only the best profiles worth your time.', icon: <TrendingUp className="w-6 h-6 text-[#b88f3f]" /> }
             ].map((step, idx) => (
-              <div key={idx} className="flex flex-col items-center p-6 bg-[#fafbfc] border border-slate-100 rounded-xl hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group">
-                <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-2xl mb-4 group-hover:bg-[#b88f3f]/10 transition-colors border border-slate-100">
+              <div key={idx} className="relative flex flex-col items-center p-6 transition-all duration-300 group">
+                <div className="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#b88f3f]/10 transition-colors border border-slate-150 shadow-xs">
                   {step.icon}
                 </div>
                 <span className="text-lg font-black text-[#b88f3f] mb-1">{step.num}</span>
                 <h3 className="font-bold text-[#090f19] text-base mb-2 font-serif">{step.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed max-w-[220px]">{step.text}</p>
+                
+                {idx < 3 && (
+                  <div className="hidden lg:flex absolute top-1/2 -right-7 -translate-y-1/2 z-10 text-[#b88f3f]">
+                    <ArrowRight className="w-6 h-6" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -161,14 +190,14 @@ const LandingPage = () => {
                     <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${ind.img}')` }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#090f19]/90 via-[#090f19]/60 to-[#090f19]/30" />
                     <div className="absolute inset-0 p-5 flex flex-col justify-end items-start text-left z-10">
-                      <span className="text-2xl mb-2">{ind.icon}</span>
+                      <div className="mb-2">{ind.icon}</div>
                       <h3 className="text-white font-bold text-sm tracking-tight leading-tight">{ind.name}</h3>
                     </div>
                   </div>
 
                   {/* Back Side */}
                   <div className="absolute inset-0 w-full h-full rounded-xl p-5 bg-[#090f19] border border-slate-800/80 flex flex-col justify-center items-center text-center [backface-visibility:hidden] [transform:rotateY(180deg)] shadow-lg">
-                    <span className="text-2xl mb-1">{ind.icon}</span>
+                    <div className="mb-2">{ind.icon}</div>
                     <h4 className="text-[#b88f3f] font-bold text-xs mb-2 uppercase tracking-wider">{ind.name}</h4>
                     <p className="text-slate-300 text-[10px] leading-relaxed font-medium">{ind.desc}</p>
                   </div>
@@ -192,13 +221,15 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { title: 'Quality Over Quantity', text: 'We invest time up front so you save time at the end. We share only the best.', icon: '🛡️' },
-              { title: 'Domain Expertise', text: 'Interviews are led by experts who understand roles, not just keywords.', icon: '⭐️' },
-              { title: 'Human Evaluation', text: 'Every decision is backed by human judgment, experience and accountability.', icon: '👥' },
-              { title: 'Partnership Mindset', text: 'We work like an extension of your team and care about your outcomes.', icon: '🤝' }
+              { title: 'Quality Over Quantity', text: 'We invest time up front so you save time at the end. We share only the best.', icon: <ShieldCheck className="w-8 h-8 text-[#b88f3f]" /> },
+              { title: 'Domain Expertise', text: 'Interviews are led by experts who understand roles, not just keywords.', icon: <Star className="w-8 h-8 text-[#b88f3f]" /> },
+              { title: 'Human Evaluation', text: 'Every decision is backed by human judgment, experience and accountability.', icon: <Users className="w-8 h-8 text-[#b88f3f]" /> },
+              { title: 'Partnership Mindset', text: 'We work like an extension of your team and care about your outcomes.', icon: <Handshake className="w-8 h-8 text-[#b88f3f]" /> }
             ].map((card, idx) => (
               <div key={idx} className="flex flex-col items-center p-6 bg-[#fafbfc] border border-slate-100 rounded-xl hover:shadow-md transition-all duration-300">
-                <span className="text-3xl mb-4">{card.icon}</span>
+                <div className="mb-4">
+                  {card.icon}
+                </div>
                 <h3 className="font-bold text-[#090f19] text-base mb-2 font-serif">{card.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed max-w-[220px]">{card.text}</p>
               </div>
@@ -214,7 +245,7 @@ const LandingPage = () => {
           <div className="bg-[#090f19] rounded-2xl p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-10 border border-slate-800">
             <div className="w-48 h-48 rounded-xl overflow-hidden border border-slate-700/60 shadow-lg flex-shrink-0">
               <img 
-                src="/rahul.jpeg" 
+                src="/WhatsApp Image 2026-08-21 at 12.42.08.jpeg" 
                 alt="Rahul Bharatiya" 
                 className="w-full h-full object-cover"
               />
@@ -225,7 +256,7 @@ const LandingPage = () => {
               
               <blockquote className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed italic relative">
                 <span className="text-3xl text-[#b88f3f] mr-1">“</span>
-                The right hire isn't the person with the best CV. It's the person who can do the job, grow with it, and strengthen the team.
+                A good hire can do the job. A great hire fits the team, adds value and helps the business grow.
                 <span className="text-3xl text-[#b88f3f] ml-1">”</span>
               </blockquote>
               
@@ -245,7 +276,9 @@ const LandingPage = () => {
           
           {/* Candidate Opportunity */}
           <div className="p-12 text-left space-y-6">
-            <div className="w-12 h-12 bg-[#b88f3f]/10 rounded-full flex items-center justify-center text-xl text-[#b88f3f]">👤+</div>
+            <div className="w-12 h-12 bg-[#b88f3f]/10 rounded-full flex items-center justify-center text-[#b88f3f]">
+              <UserPlus className="w-6 h-6" />
+            </div>
             <h3 className="text-xl sm:text-2xl font-extrabold text-[#090f19] font-serif">
               YOUR NEXT OPPORTUNITY STARTS HERE.
             </h3>
@@ -256,15 +289,20 @@ const LandingPage = () => {
               <Link to="/candidate/register" className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-3.5 rounded-sm transition-all text-center tracking-wider shadow-sm transform active:scale-95">
                 CANDIDATE REGISTRATION →
               </Link>
-              <Link to="/candidate/login" className="border border-slate-300 hover:border-slate-500 text-slate-700 font-bold text-xs px-6 py-3.5 rounded-sm transition-all text-center tracking-wider transform active:scale-95">
+              <button 
+                onClick={() => setOpenRolesModalOpen(true)}
+                className="border border-slate-300 hover:border-slate-500 text-slate-700 font-bold text-xs px-6 py-3.5 rounded-sm transition-all text-center tracking-wider transform active:scale-95"
+              >
                 VIEW OPEN ROLES →
-              </Link>
+              </button>
             </div>
           </div>
 
           {/* Looking to Hire */}
           <div id="clients" className="p-12 text-left space-y-6 scroll-mt-20">
-            <div className="w-12 h-12 bg-[#b88f3f]/10 rounded-full flex items-center justify-center text-xl text-[#b88f3f]">💼</div>
+            <div className="w-12 h-12 bg-[#b88f3f]/10 rounded-full flex items-center justify-center text-[#b88f3f]">
+              <Briefcase className="w-6 h-6" />
+            </div>
             <h3 className="text-xl sm:text-2xl font-extrabold text-[#090f19] font-serif">
               LOOKING TO HIRE?
             </h3>
@@ -286,9 +324,16 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img src="/logo.jpeg" alt="Aston Recruitment" className="h-10 w-10 rounded-lg object-cover" />
-              <span className="text-base font-bold font-serif text-white">Aston Recruitment</span>
+            <div className="flex items-center gap-2.5 no-underline" style={{ textDecoration: 'none' }}>
+              <img
+                src="/aston-logo-transparent.png"
+                alt="Aston Logo"
+                className="h-20 w-20 object-contain"
+              />
+              <div className="flex flex-col items-center text-center leading-none" style={{ textDecoration: 'none' }}>
+                <span className="text-2xl font-bold tracking-widest text-white font-serif no-underline" style={{ fontFamily: 'Georgia, serif', textDecoration: 'none' }}>ASTON</span>
+                <span className="text-[9px] font-bold tracking-[0.25em] text-[#b88f3f] uppercase mt-1.5 no-underline" style={{ textDecoration: 'none' }}>— RECRUITMENT —</span>
+              </div>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
               Aston Recruitment is a talent advisory firm helping companies build high-performing teams through a quality-first hiring process.
@@ -526,6 +571,11 @@ const LandingPage = () => {
         document.body
       )}
 
+      <ViewOpenRolesModal 
+        isOpen={openRolesModalOpen} 
+        onClose={() => setOpenRolesModalOpen(false)} 
+        isLoggedIn={false} 
+      />
     </div>
   )
 }

@@ -115,15 +115,16 @@ const PublicHeader = () => {
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14">
             {/* Logo & Brand */}
-            <Link to="/" className="flex items-center gap-3.5 hover:opacity-90 transition-opacity">
+            <Link to="/" className="flex items-center gap-2.5 hover:opacity-95 transition-opacity no-underline" style={{ textDecoration: 'none' }}>
               <img
-                src="/logo.jpeg"
-                alt="Aston Recruitment"
-                className="h-10 w-10 rounded-xl object-cover border border-slate-700/60 shadow-lg"
+                src="/aston-logo-transparent.png"
+                alt="Aston Logo"
+                className="h-20 w-20 object-contain"
               />
-              <span className="text-lg font-bold tracking-tight text-white font-serif">
-                Aston Recruitment
-              </span>
+              <div className="flex flex-col items-center text-center leading-none" style={{ textDecoration: 'none' }}>
+                <span className="text-2xl font-bold tracking-widest text-white font-serif no-underline" style={{ fontFamily: 'Georgia, serif', textDecoration: 'none' }}>ASTON</span>
+                <span className="text-[9px] font-bold tracking-[0.25em] text-[#b88f3f] uppercase mt-1.5 no-underline" style={{ textDecoration: 'none' }}>— RECRUITMENT —</span>
+              </div>
             </Link>
 
             {/* Desktop Navigation Links with Dropdowns */}
@@ -143,7 +144,7 @@ const PublicHeader = () => {
                   <span className="text-[9px] opacity-80">▼</span>
                 </div>
                 {activeDropdown === 'clients' && (
-                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
                     <div 
                       onClick={() => setClientModalOpen(true)} 
                       className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
@@ -174,7 +175,7 @@ const PublicHeader = () => {
                   <span className="text-[9px] opacity-80">▼</span>
                 </div>
                 {activeDropdown === 'candidates' && (
-                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
                     <Link 
                       to="/candidate/login" 
                       className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
@@ -191,45 +192,26 @@ const PublicHeader = () => {
                 )}
               </div>
 
-              {/* Our Process Dropdown */}
+              {/* Aston Experts Dropdown */}
               <div 
                 className="relative py-3.5 cursor-pointer"
-                onMouseEnter={() => setActiveDropdown('process')}
+                onMouseEnter={() => setActiveDropdown('experts')}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <div 
                   className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                 >
-                  <span>Our Process</span>
+                  <span>Aston Experts</span>
                   <span className="text-[9px] opacity-80">▼</span>
                 </div>
-                {activeDropdown === 'process' && (
-                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <a href="/#process" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🔍 Manual Review</a>
-                    <a href="/#process" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🗣️ Expert Interview</a>
-                    <a href="/#process" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">📈 Recommendations</a>
-                  </div>
-                )}
-              </div>
-
-              {/* Industries Dropdown */}
-              <div 
-                className="relative py-3.5 cursor-pointer"
-                onMouseEnter={() => setActiveDropdown('industries')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <div 
-                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
-                >
-                  <span>Industries</span>
-                  <span className="text-[9px] opacity-80">▼</span>
-                </div>
-                {activeDropdown === 'industries' && (
-                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">💻 Tech & IT</a>
-                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🏢 GCCs</a>
-                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🏦 Banking & Finance</a>
-                    <a href="/#industries" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">🩺 Healthcare</a>
+                {activeDropdown === 'experts' && (
+                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                    <Link 
+                      to="/recruiter/login" 
+                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                    >
+                      🛡️ Expert Portal Login
+                    </Link>
                   </div>
                 )}
               </div>
@@ -247,7 +229,7 @@ const PublicHeader = () => {
                   <span className="text-[9px] opacity-80">▼</span>
                 </div>
                 {activeDropdown === 'about' && (
-                  <div className="absolute top-full left-0 w-60 bg-[#0c1322]/98 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
                     <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">👥 Who We Are</a>
                     <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">✍️ Founder Note</a>
                   </div>

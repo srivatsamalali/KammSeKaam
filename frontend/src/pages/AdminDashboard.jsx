@@ -7,6 +7,7 @@ import {
   recruiterService,
   applicationService,
   clientService,
+  jobService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { showToast } from '../utils/notification';
@@ -390,7 +391,8 @@ const AdminDashboard = () => {
     { id: 'recruiters', label: 'Recruiters' },
     { id: 'candidates', label: 'Candidates' },
     { id: 'applications', label: 'Applications' },
-    { id: 'clients', label: 'Clients' }
+    { id: 'clients', label: 'Clients' },
+    { id: 'jobs', label: 'Open Roles' }
   ]
 
   useEffect(() => {
@@ -660,6 +662,17 @@ const AdminDashboard = () => {
     phone: '',
     email: '',
   })
+  const [jobs, setJobs] = useState([])
+  const [showCreateJob, setShowCreateJob] = useState(false)
+  const [jobForm, setJobForm] = useState({
+    title: '',
+    department: 'Technology & IT',
+    description: '',
+    location: '',
+    experience: '',
+    requirements: '',
+    salary: '',
+  })
   const [recruiterEmailSuggestions, setRecruiterEmailSuggestions] = useState([])
   const [recruiterSelectedCountryCode, setRecruiterSelectedCountryCode] = useState('+91')
   const [clientEmailSuggestions, setClientEmailSuggestions] = useState([])
@@ -720,6 +733,13 @@ const AdminDashboard = () => {
       } catch (e) {
         console.error('Error fetching clients:', e)
       }
+      // fetch jobs
+      try {
+        const jobRes = await jobService.getAll()
+        setJobs(jobRes.data || jobRes)
+      } catch (e) {
+        console.error('Error fetching jobs:', e)
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
       setErrorMsg(error.response?.data?.message || error.message || 'Failed to retrieve admin dashboard metrics')
@@ -754,6 +774,47 @@ const AdminDashboard = () => {
         } catch (error) {
           console.error('Error deleting client:', error)
           showToast(error.response?.data?.message || 'Error deleting client', 'error')
+        }
+      }
+    })
+  }
+
+  const handleCreateJob = async (e) => {
+    e.preventDefault()
+    try {
+      await jobService.create(jobForm)
+      setJobForm({
+        title: '',
+        department: 'Technology & IT',
+        description: '',
+        location: '',
+        experience: '',
+        requirements: '',
+        salary: '',
+      })
+      setShowCreateJob(false)
+      showToast('Open role added successfully', 'success')
+      const jobRes = await jobService.getAll()
+      setJobs(jobRes.data || jobRes)
+    } catch (error) {
+      console.error('Error creating job:', error)
+      showToast(error.response?.data?.message || 'Error creating open role', 'error')
+    }
+  }
+
+  const handleDeleteJob = async (id) => {
+    setConfirmModal({
+      isOpen: true,
+      message: 'Are you sure you want to delete this open role?',
+      onConfirm: async () => {
+        try {
+          await jobService.delete(id)
+          showToast('Role deleted successfully', 'success')
+          const jobRes = await jobService.getAll()
+          setJobs(jobRes.data || jobRes)
+        } catch (error) {
+          console.error('Error deleting job:', error)
+          showToast(error.response?.data?.message || 'Error deleting role', 'error')
         }
       }
     })
@@ -1750,103 +1811,85 @@ const AdminDashboard = () => {
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Client Name</label>
                     <input
                       type="text"
-                      className="form-input"
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      required
                       value={clientForm.name}
                       onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
-                      placeholder="e.g., John Doe"
-                      required
+                      placeholder="e.g. Adithya"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Company</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Company</label>
                     <input
                       type="text"
-                      className="form-input"
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      required
                       value={clientForm.company}
                       onChange={(e) => setClientForm({ ...clientForm, company: e.target.value })}
-                      placeholder="e.g., Acme Corp"
-                      required
+                      placeholder="e.g. Acme Corp"
                     />
                   </div>
-                  <div className="text-left">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Email Address</label>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Email</label>
                     <input
                       type="email"
-                      className="form-input"
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      required
                       value={clientForm.email}
                       onChange={(e) => {
                         const val = e.target.value
                         setClientForm({ ...clientForm, email: val })
-                        if (val && !val.includes('@') && /[a-zA-Z]/.test(val)) {
-                          setClientEmailSuggestions(['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'].map(d => `${val}@${d}`))
+                        if (val && val.includes('@')) {
+                          const matching = adminUsers.filter(u => u.email.toLowerCase().includes(val.toLowerCase()))
+                          setClientEmailSuggestions(matching.map(u => u.email))
                         } else {
                           setClientEmailSuggestions([])
                         }
                       }}
-                      placeholder="e.g., hiring@company.com"
-                      required
+                      placeholder="e.g. contact@acme.com"
                     />
                     {clientEmailSuggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
+                      <div className="bg-white border border-slate-200 rounded-lg mt-1 max-h-32 overflow-y-auto shadow-sm">
                         {clientEmailSuggestions.map((sug, idx) => (
-                          <button
+                          <div
                             key={idx}
-                            type="button"
                             onClick={() => {
                               setClientForm({ ...clientForm, email: sug })
                               setClientEmailSuggestions([])
                             }}
-                            className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-655 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
+                            className="p-2 hover:bg-slate-50 cursor-pointer text-xs text-slate-700 font-semibold border-b border-slate-100 last:border-0"
                           >
                             {sug}
-                          </button>
+                          </div>
                         ))}
                       </div>
                     )}
                   </div>
-                  <div className="text-left">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Client Phone Number</label>
-                    <div className="flex items-center gap-2 w-full">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Phone</label>
+                    <div className="flex gap-2">
                       <select
                         value={clientSelectedCountryCode}
                         onChange={(e) => setClientSelectedCountryCode(e.target.value)}
-                        className="form-input bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-xs rounded-xl"
-                        style={{ width: '85px', minWidth: '85px', flexShrink: 0, paddingRight: '4px', paddingLeft: '8px' }}
+                        className="bg-white border border-gray-300 rounded-lg px-2 py-2 text-sm text-slate-800 font-semibold"
+                        style={{ width: '80px' }}
                       >
-                        <option value="+91">🇮🇳 +91</option>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+61">🇦🇺 +61</option>
-                        <option value="+971">🇦🇪 +971</option>
-                        <option value="+65">🇸🇬 +65</option>
+                        <option value="+91">+91 (IN)</option>
+                        <option value="+1">+1 (US)</option>
+                        <option value="+44">+44 (UK)</option>
+                        <option value="+65">+65 (SG)</option>
+                        <option value="+971">+971 (AE)</option>
                       </select>
                       <input
-                        type="tel"
-                        className="form-input flex-1"
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
                         value={clientForm.phone}
                         onChange={(e) => {
-                          let val = e.target.value
-                          let clean = val.replace(/[^\d+]/g, '')
-                          if (clean.startsWith('+91')) {
-                            clean = clean.substring(3)
-                            setClientSelectedCountryCode('+91')
-                          } else if (clean.startsWith('+1')) {
-                            clean = clean.substring(2)
-                            setClientSelectedCountryCode('+1')
-                          } else if (clean.startsWith('+44')) {
-                            clean = clean.substring(3)
-                            setClientSelectedCountryCode('+44')
-                          } else if (clean.startsWith('+61')) {
-                            clean = clean.substring(3)
-                            setClientSelectedCountryCode('+61')
-                          }
-                          while (clean.startsWith('0')) {
-                            clean = clean.substring(1)
-                          }
-                          clean = clean.substring(0, 10)
+                          const val = e.target.value
+                          const clean = val.replace(/\D/g, '')
                           setClientForm({ ...clientForm, phone: clean })
                         }}
-                        placeholder="e.g., 9876543210"
+                        placeholder="e.g. 9876543210"
                         style={{ flexGrow: 1, minWidth: 0 }}
                       />
                     </div>
@@ -1873,6 +1916,157 @@ const AdminDashboard = () => {
                     <button
                       onClick={() => handleDeleteClient(cli.id)}
                       className="btn-danger px-4 py-2 shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Jobs/Open Roles Tab */}
+        {activeTab === 'jobs' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Open Opportunities</h3>
+              <button
+                onClick={() => setShowCreateJob(!showCreateJob)}
+                className="btn-primary"
+              >
+                {showCreateJob ? 'Close Role Form' : '⚡ Add Open Role'}
+              </button>
+            </div>
+
+            {showCreateJob && (
+              <form onSubmit={handleCreateJob} className="card p-6 bg-slate-50 border border-slate-200/50 mb-6 max-w-lg">
+                <h4 className="text-md font-bold mb-4 text-blue-900">Add Open Position</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Job Title</label>
+                    <input
+                      type="text"
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      required
+                      value={jobForm.title}
+                      onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
+                      placeholder="e.g. Senior Backend Engineer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>
+                    <select
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      value={jobForm.department}
+                      onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })}
+                    >
+                      <option value="Technology & IT">Technology & IT</option>
+                      <option value="GCCs">GCCs</option>
+                      <option value="Banking & Financial Services">Banking & Financial Services</option>
+                      <option value="Sales & Marketing">Sales & Marketing</option>
+                      <option value="Operations">Operations</option>
+                      <option value="Manufacturing">Manufacturing</option>
+                      <option value="Healthcare">Healthcare</option>
+                      <option value="Corporate Functions">Corporate Functions</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Location</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                        required
+                        value={jobForm.location}
+                        onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
+                        placeholder="e.g. Bengaluru / Remote"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Experience Required</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                        required
+                        value={jobForm.experience}
+                        onChange={(e) => setJobForm({ ...jobForm, experience: e.target.value })}
+                        placeholder="e.g. 5-8 years"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Salary Range (Optional)</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                        value={jobForm.salary}
+                        onChange={(e) => setJobForm({ ...jobForm, salary: e.target.value })}
+                        placeholder="e.g. 18-25 LPA"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Skills Stack (Optional)</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                        value={jobForm.requirements}
+                        onChange={(e) => setJobForm({ ...jobForm, requirements: e.target.value })}
+                        placeholder="e.g. React, Node.js, AWS"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Job Description</label>
+                    <textarea
+                      rows={3}
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      required
+                      value={jobForm.description}
+                      onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
+                      placeholder="Briefly describe the key responsibilities..."
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary w-full">Save Position</button>
+                </div>
+              </form>
+            )}
+
+            <div className="space-y-4">
+              {jobs.length === 0 ? (
+                <p className="text-gray-600">No open roles registered yet.</p>
+              ) : (
+                jobs.map((job) => (
+                  <div key={job.id} className="card flex justify-between items-center p-5 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                          {job.department}
+                        </span>
+                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          📍 {job.location}
+                        </span>
+                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          💼 {job.experience}
+                        </span>
+                        {job.salary && (
+                          <span className="bg-slate-100/55 text-slate-650 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            💰 {job.salary}
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900">{job.title}</h4>
+                      <p className="text-sm text-slate-600">{job.description}</p>
+                      {job.requirements && (
+                        <p className="text-xs text-slate-500">
+                          <span className="font-semibold">Skills Stack: </span>{job.requirements}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteJob(job.id)}
+                      className="btn-danger px-4 py-2 shrink-0 ml-4"
                     >
                       Delete
                     </button>

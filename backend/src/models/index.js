@@ -6,6 +6,7 @@ const Notification = require('./Notification')
 const PushSubscription = require('./PushSubscription')
 const Message = require('./Message')
 const Client = require('./Client')
+const Job = require('./Job')
 
 // Define associations
 User.hasOne(Candidate, { foreignKey: 'userId', onDelete: 'CASCADE' })
@@ -48,4 +49,5 @@ module.exports = {
   PushSubscription,
   Message,
   Client,
+  Job,
 }

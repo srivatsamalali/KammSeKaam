@@ -7,6 +7,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import { triggerMessageNotification } from '../utils/notification'
 import ChatThreadPanel from '../components/ChatThreadPanel'
 import { showToast } from '../utils/notification';
+import ViewOpenRolesModal from '../components/ViewOpenRolesModal'
 
 export const InterviewCountdown = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState('')
@@ -418,6 +419,7 @@ const CandidateDashboard = () => {
   const [resumeFile, setResumeFile] = useState(null)
 
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null })
+  const [openRolesModalOpen, setOpenRolesModalOpen] = useState(false)
 
   const [adminUsers, setAdminUsers] = useState([])
 
@@ -630,6 +632,12 @@ const CandidateDashboard = () => {
             <div className="flex items-center gap-4 z-10">
               <ThemeToggle />
               <button
+                onClick={() => setOpenRolesModalOpen(true)}
+                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
+              >
+                View Open Roles
+              </button>
+              <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
               >
@@ -679,6 +687,12 @@ const CandidateDashboard = () => {
 
           <div className="flex items-center gap-4 z-10">
             <ThemeToggle />
+            <button
+              onClick={() => setOpenRolesModalOpen(true)}
+              className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
+            >
+              View Open Roles
+            </button>
             <button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
@@ -1374,6 +1388,11 @@ const CandidateDashboard = () => {
         </div>,
         document.body
       )}
+      <ViewOpenRolesModal 
+        isOpen={openRolesModalOpen} 
+        onClose={() => setOpenRolesModalOpen(false)} 
+        isLoggedIn={true} 
+      />
     </div>
   )
 }

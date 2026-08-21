@@ -90,14 +90,10 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000
 
 const ensureAdminUser = async () => {
-  if (process.env.NODE_ENV !== 'development') {
-    return
-  }
-
   const adminEmail = process.env.ADMIN_EMAIL_ENV || 'Contact@astonrecruitment.in'
   const adminPassword = process.env.ADMIN_PASSWORD_ENV || 'Admin@12345'
 
-  const existingAdmin = await User.findOne({ where: { role: 'ADMIN' } })
+  const existingAdmin = await User.findOne({ where: { email: adminEmail } })
 
   if (!existingAdmin) {
     await User.create({
@@ -110,7 +106,14 @@ const ensureAdminUser = async () => {
     })
     console.log('Default admin user created:', { email: adminEmail })
   } else {
-    console.log('Admin user already exists:', existingAdmin.email)
+    // If admin exists with placeholder password, update it
+    if (existingAdmin.password === '$2a$10$...' || existingAdmin.password.length < 10) {
+      existingAdmin.password = adminPassword
+      await existingAdmin.save()
+      console.log('Admin user password updated/reset')
+    } else {
+      console.log('Admin user already exists:', existingAdmin.email)
+    }
   }
 }
 
@@ -120,7 +123,7 @@ const startServer = async () => {
     await sequelize.sync()
     console.log('Database synced')
 
-    // Ensure default admin exists in development
+    // Ensure default admin exists
     await ensureAdminUser()
 
     // Start server

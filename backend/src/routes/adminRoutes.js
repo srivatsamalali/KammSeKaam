@@ -11,6 +11,9 @@ const {
   createClient,
   deleteClient,
   impersonateUser,
+  getJobs,
+  createJob,
+  deleteJob,
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -54,5 +57,10 @@ router.delete('/clients/:id', authenticateToken, authorizeRole('ADMIN'), deleteC
 
 // Impersonation route
 router.post('/impersonate/:userId', authenticateToken, authorizeRole('ADMIN'), impersonateUser)
+
+// Job management routes
+router.get('/jobs', getJobs) // Publicly accessible to fetch jobs
+router.post('/jobs', authenticateToken, authorizeRole('ADMIN'), createJob)
+router.delete('/jobs/:id', authenticateToken, authorizeRole('ADMIN'), deleteJob)
 
 module.exports = router

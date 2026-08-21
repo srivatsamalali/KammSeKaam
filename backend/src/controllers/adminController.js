@@ -1,4 +1,4 @@
-const { Recruiter, Candidate, Application, User, Notification, Client } = require('../models')
+const { Recruiter, Candidate, Application, User, Notification, Client, Job } = require('../models')
 const { sendPushNotification } = require('../utils/pushService')
 const { generateToken } = require('../utils/tokenService')
 
@@ -277,6 +277,54 @@ const impersonateUser = async (req, res) => {
   }
 };
 
+const getJobs = async (req, res) => {
+  try {
+    const jobs = await Job.findAll({ order: [['createdAt', 'DESC']] })
+    res.json(jobs)
+  } catch (error) {
+    console.error('Get jobs error:', error)
+    res.status(500).json({ message: 'Error retrieving jobs', error: error.message })
+  }
+}
+
+const createJob = async (req, res) => {
+  try {
+    const { title, department, description, location, experience, requirements, salary } = req.body
+    if (!title || !department || !description || !location || !experience) {
+      return res.status(400).json({ message: 'Title, department, description, location and experience are required' })
+    }
+    const newJob = await Job.create({
+      title,
+      department,
+      description,
+      location,
+      experience,
+      requirements,
+      salary,
+      status: 'OPEN',
+    })
+    res.status(201).json(newJob)
+  } catch (error) {
+    console.error('Create job error:', error)
+    res.status(500).json({ message: 'Error creating job', error: error.message })
+  }
+}
+
+const deleteJob = async (req, res) => {
+  try {
+    const { id } = req.params
+    const job = await Job.findByPk(id)
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' })
+    }
+    await job.destroy()
+    res.json({ message: 'Job deleted successfully' })
+  } catch (error) {
+    console.error('Delete job error:', error)
+    res.status(500).json({ message: 'Error deleting job', error: error.message })
+  }
+}
+
 module.exports = {
   getDashboardStats,
   getReports,
@@ -288,4 +336,7 @@ module.exports = {
   createClient,
   deleteClient,
   impersonateUser,
+  getJobs,
+  createJob,
+  deleteJob,
 }

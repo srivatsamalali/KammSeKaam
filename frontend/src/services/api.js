@@ -87,4 +87,10 @@ export const clientService = {
   delete: (id) => api.delete(`/admin/clients/${id}`),
 }
 
+export const jobService = {
+  getAll: () => api.get('/admin/jobs'),
+  create: (data) => api.post('/admin/jobs', data),
+  delete: (id) => api.delete(`/admin/jobs/${id}`),
+}
+
 export default api
