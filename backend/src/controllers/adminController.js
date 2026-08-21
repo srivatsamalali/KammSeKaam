@@ -19,12 +19,11 @@ const syncCandidatesAndApplications = async () => {
       }
     }
 
-    // 2. Ensure all Candidate profiles have an Application entry
     const allCandidates = await Candidate.findAll()
     for (const cand of allCandidates) {
       try {
         await Application.findOrCreate({
-          where: { candidateId: cand.id },
+          where: { candidateId: cand.id, jobId: null },
           defaults: { status: 'APPLICATION_RECEIVED' }
         })
       } catch (insertErr) {
@@ -79,6 +78,9 @@ const getReports = async (req, res) => {
           model: Recruiter,
           include: [User],
         },
+        {
+          model: Job,
+        }
       ],
       order: [['createdAt', 'DESC']],
     })
@@ -96,23 +98,30 @@ const getUnassignedCandidates = async (req, res) => {
   try {
     await syncCandidatesAndApplications()
 
-    // Fetch all candidates with their applications (if any)
-    const candidates = await Candidate.findAll({
-      include: [User, { model: Application, required: false }],
+    // Fetch all applications that do not have an assigned recruiter
+    const unassignedApplications = await Application.findAll({
+      where: {
+        recruiterId: null
+      },
+      include: [
+        {
+          model: Candidate,
+          include: [User],
+        },
+        {
+          model: Job,
+        }
+      ],
+      order: [['createdAt', 'DESC']],
     })
 
-    // Filter candidates that have no application records or unassigned recruiter
-    const unassigned = candidates.filter(
-      (c) => !c.Applications || c.Applications.length === 0 || c.Applications.every(a => !a.recruiterId),
-    )
-
-    res.json(unassigned)
+    res.json(unassignedApplications)
   } catch (error) {
     console.error('Get unassigned candidates error:', error)
     res
       .status(500)
       .json({
-        message: 'Error fetching unassigned candidates',
+        message: 'Error fetching unassigned applications',
         error: error.message,
       })
   }

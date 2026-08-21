@@ -120,14 +120,72 @@ const ensureAdminUser = async () => {
 const runMigrations = async () => {
   try {
     console.log('Running automatic schema check/migration...')
-    // Check if column isRead exists in Messages table
-    const [results] = await sequelize.query("SHOW COLUMNS FROM `Messages` LIKE 'isRead'")
-    if (results.length === 0) {
+    // 1. Check if column isRead exists in Messages table
+    const [messagesCols] = await sequelize.query("SHOW COLUMNS FROM `Messages` LIKE 'isRead'")
+    if (messagesCols.length === 0) {
       console.log("Column 'isRead' not found in table 'Messages'. Adding it...")
       await sequelize.query('ALTER TABLE `Messages` ADD COLUMN `isRead` TINYINT(1) DEFAULT 0')
       console.log("Column 'isRead' added successfully!")
-    } else {
-      console.log("Column 'isRead' already exists in table 'Messages'.")
+    }
+
+    // 2. Check if column jobId exists in Applications table
+    const [appCols] = await sequelize.query("SHOW COLUMNS FROM `Applications` LIKE 'jobId'")
+    if (appCols.length === 0) {
+      console.log("Column 'jobId' not found in table 'Applications'. Adding it...")
+      await sequelize.query('ALTER TABLE `Applications` ADD COLUMN `jobId` VARCHAR(36) NULL')
+      console.log("Column 'jobId' added successfully!")
+    }
+
+    // 3. Remove unique constraint on candidateId in Applications table
+    try {
+      console.log('Cleaning up orphaned Applications records...')
+      await sequelize.query('DELETE FROM `Applications` WHERE `candidateId` NOT IN (SELECT `id` FROM `Candidates`)')
+      
+      console.log('Checking unique constraint unique_candidate on Applications...')
+      // Query foreign key constraint name
+      const [fkResults] = await sequelize.query(`
+        SELECT CONSTRAINT_NAME 
+        FROM information_schema.KEY_COLUMN_USAGE 
+        WHERE TABLE_SCHEMA = DATABASE() 
+          AND TABLE_NAME = 'Applications' 
+          AND COLUMN_NAME = 'candidateId' 
+          AND REFERENCED_TABLE_NAME = 'Candidates'
+      `)
+      
+      if (fkResults.length > 0) {
+        const fkName = fkResults[0].CONSTRAINT_NAME
+        
+        // Check if the unique key unique_candidate exists
+        const [indexResults] = await sequelize.query("SHOW INDEX FROM `Applications` WHERE Key_name = 'unique_candidate'")
+        if (indexResults.length > 0) {
+          console.log(`Found foreign key: ${fkName}. Dropping foreign key and index unique_candidate...`)
+          
+          // 1. Drop foreign key
+          await sequelize.query(`ALTER TABLE \`Applications\` DROP FOREIGN KEY \`${fkName}\``)
+          
+          // 2. Drop unique index
+          await sequelize.query('ALTER TABLE `Applications` DROP INDEX `unique_candidate`')
+          
+          // 3. Add non-unique index
+          await sequelize.query('ALTER TABLE `Applications` ADD INDEX `idx_candidateId` (`candidateId`)')
+          
+          // 4. Add foreign key back without unique restriction
+          await sequelize.query(`
+            ALTER TABLE \`Applications\` 
+            ADD CONSTRAINT \`${fkName}\` 
+            FOREIGN KEY (\`candidateId\`) REFERENCES \`Candidates\` (\`id\`) 
+            ON DELETE CASCADE ON UPDATE CASCADE
+          `)
+          
+          console.log('Successfully removed unique constraint and updated foreign key!')
+        } else {
+          console.log('Unique constraint unique_candidate already removed or does not exist.')
+        }
+      }
+    } catch (err) {
+      if (!err.message.includes("check that column/key exists") && !err.message.includes("doesn't exist")) {
+        console.error('Error updating unique_candidate constraint:', err.message)
+      }
     }
   } catch (err) {
     console.error('Error running automatic schema check/migration:', err)

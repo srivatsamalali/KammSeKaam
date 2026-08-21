@@ -10,12 +10,12 @@ const { sendPushNotification } = require('../utils/pushService')
 
 const assignCandidate = async (req, res) => {
   try {
-    const { candidateId, recruiterId } = req.body
+    const { candidateId, recruiterId, clientId, applicationId } = req.body
 
-    if (!candidateId || !recruiterId) {
+    if ((!candidateId && !applicationId) || !recruiterId) {
       return res
         .status(400)
-        .json({ message: 'Candidate ID and Recruiter ID required' })
+        .json({ message: 'Candidate ID or Application ID and Recruiter ID required' })
     }
 
     const recruiter = await Recruiter.findByPk(recruiterId)
@@ -23,25 +23,33 @@ const assignCandidate = async (req, res) => {
       return res.status(404).json({ message: 'Recruiter not found' })
     }
 
-    const candidate = await Candidate.findByPk(candidateId)
-    if (!candidate) {
-      return res.status(404).json({ message: 'Candidate not found' })
+    let application
+    if (applicationId) {
+      application = await Application.findByPk(applicationId)
+    } else {
+      application = await Application.findOne({ where: { candidateId } })
     }
 
-    // Check if application already exists for candidate
-    let application = await Application.findOne({ where: { candidateId } })
-
     if (application) {
-      // Update existing application with assigned recruiter
+      // Update existing application with assigned recruiter and client
       application.recruiterId = recruiterId
+      if (clientId) {
+        application.clientId = clientId
+      }
       await application.save()
     } else {
       // Create new application record
       application = await Application.create({
         candidateId,
         recruiterId,
+        clientId: clientId || null,
         status: 'APPLICATION_RECEIVED',
       })
+    }
+
+    const candidate = await Candidate.findByPk(application.candidateId)
+    if (!candidate) {
+      return res.status(404).json({ message: 'Candidate not found' })
     }
 
     // Update recruiter assigned candidates count

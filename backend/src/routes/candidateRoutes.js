@@ -4,9 +4,8 @@ const uploadResume = require('../middlewares/fileUpload')
 const {
   getProfile,
   updateProfile,
-} = require('../controllers/candidateController')
-const {
   getCandidateApplications,
+  applyToJob
 } = require('../controllers/candidateController')
 
 const router = express.Router()
@@ -30,6 +29,13 @@ router.get(
   authenticateToken,
   authorizeRole('CANDIDATE'),
   getCandidateApplications,
+)
+
+router.post(
+  '/apply-job',
+  authenticateToken,
+  authorizeRole('CANDIDATE'),
+  applyToJob,
 )
 
 module.exports = router

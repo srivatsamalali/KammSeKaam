@@ -1622,26 +1622,29 @@ const AdminDashboard = () => {
                 </div>
               )}
             </div>
-            {/* Unassigned candidates section */}
+            {/* Unassigned applications section */}
             {unassignedCandidates.length > 0 && (
               <div className="card mb-4">
                 <h3 className="text-lg font-bold mb-2">
-                  Unassigned Candidates
+                  Unassigned Applications
                 </h3>
                 <div className="space-y-3">
-                  {unassignedCandidates.map((c) => (
+                  {unassignedCandidates.map((app) => (
                     <div
-                      key={c.id}
+                      key={app.id}
                       className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-850/40 rounded-xl text-left"
                     >
                       <div>
-                        <p className="font-semibold">{c.name}</p>
-                        <p className="text-sm text-gray-600">{c.User?.email}</p>
+                        <p className="font-semibold">{app.Candidate?.name || 'Candidate Profile'}</p>
+                        <p className="text-sm text-gray-600">{app.Candidate?.User?.email}</p>
+                        <p className="text-xs font-bold text-amber-700 dark:text-amber-500 mt-1 uppercase tracking-wider">
+                          Applied for: {app.Job?.title || 'General Profile'}
+                        </p>
                       </div>
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                         {/* Recruiter Dropdown */}
                         <select
-                          id={`rec-${c.id}`}
+                          id={`rec-${app.id}`}
                           className="form-input w-full sm:w-[180px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         >
                           <option value="">Select recruiter</option>
@@ -1655,7 +1658,7 @@ const AdminDashboard = () => {
 
                         {/* Client Dropdown */}
                         <select
-                          id={`client-${c.id}`}
+                          id={`client-${app.id}`}
                           className="form-input w-full sm:w-[180px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         >
                           <option value="">Select client</option>
@@ -1670,11 +1673,11 @@ const AdminDashboard = () => {
                         <button
                           onClick={async () => {
                             const recruiterSelect = document.getElementById(
-                              `rec-${c.id}`,
+                              `rec-${app.id}`,
                             )
 
                             const clientSelect = document.getElementById(
-                              `client-${c.id}`,
+                              `client-${app.id}`,
                             )
 
                             const recruiterId = recruiterSelect.value
@@ -1690,7 +1693,7 @@ const AdminDashboard = () => {
 
                             try {
                               await applicationService.assign({
-                                candidateId: c.id,
+                                applicationId: app.id,
                                 recruiterId,
                                 clientId,
                               })
@@ -1725,8 +1728,13 @@ const AdminDashboard = () => {
                 <div key={app.id} className="card">
                   <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-start text-left">
                     <div className="flex-1">
-                      <h4 className="text-lg font-bold text-gray-900">
-                        {app.Candidate?.name}
+                      <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2 flex-wrap">
+                        <span>{app.Candidate?.name}</span>
+                        {app.Job && (
+                          <span className="bg-[#b88f3f]/10 text-[#b88f3f] dark:bg-[#b88f3f]/25 text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                            Role: {app.Job.title}
+                          </span>
+                        )}
                       </h4>
                       <p className="text-gray-600">
                         {app.Candidate?.User?.email}

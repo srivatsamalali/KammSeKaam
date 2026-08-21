@@ -789,7 +789,15 @@ button:disabled,
 }
 a {
   color: #065f46;
-  text-decoration: underline;
+  text-decoration: none;
+}
+
+/* Remove underlines globally at all places */
+*, a, .underline, [class*="underline"] {
+  text-decoration: none !important;
+}
+*:hover, a:hover, .hover\:underline:hover, [class*="hover:underline"]:hover {
+  text-decoration: none !important;
 }
 
 .mobile-bottom-nav {

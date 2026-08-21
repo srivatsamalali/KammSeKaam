@@ -440,6 +440,50 @@ const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, c
   }
 }
 
+const sendJobApplicationEmailToAdmin = async (adminEmail, candidateName, candidateEmail, jobTitle, department, location) => {
+  try {
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP not configured. Job application admin notification email skipped.')
+      return
+    }
+
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
+      to: adminEmail,
+      subject: `🚨 New Job Application: ${candidateName} applied for ${jobTitle}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #0f172a; padding: 24px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">Aston Recruitment</h1>
+            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 14px;">Admin Alert System</p>
+          </div>
+          <div style="padding: 24px;">
+            <h2 style="color: #0f172a; margin-top: 0;">New Job Application Received</h2>
+            <p style="color: #334155; font-size: 15px;">A candidate has applied for an open opportunity directly via the portal.</p>
+            
+            <div style="background-color: #f8fafc; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 4px; margin: 20px 0;">
+               <h3 style="margin-top: 0; color: #b88f3f; font-size: 16px;">Application Details:</h3>
+               <p style="margin: 8px 0; color: #334155;"><strong>Candidate Name:</strong> ${candidateName}</p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Candidate Email:</strong> ${candidateEmail}</p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Job Applied:</strong> ${jobTitle}</p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Department:</strong> ${department}</p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Location:</strong> ${location}</p>
+            </div>
+
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">Please log in to the Admin Dashboard to review this candidate and assign them to a recruiter.</p>
+            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+          </div>
+        </div>
+      `
+    }
+
+    await transporter.sendMail(mailOptions)
+    console.log(`Job application alert email sent successfully to admin: ${adminEmail}`)
+  } catch (error) {
+    console.error('Error sending job application email to admin:', error)
+  }
+}
+
 module.exports = {
   sendInterviewScheduledEmail,
   sendResetPasswordEmail,
@@ -448,5 +492,6 @@ module.exports = {
   sendSelectionEmail,
   sendRejectionEmail,
   sendSentToClientEmailToClient,
-  sendSentToClientEmailToCandidate
+  sendSentToClientEmailToCandidate,
+  sendJobApplicationEmailToAdmin
 }

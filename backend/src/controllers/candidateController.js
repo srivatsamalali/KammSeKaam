@@ -1,7 +1,8 @@
-const { Candidate, User, Application, Recruiter } = require('../models')
+const { Candidate, User, Application, Recruiter, Notification } = require('../models')
 const pdfParse = require('pdf-parse')
 const fs = require('fs')
 const { uploadToGoogleDrive } = require('../utils/googleDriveService')
+const { sendJobApplicationEmailToAdmin } = require('../utils/emailService')
 
 const getProfile = async (req, res) => {
   try {
@@ -235,8 +236,90 @@ const getCandidateApplications = async (req, res) => {
   }
 }
 
+const applyToJob = async (req, res) => {
+  try {
+    const candidateUserId = req.user.id
+    const { jobId, jobTitle, department, location } = req.body
+
+    if (!jobId || !jobTitle) {
+      return res.status(400).json({ message: 'Job ID and Job Title are required' })
+    }
+
+    // Find candidate details
+    const candidate = await Candidate.findOne({
+      where: { userId: candidateUserId },
+      include: [{ model: User, attributes: ['email'] }],
+    })
+
+    if (!candidate) {
+      return res.status(404).json({ message: 'Candidate profile not found' })
+    }
+
+    // Check if they already applied to this specific job
+    const existingApp = await Application.findOne({
+      where: { candidateId: candidate.id, jobId }
+    })
+
+    if (existingApp) {
+      return res.status(400).json({ message: 'You have already applied for this job opportunity!' })
+    }
+
+    // Create a new Application record
+    await Application.create({
+      candidateId: candidate.id,
+      jobId,
+      status: 'APPLICATION_RECEIVED'
+    })
+
+    // Find all Admin users to notify
+    const admins = await User.findAll({ where: { role: 'ADMIN' } })
+
+    // Create notifications for all admins
+    const notificationPromises = admins.map(admin => {
+      return Notification.create({
+        userId: admin.id,
+        type: 'JOB_APPLICATION',
+        message: `Candidate ${candidate.name || 'Someone'} (${candidate.User?.email || ''}) applied for Job: ${jobTitle} (${department || 'General'})`,
+      })
+    })
+    await Promise.all(notificationPromises)
+
+    // Send emails to all admins
+    const adminEmail = process.env.ADMIN_EMAIL_ENV || 'Contact@astonrecruitment.in'
+    await sendJobApplicationEmailToAdmin(
+      adminEmail,
+      candidate.name || 'Someone',
+      candidate.User?.email || '',
+      jobTitle,
+      department || 'General',
+      location || 'Remote'
+    )
+
+    // Send to other admins in DB
+    const emailPromises = admins
+      .filter(admin => admin.email !== adminEmail)
+      .map(admin => {
+        return sendJobApplicationEmailToAdmin(
+          admin.email,
+          candidate.name || 'Someone',
+          candidate.User?.email || '',
+          jobTitle,
+          department || 'General',
+          location || 'Remote'
+        )
+      })
+    await Promise.all(emailPromises)
+
+    res.status(200).json({ message: 'Application submitted successfully directly in portal!' })
+  } catch (error) {
+    console.error('Apply to job error:', error)
+    res.status(500).json({ message: 'Error submitting application', error: error.message })
+  }
+}
+
 module.exports = {
   getProfile,
   updateProfile,
   getCandidateApplications,
+  applyToJob
 }

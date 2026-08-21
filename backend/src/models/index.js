@@ -40,6 +40,9 @@ Message.belongsTo(User, { foreignKey: 'senderId' })
 Client.hasMany(Application, { foreignKey: 'clientId', onDelete: 'SET NULL' })
 Application.belongsTo(Client, { foreignKey: 'clientId' })
 
+Job.hasMany(Application, { foreignKey: 'jobId', onDelete: 'SET NULL' })
+Application.belongsTo(Job, { foreignKey: 'jobId' })
+
 module.exports = {
   User,
   Candidate,

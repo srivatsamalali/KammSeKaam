@@ -34,6 +34,7 @@ export const candidateService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
   getApplications: () => api.get('/candidate/applications'),
+  applyJob: (data) => api.post('/candidate/apply-job', data),
 }
 
 export const recruiterService = {

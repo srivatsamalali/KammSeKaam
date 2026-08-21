@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { jobService } from '../services/api'
+import { jobService, candidateService } from '../services/api'
 import { Link } from 'react-router-dom'
 
 const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
@@ -9,6 +9,27 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
   const [selectedDept, setSelectedDept] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedJobId, setExpandedJobId] = useState(null)
+  const [applyingJobIds, setApplyingJobIds] = useState({})
+  const [appliedJobIds, setAppliedJobIds] = useState({})
+
+  const handleApplyDirectly = async (job) => {
+    setApplyingJobIds(prev => ({ ...prev, [job.id]: true }))
+    try {
+      await candidateService.applyJob({
+        jobId: job.id,
+        jobTitle: job.title,
+        department: job.department,
+        location: job.location
+      })
+      setAppliedJobIds(prev => ({ ...prev, [job.id]: true }))
+      alert(`Success! Your application for "${job.title}" has been submitted directly in the portal. Admin has been notified via email and portal notification.`)
+    } catch (err) {
+      console.error('Error applying directly:', err)
+      alert(err.response?.data?.message || 'Failed to submit application. Please try again.')
+    } finally {
+      setApplyingJobIds(prev => ({ ...prev, [job.id]: false }))
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -181,20 +202,31 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
                       </div>
 
                       {/* Action Apply Button Block */}
-                      <div className="pt-2 border-t border-gray-200 dark:border-slate-850/60 flex justify-end">
-                        {job.applyUrl ? (
+                      <div className="pt-2 border-t border-gray-200 dark:border-slate-850/60 flex justify-end gap-3 flex-wrap">
+                        {job.applyUrl && (
                           <a 
                             href={job.applyUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg text-center tracking-wider shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            className="bg-[#b88f3f]/20 hover:bg-[#b88f3f]/30 border border-[#b88f3f]/40 text-[#b88f3f] font-bold text-xs px-6 py-2.5 rounded-lg text-center tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all"
                           >
-                            APPLY NOW VIA FORM →
+                            APPLY VIA EXTERNAL FORM →
                           </a>
-                        ) : isLoggedIn ? (
-                          <div className="bg-[#b88f3f]/10 text-[#b88f3f] border border-[#b88f3f]/20 font-bold text-xs px-5 py-2.5 rounded-lg text-center">
-                            Applied via Profile ✓
-                          </div>
+                        )}
+                        {isLoggedIn ? (
+                          appliedJobIds[job.id] ? (
+                            <div className="bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 font-bold text-xs px-5 py-2.5 rounded-lg text-center">
+                              Applied via Portal ✓
+                            </div>
+                          ) : (
+                            <button
+                              disabled={applyingJobIds[job.id]}
+                              onClick={() => handleApplyDirectly(job)}
+                              className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg text-center tracking-wider shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+                            >
+                              {applyingJobIds[job.id] ? 'APPLYING...' : 'APPLY IN PORTAL →'}
+                            </button>
+                          )
                         ) : (
                           <Link 
                             to="/candidate/register" 
