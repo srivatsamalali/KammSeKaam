@@ -167,7 +167,6 @@ const ForgotPassword = () => {
           setIsOrbiting(false)
           setIsVerified(false)
           setOtpArray(['', '', '', '', '', ''])
-          setOtp('')
         }, 850)
 
       } catch (error) {
