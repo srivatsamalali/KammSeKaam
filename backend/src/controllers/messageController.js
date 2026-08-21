@@ -92,45 +92,6 @@ const sendMessage = async (req, res) => {
       } catch (err) {
         console.error('Failed to notify message recipient:', err)
       }
-
-      // Schedule unread notification email check after 60 seconds (1 minute)
-      setTimeout(async () => {
-        try {
-          const freshMessage = await Message.findByPk(newMessage.id)
-          if (freshMessage && !freshMessage.isRead) {
-            const recipientUser = await User.findByPk(recipientUserId)
-            if (recipientUser) {
-              const { sendUnreadMessageEmail } = require('../utils/emailService')
-              
-              // Direct Link resolution
-              let directLink = 'http://localhost:5173'
-              if (recipientUser.role === 'CANDIDATE') {
-                directLink = 'http://localhost:5173/candidate/dashboard'
-              } else if (recipientUser.role === 'RECRUITER' || recipientUser.role === 'ADMIN') {
-                directLink = 'http://localhost:5173/recruiter/dashboard'
-              }
-              
-              const recipientName = recipientUser.role === 'CANDIDATE' 
-                ? (application.Candidate?.name || '') 
-                : (application.Recruiter?.name || '')
-
-              const messagePreview = message.length > 100 
-                ? message.substring(0, 100) + '...' 
-                : message
-
-              await sendUnreadMessageEmail(
-                recipientUser.email,
-                recipientName,
-                senderName,
-                messagePreview,
-                directLink
-              )
-            }
-          }
-        } catch (timerErr) {
-          console.error('Error in unread message notification timer:', timerErr)
-        }
-      }, 60000)
     }
 
     // Attach sender User details for frontend convenience

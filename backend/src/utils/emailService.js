@@ -440,59 +440,6 @@ const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, c
   }
 }
 
-const sendUnreadMessageEmail = async (
-  recipientEmail,
-  recipientName,
-  senderName,
-  messagePreview,
-  directLink,
-) => {
-  try {
-    if (!isSmtpConfigured()) {
-      console.log('📧 [DEV MODE] SMTP not configured. Unread message notification email skipped for:', recipientEmail)
-      return
-    }
-
-    const mailOptions = {
-      from: `"Aston Recruitment" <${process.env.SMTP_USER}>`,
-      to: recipientEmail,
-      subject: `New message from ${senderName} on Aston Recruitment`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-          <div style="background-color: #090f19; padding: 24px; text-align: center;">
-            <img src="https://astonrecruitment.in/aston-logo-transparent.png" alt="Aston Recruitment" style="height: 40px; object-fit: contain;" />
-          </div>
-          <div style="padding: 24px; background-color: #ffffff;">
-            <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Hello ${recipientName || 'there'},</h2>
-            <p style="color: #334155; font-size: 15px; line-height: 1.6;">You have a new unread message from <strong>${senderName}</strong> on the Aston Recruitment portal.</p>
-            
-            <div style="background-color: #f8fafc; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 8px; margin: 20px 0; font-style: italic; color: #475569;">
-              "${messagePreview}"
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${directLink}" style="background-color: #b88f3f; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 14px; box-shadow: 0 4px 6px -1px rgba(184, 143, 63, 0.25);">
-                View Message & Reply
-              </a>
-            </div>
-            
-            <p style="color: #64748b; font-size: 12px; margin-top: 24px;">If the button above does not work, copy and paste this URL into your browser:<br/>
-            <a href="${directLink}" style="color: #b88f3f; word-break: break-all;">${directLink}</a></p>
-          </div>
-          <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
-            © ${new Date().getFullYear()} Aston Recruitment. All rights reserved.
-          </div>
-        </div>
-      `
-    }
-
-    await transporter.sendMail(mailOptions)
-    console.log(`Unread message notification email sent successfully to ${recipientEmail}`)
-  } catch (error) {
-    console.error('Error sending unread message email:', error)
-  }
-}
-
 module.exports = {
   sendInterviewScheduledEmail,
   sendResetPasswordEmail,
@@ -501,6 +448,5 @@ module.exports = {
   sendSelectionEmail,
   sendRejectionEmail,
   sendSentToClientEmailToClient,
-  sendSentToClientEmailToCandidate,
-  sendUnreadMessageEmail
+  sendSentToClientEmailToCandidate
 }

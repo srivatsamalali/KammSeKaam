@@ -102,7 +102,7 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button 
                 onClick={() => window.dispatchEvent(new Event('aston-open-client-modal'))}
-                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95 shadow-lg"
+                className="btn-custom bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95 shadow-lg"
               >
                 <span>HIRE TALENT</span>
                 <span className="group-hover:translate-x-1.5 transition-transform">→</span>
@@ -211,9 +211,9 @@ const LandingPage = () => {
       </section>
 
       {/* Why Aston? */}
-      <section id="why-aston" className="py-20 bg-white border-t border-b border-slate-200/60">
+      <section id="why-aston" className="py-20 bg-white dark:bg-[#0c101a] border-t border-b border-slate-200/60 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto px-6 sm:px-12 text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#090f19] mb-12 font-serif tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#090f19] dark:text-white mb-12 font-serif tracking-tight">
             WHY ASTON?
           </h2>
 
@@ -224,12 +224,12 @@ const LandingPage = () => {
               { title: 'Human Evaluation', text: 'Every decision is backed by human judgment, experience and accountability.', icon: <Users className="w-8 h-8 text-[#b88f3f]" /> },
               { title: 'Partnership Mindset', text: 'We work like an extension of your team and care about your outcomes.', icon: <Handshake className="w-8 h-8 text-[#b88f3f]" /> }
             ].map((card, idx) => (
-              <div key={idx} className="flex flex-col items-center p-6 bg-[#fafbfc] border border-slate-100 rounded-xl hover:shadow-md transition-all duration-300">
+              <div key={idx} className="flex flex-col items-center p-6 bg-slate-50 dark:bg-[#090f19] border border-slate-200/60 dark:border-slate-800 rounded-2xl hover:shadow-lg hover:border-amber-500/20 hover:dark:border-[#b88f3f]/30 transition-all duration-300">
                 <div className="mb-4">
                   {card.icon}
                 </div>
-                <h3 className="font-bold text-[#090f19] text-base mb-2 font-serif">{card.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed max-w-[220px]">{card.text}</p>
+                <h3 className="font-bold text-[#090f19] dark:text-white text-base mb-2 font-serif">{card.title}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-[220px]">{card.text}</p>
               </div>
             ))}
           </div>
@@ -478,7 +478,7 @@ const LandingPage = () => {
           {!chatbotOpen ? (
             <button
               onClick={() => setChatbotOpen(true)}
-              className="chatbot-toggle-button hover:scale-105 active:scale-95 transition-all flex items-center justify-between pl-5 pr-4 py-3.5 relative cursor-pointer gap-3 group"
+              className="btn-custom chatbot-toggle-button hover:scale-105 active:scale-95 transition-all flex items-center justify-between pl-5 pr-4 py-3.5 relative cursor-pointer gap-3 group"
             >
               <div className="flex flex-col items-start text-left">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#fef3c7]">Ask Aston</span>

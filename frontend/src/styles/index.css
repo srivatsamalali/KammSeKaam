@@ -10,6 +10,22 @@
   --accent-bg-glow: rgba(184, 143, 63, 0.18);
 }
 
+/* Force gold theme text utility to always stay gold regardless of dark mode resets */
+.text-\[\#b88f3f\] {
+  color: #b88f3f !important;
+}
+
+/* Re-anchor hero banner typography to remain light colored on dark graphic */
+#home h1 {
+  color: #ffffff !important;
+}
+#home p {
+  color: #cbd5e1 !important;
+}
+#home span:not(.text-\[\#b88f3f\]) {
+  color: #cbd5e1 !important;
+}
+
 .dark {
   --bg-color: #2b2f3a;
   --text-color: #e2e8f0;
@@ -33,7 +49,7 @@ html,
 body {
   min-height: 100%;
   background: var(--bg-color) !important;
-  color: var(--text-color) !important;
+  color: var(--text-color);
   scroll-behavior: smooth;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -70,7 +86,7 @@ body {
 }
 
 .dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark label, .dark span {
-  color: #e2e8f0 !important;
+  color: #e2e8f0;
 }
 
 .dark .text-gray-900, .dark .text-gray-800, .dark .text-slate-900, .dark .text-slate-800 {
@@ -81,7 +97,7 @@ body {
   color: #94a3b8 !important;
 }
 
-.dark button:not(.btn-primary):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.px-3) {
+.dark button:not(.btn-primary):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.px-3):not(.btn-custom) {
   background: #242933 !important;
   color: #e2e8f0 !important;
   border-color: #454d5b !important;
@@ -191,7 +207,7 @@ body {
 }
 
 /* default button style for elements without explicit btn classes */
-button:not(.btn-primary):not(.btn-secondary) {
+button:not(.btn-primary):not(.btn-secondary):not(.btn-custom) {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   padding: 0.45rem 0.75rem;
