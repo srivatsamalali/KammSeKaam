@@ -289,7 +289,7 @@ const getJobs = async (req, res) => {
 
 const createJob = async (req, res) => {
   try {
-    const { title, department, description, location, experience, requirements, salary } = req.body
+    const { title, department, description, location, experience, requirements, salary, applyUrl } = req.body
     if (!title || !department || !description || !location || !experience) {
       return res.status(400).json({ message: 'Title, department, description, location and experience are required' })
     }
@@ -301,12 +301,39 @@ const createJob = async (req, res) => {
       experience,
       requirements,
       salary,
+      applyUrl,
       status: 'OPEN',
     })
     res.status(201).json(newJob)
   } catch (error) {
     console.error('Create job error:', error)
     res.status(500).json({ message: 'Error creating job', error: error.message })
+  }
+}
+
+const updateJob = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { title, department, description, location, experience, requirements, salary, applyUrl, status } = req.body
+    const job = await Job.findByPk(id)
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' })
+    }
+    if (title !== undefined) job.title = title
+    if (department !== undefined) job.department = department
+    if (description !== undefined) job.description = description
+    if (location !== undefined) job.location = location
+    if (experience !== undefined) job.experience = experience
+    if (requirements !== undefined) job.requirements = requirements
+    if (salary !== undefined) job.salary = salary
+    if (applyUrl !== undefined) job.applyUrl = applyUrl
+    if (status !== undefined) job.status = status
+
+    await job.save()
+    res.json(job)
+  } catch (error) {
+    console.error('Update job error:', error)
+    res.status(500).json({ message: 'Error updating job', error: error.message })
   }
 }
 
@@ -338,5 +365,6 @@ module.exports = {
   impersonateUser,
   getJobs,
   createJob,
+  updateJob,
   deleteJob,
 }

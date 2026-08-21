@@ -90,6 +90,7 @@ export const clientService = {
 export const jobService = {
   getAll: () => api.get('/admin/jobs'),
   create: (data) => api.post('/admin/jobs', data),
+  update: (id, data) => api.put(`/admin/jobs/${id}`, data),
   delete: (id) => api.delete(`/admin/jobs/${id}`),
 }
 

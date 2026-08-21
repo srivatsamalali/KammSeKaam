@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   recruiterService,
   applicationService,
@@ -592,17 +592,17 @@ const RecruiterDashboard = () => {
               </p>
             </div>
 
-            {/* Static Center Brand Logo */}
-            <div className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+            {/* Clickable Center Brand Logo */}
+            <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
               <img
-                src="/logo.jpeg"
+                src="/aston-logo-transparent.png"
                 alt="Aston Recruitment"
-                className="h-8 w-8 rounded-full object-cover shadow-md shadow-amber-200/30"
+                className="h-8 w-8 object-contain"
               />
               <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
                 Aston Recruitment
               </span>
-            </div>
+            </Link>
 
             <div className="flex items-center gap-4 z-10">
               <ThemeToggle />
@@ -648,17 +648,17 @@ const RecruiterDashboard = () => {
             </p>
           </div>
 
-          {/* Static Center Brand Logo */}
-          <div className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+          {/* Clickable Center Brand Logo */}
+          <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
             <img
-              src="/logo.jpeg"
+              src="/aston-logo-transparent.png"
               alt="Aston Recruitment"
-              className="h-8 w-8 rounded-full object-cover shadow-md shadow-amber-200/30"
+              className="h-8 w-8 object-contain"
             />
             <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
               Aston Recruitment
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-4 z-10">
             <ThemeToggle />

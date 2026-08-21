@@ -13,6 +13,7 @@ const {
   impersonateUser,
   getJobs,
   createJob,
+  updateJob,
   deleteJob,
 } = require('../controllers/adminController')
 
@@ -61,6 +62,7 @@ router.post('/impersonate/:userId', authenticateToken, authorizeRole('ADMIN'), i
 // Job management routes
 router.get('/jobs', getJobs) // Publicly accessible to fetch jobs
 router.post('/jobs', authenticateToken, authorizeRole('ADMIN'), createJob)
+router.put('/jobs/:id', authenticateToken, authorizeRole('ADMIN'), updateJob)
 router.delete('/jobs/:id', authenticateToken, authorizeRole('ADMIN'), deleteJob)
 
 module.exports = router

@@ -8,6 +8,7 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
   const [error, setError] = useState('')
   const [selectedDept, setSelectedDept] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
+  const [expandedJobId, setExpandedJobId] = useState(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -20,7 +21,6 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
     setError('')
     try {
       const data = await jobService.getAll()
-      // Filter open jobs
       const openJobs = (data.data || data).filter(j => j.status === 'OPEN')
       setJobs(openJobs)
     } catch (err) {
@@ -33,10 +33,8 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
 
   if (!isOpen) return null
 
-  // Get unique departments for filter
   const departments = ['All', ...new Set(jobs.map(j => j.department))]
 
-  // Filter jobs based on selected department and search term
   const filteredJobs = jobs.filter(j => {
     const matchesDept = selectedDept === 'All' || j.department === selectedDept
     const matchesSearch = j.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -45,9 +43,13 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
     return matchesDept && matchesSearch
   })
 
+  const toggleExpand = (jobId) => {
+    setExpandedJobId(expandedJobId === jobId ? null : jobId)
+  }
+
   return (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-4xl w-full h-[85vh] flex flex-col relative animate-in slide-in-from-bottom-4 duration-300 shadow-2xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl max-w-5xl w-full h-[85vh] flex flex-col relative animate-in slide-in-from-bottom-4 duration-300 shadow-2xl overflow-hidden">
         
         {/* Header */}
         <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
@@ -56,7 +58,7 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
               Open Opportunities
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Explore open roles at premier organizations curated by Aston Recruitment.
+              Click on any role tile below to expand and view the full Job Description (JD).
             </p>
           </div>
           <button 
@@ -92,7 +94,7 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
         </div>
 
         {/* Job Listings Grid */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-3">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-3">
               <div className="w-8 h-8 border-2 border-[#b88f3f] border-t-transparent rounded-full animate-spin"></div>
@@ -114,58 +116,100 @@ const ViewOpenRolesModal = ({ isOpen, onClose, isLoggedIn = false }) => {
               <p className="text-xs text-slate-500">Check back later or register to get notified of new matching positions.</p>
             </div>
           ) : (
-            filteredJobs.map((job) => (
-              <div 
-                key={job.id} 
-                className="p-6 bg-slate-950/40 border border-slate-800 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-slate-700 transition-all hover:bg-slate-950/80 group"
-              >
-                <div className="space-y-2.5 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="bg-[#b88f3f]/10 text-[#b88f3f] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      {job.department}
-                    </span>
-                    <span className="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      📍 {job.location}
-                    </span>
-                    <span className="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      💼 {job.experience}
-                    </span>
-                    {job.salary && (
-                      <span className="bg-slate-800/50 text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                        💰 {job.salary}
-                      </span>
-                    )}
+            filteredJobs.map((job) => {
+              const isExpanded = expandedJobId === job.id
+              return (
+                <div 
+                  key={job.id} 
+                  className="bg-slate-950/40 border border-slate-800/80 rounded-xl overflow-hidden hover:border-slate-700 transition-colors"
+                >
+                  {/* Long Horizontal Tile */}
+                  <div 
+                    onClick={() => toggleExpand(job.id)}
+                    className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-slate-900/40 select-none transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <span className="bg-[#b88f3f]/10 text-[#b88f3f] text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                          {job.department}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-bold text-white font-serif tracking-tight truncate sm:max-w-md md:max-w-lg">
+                        {job.title}
+                      </h3>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-slate-300">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-md">
+                        <span>📍</span>
+                        <span className="font-semibold">{job.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-md">
+                        <span>💼</span>
+                        <span className="font-semibold">{job.experience}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-md">
+                        <span>💰</span>
+                        <span className="font-semibold">{job.salary || 'Market Standards'}</span>
+                      </div>
+                      <div className="ml-2 text-slate-400 text-sm">
+                        {isExpanded ? '▲' : '▼'}
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-bold text-white font-serif group-hover:text-[#b88f3f] transition-colors">
-                    {job.title}
-                  </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {job.description}
-                  </p>
-                  {job.requirements && (
-                    <div className="text-xs text-slate-500 pt-1">
-                      <span className="font-semibold text-slate-400">Skills Stack: </span>
-                      {job.requirements}
+
+                  {/* Expanded Content View (JD + Apply Controls) */}
+                  {isExpanded && (
+                    <div className="p-6 border-t border-slate-850 bg-slate-900/20 text-left space-y-6 animate-in slide-in-from-top duration-200">
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-xs uppercase tracking-wider text-[#b88f3f] font-bold mb-1.5">Job Description</h4>
+                          {/* PRESERVES WHITE SPACE AND FORMATTING */}
+                          <div className="text-sm text-slate-300 leading-relaxed font-sans whitespace-pre-wrap">
+                            {job.description}
+                          </div>
+                        </div>
+
+                        {job.requirements && (
+                          <div>
+                            <h4 className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Key Requirements / Skills Stack</h4>
+                            <div className="text-xs text-slate-350 bg-slate-950/45 p-3 rounded-lg border border-slate-850/60 font-mono">
+                              {job.requirements}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Apply Button Block */}
+                      <div className="pt-2 border-t border-slate-850/60 flex justify-end">
+                        {job.applyUrl ? (
+                          <a 
+                            href={job.applyUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg text-center tracking-wider shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+                          >
+                            APPLY NOW VIA FORM →
+                          </a>
+                        ) : isLoggedIn ? (
+                          <div className="bg-[#b88f3f]/10 text-[#b88f3f] border border-[#b88f3f]/20 font-bold text-xs px-5 py-2.5 rounded-lg text-center">
+                            Applied via Profile ✓
+                          </div>
+                        ) : (
+                          <Link 
+                            to="/candidate/register" 
+                            onClick={onClose}
+                            className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg text-center tracking-wider shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+                          >
+                            REGISTER TO APPLY →
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
-                <div className="flex-shrink-0 w-full md:w-auto">
-                  {isLoggedIn ? (
-                    <div className="bg-[#b88f3f]/10 text-[#b88f3f] border border-[#b88f3f]/20 font-bold text-xs px-5 py-2.5 rounded-lg text-center shadow-xs">
-                      Applied via Profile ✓
-                    </div>
-                  ) : (
-                    <Link 
-                      to="/candidate/register" 
-                      onClick={onClose}
-                      className="block bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg text-center tracking-wider shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                      REGISTER TO APPLY →
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       </div>

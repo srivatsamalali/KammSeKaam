@@ -37,6 +37,10 @@ const Job = sequelize.define('Job', {
     type: DataTypes.ENUM('OPEN', 'CLOSED'),
     defaultValue: 'OPEN',
   },
+  applyUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 })
 
 module.exports = Job

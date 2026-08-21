@@ -9,7 +9,7 @@ const PublicHeader = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const lastCheckedRef = useRef({})
 
   const [clientModalOpen, setClientModalOpen] = useState(false)
@@ -248,21 +248,78 @@ const PublicHeader = () => {
               </a>
             </div>
 
-            {/* Desktop Action Buttons */}
+            {/* Desktop Action Buttons / User Dropdown */}
             <div className="hidden md:flex items-center gap-4">
-              <Link 
-                to="/candidate/register" 
-                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-lg hover:shadow-amber-500/10 transition-all duration-300 uppercase tracking-wider transform hover:scale-[1.02]"
-              >
-                Candidate Registration
-              </Link>
+              {user ? (
+                <div 
+                  className="relative py-3.5 cursor-pointer z-[9999]"
+                  onMouseEnter={() => setActiveDropdown('user')}
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <div className="flex items-center gap-2 px-4 py-2 border border-slate-700/60 rounded-xl bg-slate-900/40 hover:bg-slate-900/80 transition-colors">
+                    <span className="text-xs font-semibold text-white">👤 {user.name || user.email}</span>
+                    <span className="text-[9px] text-[#b88f3f]">▼</span>
+                  </div>
+                  {activeDropdown === 'user' && (
+                    <div 
+                      className="absolute right-0 top-full w-48 backdrop-blur-lg border border-slate-800 rounded-xl p-3 shadow-2xl z-[9999] text-left space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-300"
+                      style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}
+                    >
+                      <Link 
+                        to={
+                          user.role === 'ADMIN' ? '/admin/dashboard' :
+                          user.role === 'RECRUITER' ? '/recruiter/dashboard' :
+                          '/candidate/dashboard'
+                        }
+                        className="block text-xs text-slate-200 font-bold hover:text-[#b88f3f] py-1.5 px-2.5 rounded-lg hover:bg-slate-800/40 transition-all duration-200"
+                      >
+                        📊 Dashboard
+                      </Link>
+                      <button
+                        onClick={logout}
+                        className="w-full text-left block text-xs text-red-400 font-bold hover:text-red-300 py-1.5 px-2.5 rounded-lg hover:bg-red-500/10 transition-all duration-200"
+                      >
+                        🚪 Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link 
+                  to="/candidate/register" 
+                  className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-lg hover:shadow-amber-500/10 transition-all duration-300 uppercase tracking-wider transform hover:scale-[1.02]"
+                >
+                  Candidate Registration
+                </Link>
+              )}
             </div>
 
             {/* Mobile Actions Menu toggle */}
             <div className="flex md:hidden items-center gap-3">
-              <Link to="/candidate/register" className="bg-[#b88f3f] text-white font-semibold text-xs px-3.5 py-2 rounded-md">
-                Register
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Link 
+                    to={
+                      user.role === 'ADMIN' ? '/admin/dashboard' :
+                      user.role === 'RECRUITER' ? '/recruiter/dashboard' :
+                      '/candidate/dashboard'
+                    }
+                    className="bg-[#b88f3f] text-white font-semibold text-xs px-3.5 py-1.5 rounded-md"
+                  >
+                    Dashboard
+                  </Link>
+                  <button 
+                    onClick={logout}
+                    className="bg-red-550/10 text-red-400 border border-red-500/20 font-semibold text-xs px-3 py-1.5 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link to="/candidate/register" className="bg-[#b88f3f] text-white font-semibold text-xs px-3.5 py-2 rounded-md">
+                  Register
+                </Link>
+              )}
             </div>
 
           </div>

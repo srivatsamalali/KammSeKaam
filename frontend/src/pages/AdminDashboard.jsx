@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   adminService,
   recruiterService,
@@ -664,6 +664,7 @@ const AdminDashboard = () => {
   })
   const [jobs, setJobs] = useState([])
   const [showCreateJob, setShowCreateJob] = useState(false)
+  const [editingJobId, setEditingJobId] = useState(null)
   const [jobForm, setJobForm] = useState({
     title: '',
     department: 'Technology & IT',
@@ -672,6 +673,7 @@ const AdminDashboard = () => {
     experience: '',
     requirements: '',
     salary: '',
+    applyUrl: '',
   })
   const [recruiterEmailSuggestions, setRecruiterEmailSuggestions] = useState([])
   const [recruiterSelectedCountryCode, setRecruiterSelectedCountryCode] = useState('+91')
@@ -782,7 +784,13 @@ const AdminDashboard = () => {
   const handleCreateJob = async (e) => {
     e.preventDefault()
     try {
-      await jobService.create(jobForm)
+      if (editingJobId) {
+        await jobService.update(editingJobId, jobForm)
+        showToast('Open role updated successfully', 'success')
+      } else {
+        await jobService.create(jobForm)
+        showToast('Open role added successfully', 'success')
+      }
       setJobForm({
         title: '',
         department: 'Technology & IT',
@@ -791,15 +799,33 @@ const AdminDashboard = () => {
         experience: '',
         requirements: '',
         salary: '',
+        applyUrl: '',
       })
+      setEditingJobId(null)
       setShowCreateJob(false)
-      showToast('Open role added successfully', 'success')
       const jobRes = await jobService.getAll()
       setJobs(jobRes.data || jobRes)
     } catch (error) {
-      console.error('Error creating job:', error)
-      showToast(error.response?.data?.message || 'Error creating open role', 'error')
+      console.error('Error saving job:', error)
+      showToast(error.response?.data?.message || 'Error saving open role', 'error')
     }
+  }
+
+  const handleEditJob = (job) => {
+    setJobForm({
+      title: job.title || '',
+      department: job.department || 'Technology & IT',
+      description: job.description || '',
+      location: job.location || '',
+      experience: job.experience || '',
+      requirements: job.requirements || '',
+      salary: job.salary || '',
+      applyUrl: job.applyUrl || '',
+    })
+    setEditingJobId(job.id)
+    setShowCreateJob(true)
+    // Scroll up to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDeleteJob = async (id) => {
@@ -961,17 +987,17 @@ const AdminDashboard = () => {
               </p>
             </div>
 
-            {/* Static Center Brand Logo */}
-            <div className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+            {/* Clickable Center Brand Logo */}
+            <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
               <img
-                src="/logo.jpeg"
+                src="/aston-logo-transparent.png"
                 alt="Aston Recruitment"
-                className="h-8 w-8 rounded-full object-cover shadow-md shadow-amber-200/30"
+                className="h-8 w-8 object-contain"
               />
               <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
                 Aston Recruitment
               </span>
-            </div>
+            </Link>
 
             <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto z-10">
               <ThemeToggle />
@@ -1036,17 +1062,17 @@ const AdminDashboard = () => {
             </p>
           </div>
 
-          {/* Static Center Brand Logo */}
-          <div className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+          {/* Clickable Center Brand Logo */}
+          <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
             <img
-              src="/logo.jpeg"
+              src="/aston-logo-transparent.png"
               alt="Aston Recruitment"
-              className="h-8 w-8 rounded-full object-cover shadow-md shadow-amber-200/30"
+              className="h-8 w-8 object-contain"
             />
             <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
               Aston Recruitment
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto z-10">
             <ThemeToggle />
@@ -1941,7 +1967,9 @@ const AdminDashboard = () => {
 
             {showCreateJob && (
               <form onSubmit={handleCreateJob} className="card p-6 bg-slate-50 border border-slate-200/50 mb-6 max-w-lg">
-                <h4 className="text-md font-bold mb-4 text-blue-900">Add Open Position</h4>
+                <h4 className="text-md font-bold mb-4 text-blue-900">
+                  {editingJobId ? 'Edit Open Position' : 'Add Open Position'}
+                </h4>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Job Title</label>
@@ -2018,17 +2046,53 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Application Form Link (Optional)</label>
+                    <input
+                      type="url"
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
+                      value={jobForm.applyUrl}
+                      onChange={(e) => setJobForm({ ...jobForm, applyUrl: e.target.value })}
+                      placeholder="e.g. https://forms.gle/... or linkedin apply link"
+                    />
+                  </div>
+                  <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Job Description</label>
                     <textarea
-                      rows={3}
+                      rows={5}
                       className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-slate-800"
                       required
                       value={jobForm.description}
                       onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
-                      placeholder="Briefly describe the key responsibilities..."
+                      placeholder="Paste your full job description here (line breaks will be preserved)..."
                     />
                   </div>
-                  <button type="submit" className="btn-primary w-full">Save Position</button>
+                  <div className="flex gap-3">
+                    <button type="submit" className="btn-primary flex-1">
+                      {editingJobId ? 'Update Position' : 'Save Position'}
+                    </button>
+                    {editingJobId && (
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setEditingJobId(null)
+                          setJobForm({
+                            title: '',
+                            department: 'Technology & IT',
+                            description: '',
+                            location: '',
+                            experience: '',
+                            requirements: '',
+                            salary: '',
+                            applyUrl: '',
+                          })
+                          setShowCreateJob(false)
+                        }}
+                        className="btn-secondary"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </form>
             )}
@@ -2039,7 +2103,7 @@ const AdminDashboard = () => {
               ) : (
                 jobs.map((job) => (
                   <div key={job.id} className="card flex justify-between items-center p-5 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
                           {job.department}
@@ -2050,26 +2114,40 @@ const AdminDashboard = () => {
                         <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
                           💼 {job.experience}
                         </span>
-                        {job.salary && (
-                          <span className="bg-slate-100/55 text-slate-650 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            💰 {job.salary}
+                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          💰 {job.salary || 'Market Standards'}
+                        </span>
+                        {job.applyUrl && (
+                          <span className="bg-blue-50 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full truncate max-w-[200px]">
+                            🔗 Link: {job.applyUrl}
                           </span>
                         )}
                       </div>
-                      <h4 className="text-lg font-bold text-gray-900">{job.title}</h4>
-                      <p className="text-sm text-slate-600">{job.description}</p>
+                      <h4 className="text-lg font-bold text-gray-900 truncate">{job.title}</h4>
+                      {/* PRESERVES WHITE SPACE AND FORMATTING */}
+                      <p className="text-sm text-slate-655 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        {job.description}
+                      </p>
                       {job.requirements && (
                         <p className="text-xs text-slate-500">
                           <span className="font-semibold">Skills Stack: </span>{job.requirements}
                         </p>
                       )}
                     </div>
-                    <button
-                      onClick={() => handleDeleteJob(job.id)}
-                      className="btn-danger px-4 py-2 shrink-0 ml-4"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center gap-2 shrink-0 ml-4">
+                      <button
+                        onClick={() => handleEditJob(job)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteJob(job.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
