@@ -2,30 +2,49 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { candidateService, recruiterService } from '../services/api'
+import { createPortal } from 'react-dom'
 
 const PRESET_QUERIES = [
   {
+    id: 'how_register',
+    question: 'How do I register?',
+    answer: 'To register, click "Candidate Registration" or "Looking for a job?" to set up your profile, input experience and CTC preferences, and upload your resume (PDF, under 5MB).',
+    path: '/candidate/register'
+  },
+  {
+    id: 'cities_operate',
+    question: 'What cities do you operate in?',
+    answer: 'We operate in all major tech centers including Bengaluru, Mumbai, Pune, Hyderabad, Chennai, Kolkata, and Delhi NCR.',
+    path: '/'
+  },
+  {
+    id: 'want_hire',
+    question: 'I want to hire candidates',
+    answer: 'If you are looking to hire, select "For Clients" or click "Tell us who you\'re hiring" at the bottom of the home page to hire matching professionals.',
+    path: '/'
+  },
+  {
     id: 'how_schedule',
     question: 'How do I schedule an interview?',
-    answer: 'Recruiters can schedule interviews by logging in via /recruiter/login, clicking the "Schedule" button on any candidate application tab, setting the date, and sharing the auto-generated meeting room link.',
+    answer: 'Recruiters can schedule interviews by logging in, opening the Candidate details panel on their dashboard, clicking "Schedule Interview", and entering the details.',
     path: '/recruiter/login'
   },
   {
     id: 'upload_resume',
     question: 'How can a candidate upload their resume?',
-    answer: 'Candidates can manage their profile and upload their resume (PDF format, under 5MB) by logging in via /candidate/login and clicking the "Edit Profile" button to update their information.',
+    answer: 'Candidates can manage their profile and upload their resume by logging in via /candidate/login, and clicking "Edit Profile" on their dashboard.',
     path: '/candidate/login'
   },
   {
     id: 'find_meeting',
     question: 'Where do I find my meeting room?',
-    answer: 'Once scheduled, meeting rooms are accessible via the candidate/recruiter dashboards under the "Upcoming Interviews" banner, or directly via the URL structure `/meeting/<roomId>`.',
+    answer: 'Once scheduled, meeting rooms are accessible via the candidate/recruiter dashboards under the active applications or interview cards, or directly via `/meeting/<roomId>`.',
     path: '/'
   },
   {
     id: 'admin_actions',
     question: 'What is the Admin\'s role?',
-    answer: 'Admins log in via /admin/login. They can create/edit/delete recruiter profiles, override candidate statuses, view system analytics, and assign candidates to matching recruiters.',
+    answer: 'Admins log in via /admin/login. They can manage recruiters and candidates, assign candidates, override application statuses, and view system analytics.',
     path: '/admin/login'
   }
 ]
@@ -33,15 +52,11 @@ const PRESET_QUERIES = [
 const ChatBot = () => {
   const { user } = useAuth()
   const location = useLocation()
-
-  if (location.pathname === '/' || window.location.pathname === '/') {
-    return null
-  }
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Hello! I am the Aston Recruitment Assistant. How can I help you navigate the Aston Recruitment portal today?'
+      text: 'Hello! Welcome to Aston Recruitment. How can I help you navigate the Aston Recruitment portal today?'
     }
   ])
   const [isTyping, setIsTyping] = useState(false)
@@ -52,11 +67,9 @@ const ChatBot = () => {
   }, [messages, isTyping])
 
   const handleQueryClick = (query) => {
-    // Add user message
     setMessages((prev) => [...prev, { sender: 'user', text: query.question }])
     setIsTyping(true)
 
-    // Simulate response delay
     setTimeout(() => {
       setIsTyping(false)
       setMessages((prev) => [
@@ -67,7 +80,53 @@ const ChatBot = () => {
           link: query.path
         }
       ])
-    }, 800)
+    }, 600)
+  }
+
+  const handleSendFreeText = (text) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+
+    setMessages((prev) => [...prev, { sender: 'user', text: trimmed }])
+    setIsTyping(true)
+
+    setTimeout(() => {
+      let reply = "Thank you for reaching out! Aston Recruitment assists matching top talents with premier organizations. Contact us at contact@astonrecruitment.in for customized contracts."
+      
+      const query = trimmed.toLowerCase()
+      const matchedPreset = PRESET_QUERIES.find(q => 
+        query.includes(q.question.toLowerCase()) || 
+        q.question.toLowerCase().includes(query)
+      )
+      
+      if (matchedPreset) {
+        reply = matchedPreset.answer
+      } else if (query.includes('register') || query.includes('apply')) {
+        reply = "To register, click 'Candidate Registration' at the top right to upload your resume and checklist your techstacks."
+      } else if (query.includes('cities') || query.includes('location')) {
+        reply = "We operate in all major tech centers including Bengaluru, Mumbai, Pune, Hyderabad, Chennai, Kolkata, and Delhi NCR."
+      } else if (query.includes('hire') || query.includes('client')) {
+        reply = "If you are looking to hire, select 'For Clients' or click 'Tell us who you\'re hiring' at the bottom of the home page."
+      } else if (query.includes('schedule') || query.includes('interview')) {
+        reply = "Recruiters can schedule interviews by logging in, opening the Candidate details panel on their dashboard, clicking 'Schedule Interview', and entering the details."
+      } else if (query.includes('resume') || query.includes('upload')) {
+        reply = "Candidates can manage their profile and upload their resume by logging in via /candidate/login, and clicking 'Edit Profile' on their dashboard."
+      } else if (query.includes('meeting') || query.includes('room') || query.includes('link')) {
+        reply = "Once scheduled, meeting rooms are accessible via the candidate/recruiter dashboards under the active applications or interview cards, or directly via `/meeting/<roomId>`."
+      } else if (query.includes('admin')) {
+        reply = "Admins log in via /admin/login. They can manage recruiters and candidates, assign candidates, override application statuses, and view system analytics."
+      }
+
+      setIsTyping(false)
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'bot',
+          text: reply,
+          link: matchedPreset?.path
+        }
+      ])
+    }, 600)
   }
 
   const handleCheckStatus = async () => {
@@ -147,77 +206,64 @@ const ChatBot = () => {
     }
   }
 
-  return (
-    <div className="fixed bottom-6 right-6 z-50 chatbot-container">
+  return createPortal(
+    <div className="fixed bottom-6 right-6 z-[9990]">
       {/* Floating Button */}
-      {!isOpen && (
+      {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 bg-amber-600 hover:bg-amber-700 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-all border border-amber-500/20"
+          className="btn-custom chatbot-toggle-button hover:scale-105 active:scale-95 transition-all flex items-center justify-between pl-5 pr-4 py-3.5 relative cursor-pointer gap-3 group"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
+          <div className="flex flex-col items-start text-left">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#fef3c7]">Ask Aston</span>
+            <span className="text-[9px] text-[#fef3c7] font-semibold flex items-center gap-1 mt-0.5">
+              We\'re online
+            </span>
+          </div>
+          <span className="text-2xl bg-white/20 p-2.5 rounded-full group-hover:rotate-12 transition-transform">💬</span>
         </button>
-      )}
-
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="w-80 h-96 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+      ) : (
+        /* Unified Premium Dark Chatbot Panel */
+        <div className="w-[calc(100vw-32px)] sm:w-96 rounded-3xl bg-slate-950/95 backdrop-blur-md border border-slate-800 shadow-2xl overflow-hidden flex flex-col h-[420px] animate-slide-up text-left">
           {/* Header */}
-          <div className="bg-amber-600 text-white px-4 py-3 flex justify-between items-center">
+          <div className="bg-[#090f19] px-4 py-3.5 border-b border-slate-800 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse" />
-              <span className="font-bold text-sm">Aston Assistant</span>
+              <span className="text-xl">🤖</span>
+              <div>
+                <h4 className="text-xs font-bold text-white leading-none">Aston AI Assistant</h4>
+                <span className="text-[9px] text-emerald-500 font-semibold flex items-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
+                </span>
+              </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white transition-colors"
+              className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-850 transition-colors text-xs"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              ✕
             </button>
           </div>
 
-          {/* Messages */}
+          {/* Messages Body */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
+                className={`flex flex-col ${msg.sender === 'user' ? 'items-end ml-8' : 'items-start mr-8'}`}
               >
                 <div
-                  className={`max-w-[85%] px-3 py-2 rounded-xl text-xs ${
+                  className={`p-3 rounded-2xl text-xs leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-amber-600 text-white rounded-tr-none'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-none'
+                      ? 'bg-[#b88f3f] text-white rounded-br-none font-semibold'
+                      : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none'
                   }`}
                 >
-                  <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                  <p className="whitespace-pre-wrap">{msg.text}</p>
                   {msg.link && (
                     <Link
                       to={msg.link}
                       onClick={() => setIsOpen(false)}
-                      className="mt-1.5 inline-block text-amber-700 dark:text-amber-400 font-bold underline"
+                      className="mt-1.5 inline-block text-amber-400 font-bold underline"
                     >
                       Go to Route →
                     </Link>
@@ -227,51 +273,76 @@ const ChatBot = () => {
             ))}
 
             {isTyping && (
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded-xl rounded-tl-none w-14">
-                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce" />
-                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]" />
-                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]" />
+              <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 px-3 py-2 rounded-2xl rounded-tl-none w-14">
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]" />
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Queries List */}
-          <div className="bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-3 max-h-36 overflow-y-auto flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-              Select a query:
-            </span>
+          {/* Preset Buttons Grid */}
+          <div className="px-4 py-2 flex flex-wrap gap-1.5 border-t border-slate-900 bg-slate-950/50 max-h-28 overflow-y-auto">
             {user?.role === 'CANDIDATE' && (
               <button
+                type="button"
                 onClick={handleCheckStatus}
-                className="text-[10px] font-bold text-left bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs flex items-center justify-between"
+                className="text-[9px] font-bold text-[#fef3c7] bg-[#b88f3f]/20 hover:bg-[#b88f3f]/30 border border-[#b88f3f]/40 px-2.5 py-1 rounded-full transition-all text-left flex items-center gap-1"
               >
-                <span>🔍 Check my Application Status</span>
-                <span className="text-[9px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold">Live Status</span>
+                🔍 Check Status
               </button>
             )}
             {user?.role === 'RECRUITER' && (
               <button
+                type="button"
                 onClick={handleCheckRecruiterInterviews}
-                className="text-[10px] font-bold text-left bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400 px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs flex items-center justify-between"
+                className="text-[9px] font-bold text-[#fef3c7] bg-[#b88f3f]/20 hover:bg-[#b88f3f]/30 border border-[#b88f3f]/40 px-2.5 py-1 rounded-full transition-all text-left flex items-center gap-1"
               >
-                <span>🗓️ Check My Scheduled Interviews</span>
-                <span className="text-[9px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold">Live Count</span>
+                🗓️ Check Interviews
               </button>
             )}
-            {PRESET_QUERIES.map((q) => (
+            {PRESET_QUERIES.slice(0, 3).map((q) => (
               <button
                 key={q.id}
+                type="button"
                 onClick={() => handleQueryClick(q)}
-                className="text-[10px] font-medium text-left bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs"
+                className="text-[9px] font-bold text-slate-300 bg-slate-900/80 hover:bg-[#b88f3f]/10 hover:text-[#b88f3f] border border-slate-800 hover:border-amber-500/30 px-2.5 py-1 rounded-full transition-all text-left"
               >
                 💡 {q.question}
               </button>
             ))}
           </div>
+
+          {/* Chat Input Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              const text = e.target.elements.botInput.value
+              if (!text.trim()) return
+              handleSendFreeText(text)
+              e.target.reset()
+            }}
+            className="p-3 border-t border-slate-800 flex gap-2"
+          >
+            <input
+              type="text"
+              name="botInput"
+              placeholder="Ask something..."
+              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 flex-1 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white rounded-xl px-3 py-1.5 text-xs font-bold transition-colors"
+            >
+              Send
+            </button>
+          </form>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   )
 }
 
