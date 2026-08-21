@@ -605,48 +605,6 @@ const CandidateDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen page-shell">
-        {/* Header with Logout */}
-        <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                Candidate Dashboard
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-                Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
-              </p>
-            </div>
-
-          {/* Clickable Center Brand Logo */}
-          <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
-            <img
-              src="/aston-logo-transparent.png"
-              alt="Aston Recruitment"
-              className="h-8 w-8 object-contain"
-            />
-            <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
-              Aston Recruitment
-            </span>
-          </Link>
-
-            <div className="flex items-center gap-4 z-10">
-              <ThemeToggle />
-              <button
-                onClick={() => setOpenRolesModalOpen(true)}
-                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
-              >
-                View Open Roles
-              </button>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Pulse Skeleton Content Area */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-6">
           <div className="bg-slate-100 dark:bg-slate-800/40 rounded-3xl p-6 h-56 border border-slate-200/50 dark:border-slate-800/40"></div>
@@ -660,49 +618,24 @@ const CandidateDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen page-shell">
-      {/* Header with Logout */}
-      <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              Candidate Dashboard
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-              Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
-            </p>
-          </div>
-
-          {/* Clickable Center Brand Logo */}
-          <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
-            <img
-              src="/aston-logo-transparent.png"
-              alt="Aston Recruitment"
-              className="h-8 w-8 object-contain"
-            />
-            <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
-              Aston Recruitment
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-4 z-10">
-            <ThemeToggle />
-            <button
-              onClick={() => setOpenRolesModalOpen(true)}
-              className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
-            >
-              View Open Roles
-            </button>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
-            >
-              Logout
-            </button>
-          </div>
+    <div className="min-h-screen page-shell pb-12">
+      {/* Dashboard Top Title Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white font-serif">
+            Candidate Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">
+            Welcome back, <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
+          </p>
         </div>
+        <button
+          onClick={() => setOpenRolesModalOpen(true)}
+          className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-5 py-3 rounded-xl tracking-wider shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+        >
+          View Open Roles
+        </button>
       </div>
-
 
       {/* Main Content */}
       {user?.role === 'ADMIN' ? (
@@ -1216,8 +1149,8 @@ const CandidateDashboard = () => {
 
             {/* AI Resume Analysis Panel */}
             <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-              <div className="bg-amber-50/50 dark:bg-slate-900/40 border border-amber-200/50 dark:border-slate-800 rounded-xl p-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-500 mb-3 flex items-center gap-1.5">
+              <div className="p-2">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-400 mb-3 flex items-center gap-1.5">
                   ✨ AI Resume Match Analysis
                 </h4>
                 <div className="flex flex-col md:flex-row gap-5 items-center">
@@ -1249,7 +1182,7 @@ const CandidateDashboard = () => {
                             className="transition-all duration-1000"
                           />
                         </svg>
-                        <div className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-amber-800 dark:text-amber-500">
+                        <div className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-amber-800 dark:text-amber-400">
                           {finalScore}%
                         </div>
                       </div>
@@ -1257,16 +1190,16 @@ const CandidateDashboard = () => {
                   })()}
                   {/* Match Details */}
                   <div className="flex-1 w-full">
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Extracted Core Skills</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-350">Extracted Core Skills</span>
                     <div className="flex flex-wrap gap-1 mt-1 mb-2">
                       {parseSkills(profile?.technicalSkills).map((skill, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 text-[10px] rounded font-semibold border border-amber-200/30">
+                        <span key={idx} className="px-2 py-0.5 bg-amber-100/80 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300 text-[10px] rounded font-bold border border-amber-250/20 dark:border-amber-900/30">
                           {skill}
                         </span>
                       ))}
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                      <strong className="text-slate-700 dark:text-slate-300">AI Insight:</strong> Strong alignment with Aston Recruitment client mandates. Technical skills match 4 active openings in your area. Recommended: Add system design keywords to improve ATS readability.
+                    <p className="text-[11px] text-slate-800 dark:text-slate-100 leading-relaxed">
+                      <strong className="text-slate-950 dark:text-amber-400 font-bold">AI Insight:</strong> Strong alignment with Aston Recruitment client mandates. Technical skills match 4 active openings in your area. Recommended: Add system design keywords to improve ATS readability.
                     </p>
                   </div>
                 </div>
@@ -1326,7 +1259,7 @@ const CandidateDashboard = () => {
                 <ApplicationStepper status={app.status} />
 
                 {/* Recruiter Chat Button trigger */}
-                {app.recruiterId && (
+                {app.id && (
                   <button
                     onClick={() => {
                       setActiveChatAppId(app.id)

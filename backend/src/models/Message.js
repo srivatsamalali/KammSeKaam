@@ -33,6 +33,11 @@ const Message = sequelize.define(
       allowNull: false,
     },
 
+    isRead: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

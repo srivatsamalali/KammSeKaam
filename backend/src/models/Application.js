@@ -10,6 +10,7 @@ const Application = sequelize.define('Application', {
   candidateId: {
     type: DataTypes.UUID,
     allowNull: false,
+    unique: true,
     references: {
       model: 'Candidates',
       key: 'id',

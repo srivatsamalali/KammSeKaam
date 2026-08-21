@@ -22,12 +22,13 @@ const syncCandidatesAndApplications = async () => {
     // 2. Ensure all Candidate profiles have an Application entry
     const allCandidates = await Candidate.findAll()
     for (const cand of allCandidates) {
-      const existingApp = await Application.findOne({ where: { candidateId: cand.id } })
-      if (!existingApp) {
-        await Application.create({
-          candidateId: cand.id,
-          status: 'APPLICATION_RECEIVED',
+      try {
+        await Application.findOrCreate({
+          where: { candidateId: cand.id },
+          defaults: { status: 'APPLICATION_RECEIVED' }
         })
+      } catch (insertErr) {
+        // Ignore race condition unique violations
       }
     }
   } catch (err) {
@@ -257,7 +258,6 @@ const deleteClient = async (req, res) => {
     res.status(500).json({ message: 'Error deleting client', error: error.message })
   }
 }
-
 
 const impersonateUser = async (req, res) => {
   try {

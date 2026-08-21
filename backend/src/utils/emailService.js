@@ -134,15 +134,22 @@ const sendResetPasswordEmail = async (email, resetToken) => {
       to: email,
       subject: 'Reset Your Password - Aston Recruitment',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
-            <h2 style="color: #0066cc;">Reset Your Password</h2>
-            <p>We received a request to reset your password. Click the link below to proceed:</p>
-            <p><a href="${resetLink}" style="background-color: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a></p>
-            <p>This link expires in 1 hour.</p>
-            <p>If you did not request this, please ignore this email.</p>
-            <p style="color: #666666; font-size: 13px; margin-top: 20px;">If you experience any issues, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0066cc;">Contact@astonrecruitment.in</a>.</p>
-            <p>Best regards,<br/>Aston Recruitment Team</p>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="background-color: #090f19; padding: 24px; text-align: center;">
+            <img src="https://astonrecruitment.in/aston-logo-transparent.png" alt="Aston Recruitment" style="height: 40px; object-fit: contain;" />
+            <p style="margin: 8px 0 0 0; color: #b88f3f; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Password Assistance</p>
+          </div>
+          <div style="padding: 24px; background-color: #ffffff;">
+            <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Reset Your Password</h2>
+            <p style="color: #334155; font-size: 15px;">We received a request to reset your password. Click the link below to proceed:</p>
+            <p style="margin: 20px 0;"><a href="${resetLink}" style="background-color: #b88f3f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; font-size: 14px;">Reset Password</a></p>
+            <p style="color: #334155; font-size: 15px;">This link will expire in 1 hour.</p>
+            <p style="color: #475569; font-size: 14px;">If you did not request this, please ignore this email.</p>
+            <p style="color: #64748b; font-size: 12px; margin-top: 20px;">If you experience any issues, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #b88f3f;">Contact@astonrecruitment.in</a>.</p>
+            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+          </div>
+          <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
+            © ${new Date().getFullYear()} Aston Recruitment. All rights reserved.
           </div>
         </div>
       `,
@@ -170,18 +177,24 @@ const sendOtpEmail = async (email, otp) => {
       to: email,
       subject: 'Phone Verification OTP - Aston Recruitment',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
-            <h2 style="color: #0066cc;">Phone Verification</h2>
-            <p>Your One-Time Password (OTP) for phone verification is:</p>
-            <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center;">
-              <h1 style="color: #0066cc; letter-spacing: 5px; margin: 0;">${otp}</h1>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="background-color: #090f19; padding: 24px; text-align: center;">
+            <img src="https://astonrecruitment.in/aston-logo-transparent.png" alt="Aston Recruitment" style="height: 40px; object-fit: contain;" />
+            <p style="margin: 8px 0 0 0; color: #b88f3f; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Consultancy Verification</p>
+          </div>
+          <div style="padding: 24px; background-color: #ffffff;">
+            <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Phone Verification</h2>
+            <p style="color: #334155; font-size: 15px;">Your One-Time Password (OTP) for phone verification is:</p>
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 1px solid #e2e8f0;">
+              <h1 style="color: #b88f3f; letter-spacing: 5px; margin: 0; font-size: 32px;">${otp}</h1>
             </div>
-            <p>This OTP will expire in 10 minutes.</p>
-            <p>Do not share this OTP with anyone. Aston Recruitment team will never ask for your OTP.</p>
-            <p>If you did not request this verification, please ignore this email.</p>
-            <p style="color: #666666; font-size: 13px; margin-top: 20px;">If you experience any issues, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #0066cc;">Contact@astonrecruitment.in</a>.</p>
-            <p>Best regards,<br/>Aston Recruitment Team</p>
+            <p style="color: #334155; font-size: 15px;">This OTP will expire in 10 minutes.</p>
+            <p style="color: #475569; font-size: 14px;">Do not share this OTP with anyone. Aston Recruitment team will never ask for your OTP.</p>
+            <p style="color: #64748b; font-size: 12px; margin-top: 20px;">If you experience any issues, please contact support at <a href="mailto:Contact@astonrecruitment.in" style="color: #b88f3f;">Contact@astonrecruitment.in</a>.</p>
+            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+          </div>
+          <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
+            © ${new Date().getFullYear()} Aston Recruitment. All rights reserved.
           </div>
         </div>
       `,
@@ -207,10 +220,10 @@ const sendRegistrationSuccessEmail = async (email, name) => {
       to: email,
       subject: '🎉 Welcome to Aston Recruitment!',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
-          <div style="background-color: #0f172a; padding: 24px; text-align: center; color: #ffffff;">
-            <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">Aston Recruitment</h1>
-            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 14px;">Consultancy Management Portal</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #090f19; padding: 24px; text-align: center;">
+            <img src="https://astonrecruitment.in/aston-logo-transparent.png" alt="Aston Recruitment" style="height: 40px; object-fit: contain;" />
+            <p style="margin: 8px 0 0 0; color: #b88f3f; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Consultancy Management Portal</p>
           </div>
           <div style="padding: 24px;">
             <h2 style="color: #0f172a; margin-top: 0;">Welcome, ${name}!</h2>
@@ -427,6 +440,59 @@ const sendSentToClientEmailToCandidate = async (candidateEmail, candidateName, c
   }
 }
 
+const sendUnreadMessageEmail = async (
+  recipientEmail,
+  recipientName,
+  senderName,
+  messagePreview,
+  directLink,
+) => {
+  try {
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP not configured. Unread message notification email skipped for:', recipientEmail)
+      return
+    }
+
+    const mailOptions = {
+      from: `"Aston Recruitment" <${process.env.SMTP_USER}>`,
+      to: recipientEmail,
+      subject: `New message from ${senderName} on Aston Recruitment`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="background-color: #090f19; padding: 24px; text-align: center;">
+            <img src="https://astonrecruitment.in/aston-logo-transparent.png" alt="Aston Recruitment" style="height: 40px; object-fit: contain;" />
+          </div>
+          <div style="padding: 24px; background-color: #ffffff;">
+            <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Hello ${recipientName || 'there'},</h2>
+            <p style="color: #334155; font-size: 15px; line-height: 1.6;">You have a new unread message from <strong>${senderName}</strong> on the Aston Recruitment portal.</p>
+            
+            <div style="background-color: #f8fafc; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 8px; margin: 20px 0; font-style: italic; color: #475569;">
+              "${messagePreview}"
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${directLink}" style="background-color: #b88f3f; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 14px; box-shadow: 0 4px 6px -1px rgba(184, 143, 63, 0.25);">
+                View Message & Reply
+              </a>
+            </div>
+            
+            <p style="color: #64748b; font-size: 12px; margin-top: 24px;">If the button above does not work, copy and paste this URL into your browser:<br/>
+            <a href="${directLink}" style="color: #b88f3f; word-break: break-all;">${directLink}</a></p>
+          </div>
+          <div style="background-color: #f1f5f9; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
+            © ${new Date().getFullYear()} Aston Recruitment. All rights reserved.
+          </div>
+        </div>
+      `
+    }
+
+    await transporter.sendMail(mailOptions)
+    console.log(`Unread message notification email sent successfully to ${recipientEmail}`)
+  } catch (error) {
+    console.error('Error sending unread message email:', error)
+  }
+}
+
 module.exports = {
   sendInterviewScheduledEmail,
   sendResetPasswordEmail,
@@ -435,5 +501,6 @@ module.exports = {
   sendSelectionEmail,
   sendRejectionEmail,
   sendSentToClientEmailToClient,
-  sendSentToClientEmailToCandidate
+  sendSentToClientEmailToCandidate,
+  sendUnreadMessageEmail
 }

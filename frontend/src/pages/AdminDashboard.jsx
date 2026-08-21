@@ -365,6 +365,7 @@ const AdminDashboard = () => {
   }
   const [stats, setStats] = useState(null)
   const [recruiters, setRecruiters] = useState([])
+  const [selectedDomain, setSelectedDomain] = useState('All')
   const [candidates, setCandidates] = useState([])
   const [applications, setApplications] = useState([])
   const [unassignedCandidates, setUnassignedCandidates] = useState([])
@@ -388,7 +389,7 @@ const AdminDashboard = () => {
   })
 
   const tabs = [
-    { id: 'recruiters', label: 'Recruiters' },
+    { id: 'recruiters', label: 'Aston Experts' },
     { id: 'candidates', label: 'Candidates' },
     { id: 'applications', label: 'Applications' },
     { id: 'clients', label: 'Clients' },
@@ -649,10 +650,14 @@ const AdminDashboard = () => {
     mobileNumber: '',
     specialization: [],
   })
+  const [expertIndustryInput, setExpertIndustryInput] = useState('Technology & IT')
+  const [expertSpecInput, setExpertSpecInput] = useState('')
+  const [editExpertIndustryInput, setEditExpertIndustryInput] = useState('Technology & IT')
+  const [editExpertSpecInput, setEditExpertSpecInput] = useState('')
   const [editingRecruiterId, setEditingRecruiterId] = useState(null)
   const [editingForm, setEditingForm] = useState({
     name: '',
-    specialization: '',
+    specialization: [],
   })
   const [clients, setClients] = useState([])
   const [showCreateClient, setShowCreateClient] = useState(false)
@@ -975,56 +980,6 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen page-shell">
-        {/* Header with Logout */}
-        <div className="bg-white dark:bg-[#2b2f3a] border border-gray-205 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-          <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
-            <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                Admin Portal
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-                Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
-              </p>
-            </div>
-
-            {/* Clickable Center Brand Logo */}
-            <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
-              <img
-                src="/aston-logo-transparent.png"
-                alt="Aston Recruitment"
-                className="h-8 w-8 object-contain"
-              />
-              <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
-                Aston Recruitment
-              </span>
-            </Link>
-
-            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto z-10">
-              <ThemeToggle />
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors flex items-center gap-1.5 text-xs sm:text-sm"
-              >
-                <span>Logout</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 sm:h-5 sm:w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Pulse Skeleton Content Area */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -1049,55 +1004,15 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen page-shell">
-      {/* Header with Logout */}
-      <div className="bg-white dark:bg-[#2b2f3a] border border-gray-205 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
-          <div className="w-full sm:w-auto">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              Admin Portal
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-              Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
-            </p>
-          </div>
-
-          {/* Clickable Center Brand Logo */}
-          <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
-            <img
-              src="/aston-logo-transparent.png"
-              alt="Aston Recruitment"
-              className="h-8 w-8 object-contain"
-            />
-            <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
-              Aston Recruitment
-            </span>
-          </Link>
-
-          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto z-10">
-            <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors flex items-center gap-1.5 text-xs sm:text-sm"
-            >
-              <span>Logout</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 sm:h-5 sm:w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
+    <div className="min-h-screen page-shell pb-12">
+      {/* Dashboard Top Title Bar */}
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-4 flex flex-col justify-between items-start gap-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white font-serif">
+          Admin Dashboard
+        </h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400">
+          Welcome back, <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
+        </p>
       </div>
 
       {/* Main Content */}
@@ -1236,12 +1151,12 @@ const AdminDashboard = () => {
               onClick={() => setShowCreateRecruiter(!showCreateRecruiter)}
               className="btn-primary mb-6"
             >
-              {showCreateRecruiter ? 'Cancel' : 'Create New Recruiter'}
+              {showCreateRecruiter ? 'Cancel' : 'Create New Expert'}
             </button>
 
             {showCreateRecruiter && (
               <form onSubmit={handleCreateRecruiter} className="card mb-6">
-                <h3 className="text-lg font-bold mb-4">Create New Recruiter</h3>
+                <h3 className="text-lg font-bold mb-4">Create New Expert</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-group">
                     <label className="form-label">Name</label>
@@ -1359,37 +1274,129 @@ const AdminDashboard = () => {
                       />
                     </div>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">
-                      Specialization (comma separated)
+                  <div className="form-group col-span-2">
+                    <label className="form-label font-bold mb-2 block">
+                      Expert Domains & Specializations
                     </label>
-                    <input
-                      type="text"
-                      value={recruiterForm.specialization.join(', ')}
-                      onChange={(e) =>
-                        setRecruiterForm({
-                          ...recruiterForm,
-                          specialization: e.target.value
-                            .split(',')
-                            .map((s) => s.trim())
-                            .filter(Boolean),
-                        })
-                      }
-                      className="form-input"
-                    />
+
+                    {/* Tags list */}
+                    <div className="flex flex-wrap gap-1.5 mb-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-205/60 dark:border-slate-800/60 min-h-12">
+                      {recruiterForm.specialization.map((spec, sIdx) => (
+                        <span key={sIdx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 text-xs rounded-lg font-semibold border border-amber-200/20">
+                          <span>{spec}</span>
+                          <button
+                            type="button"
+                            onClick={() => setRecruiterForm({
+                              ...recruiterForm,
+                              specialization: recruiterForm.specialization.filter(item => item !== spec)
+                            })}
+                            className="text-amber-900 dark:text-amber-300 hover:text-red-500 font-bold ml-1 text-sm focus:outline-hidden"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))}
+                      {recruiterForm.specialization.length === 0 && (
+                        <span className="text-xs text-slate-400 font-medium italic self-center">No specialization domains added yet. Use the selector below to add.</span>
+                      )}
+                    </div>
+
+                    {/* Add helper controls */}
+                    <div className="flex gap-3 items-center flex-wrap sm:flex-nowrap">
+                      <div className="w-full sm:w-1/2">
+                        <label className="text-[10px] text-slate-500 block mb-1 font-bold">SELECT INDUSTRY</label>
+                        <select
+                          value={expertIndustryInput}
+                          onChange={(e) => setExpertIndustryInput(e.target.value)}
+                          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-hidden w-full"
+                        >
+                          {[
+                            'Technology & IT',
+                            'GCCs',
+                            'Banking & Financial Services',
+                            'Sales & Marketing',
+                            'Operations',
+                            'Manufacturing',
+                            'Healthcare',
+                            'Corporate Functions'
+                          ].map((ind, i) => (
+                            <option key={i} value={ind}>{ind}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-full sm:w-1/2">
+                        <label className="text-[10px] text-slate-500 block mb-1 font-bold">TYPE SPECIALIZATION</label>
+                        <input
+                          type="text"
+                          value={expertSpecInput}
+                          onChange={(e) => setExpertSpecInput(e.target.value)}
+                          placeholder="e.g. React Developer, Risk Management"
+                          className="form-input w-full"
+                        />
+                      </div>
+                      <div className="self-end pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!expertSpecInput.trim()) return
+                            const newItem = `${expertIndustryInput} - ${expertSpecInput.trim()}`
+                            if (!recruiterForm.specialization.includes(newItem)) {
+                              setRecruiterForm({
+                                ...recruiterForm,
+                                specialization: [...recruiterForm.specialization, newItem]
+                              })
+                            }
+                            setExpertSpecInput('')
+                          }}
+                          className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition-all h-[42px] flex items-center justify-center whitespace-nowrap"
+                        >
+                          ➕ Add Specialization
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <button type="submit" className="btn-primary">
-                  Create Recruiter
+                  Create Expert
                 </button>
               </form>
             )}
 
+            {/* Domain Filter selector */}
+            <div className="card mb-6 p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Filter by Domain/Specialization:</span>
+                <select
+                  value={selectedDomain}
+                  onChange={(e) => setSelectedDomain(e.target.value)}
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-hidden transition-colors"
+                >
+                  {['All', ...new Set(recruiters.flatMap(r => r.specialization || []).map(s => s.trim()).filter(Boolean))].map((dom, i) => (
+                    <option key={i} value={dom}>{dom}</option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-xs font-semibold text-slate-500">
+                Showing {
+                  recruiters.filter(rec => {
+                    if (selectedDomain === 'All') return true;
+                    return (rec.specialization || []).some(s => s.trim().toLowerCase() === selectedDomain.toLowerCase());
+                  }).length
+                } of {recruiters.length} Experts
+              </span>
+            </div>
+
             <div className="space-y-4">
-              {recruiters.length === 0 ? (
-                <p className="text-gray-600">No recruiters yet</p>
+              {recruiters.filter(rec => {
+                if (selectedDomain === 'All') return true;
+                return (rec.specialization || []).some(s => s.trim().toLowerCase() === selectedDomain.toLowerCase());
+              }).length === 0 ? (
+                <p className="text-gray-600">No experts found matching this domain</p>
               ) : (
-                recruiters.map((rec) => (
+                recruiters.filter(rec => {
+                  if (selectedDomain === 'All') return true;
+                  return (rec.specialization || []).some(s => s.trim().toLowerCase() === selectedDomain.toLowerCase());
+                }).map((rec) => (
                   <div
                     key={rec.id}
                     className="card flex justify-between items-start"
@@ -1408,29 +1415,85 @@ const AdminDashboard = () => {
                             }
                             className="form-input"
                           />
-                          <input
-                            type="text"
-                            value={editingForm.specialization}
-                            onChange={(e) =>
-                              setEditingForm({
-                                ...editingForm,
-                                specialization: e.target.value,
-                              })
-                            }
-                            placeholder="comma separated skills"
-                            className="form-input"
-                          />
+                          <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-205/60 dark:border-slate-800/60">
+                            <label className="text-[10px] font-bold text-slate-500 block uppercase">Specialization Domains</label>
+                            
+                            {/* Tags list */}
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              {(editingForm.specialization || []).map((spec, sIdx) => (
+                                <span key={sIdx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 text-xs rounded-lg font-semibold border border-amber-200/20">
+                                  <span>{spec}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingForm({
+                                      ...editingForm,
+                                      specialization: (editingForm.specialization || []).filter(item => item !== spec)
+                                    })}
+                                    className="text-amber-900 dark:text-amber-300 hover:text-red-500 font-bold ml-1 text-sm focus:outline-hidden"
+                                  >
+                                    ✕
+                                  </button>
+                                </span>
+                              ))}
+                              {(editingForm.specialization || []).length === 0 && (
+                                <span className="text-xs text-slate-400 font-medium italic">No domains added yet</span>
+                              )}
+                            </div>
+
+                            {/* Add helper controls */}
+                            <div className="flex gap-2 items-center flex-wrap sm:flex-nowrap">
+                              <select
+                                value={editExpertIndustryInput}
+                                onChange={(e) => setEditExpertIndustryInput(e.target.value)}
+                                className="bg-white dark:bg-slate-950 border border-slate-205 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-hidden"
+                              >
+                                {[
+                                  'Technology & IT',
+                                  'GCCs',
+                                  'Banking & Financial Services',
+                                  'Sales & Marketing',
+                                  'Operations',
+                                  'Manufacturing',
+                                  'Healthcare',
+                                  'Corporate Functions'
+                                ].map((ind, i) => (
+                                  <option key={i} value={ind}>{ind}</option>
+                                ))}
+                              </select>
+                              <input
+                                type="text"
+                                value={editExpertSpecInput}
+                                onChange={(e) => setEditExpertSpecInput(e.target.value)}
+                                placeholder="Specialization description..."
+                                className="form-input text-xs flex-1 py-1.5 h-auto min-w-0"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!editExpertSpecInput.trim()) return
+                                  const newItem = `${editExpertIndustryInput} - ${editExpertSpecInput.trim()}`
+                                  const currentSpecs = editingForm.specialization || []
+                                  if (!currentSpecs.includes(newItem)) {
+                                    setEditingForm({
+                                      ...editingForm,
+                                      specialization: [...currentSpecs, newItem]
+                                    })
+                                  }
+                                  setEditExpertSpecInput('')
+                                }}
+                                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition-all whitespace-nowrap"
+                              >
+                                ➕ Add
+                              </button>
+                            </div>
+                          </div>
                           <div className="space-x-2">
                             <button
                               onClick={async () => {
                                 try {
-                                  const specArray = editingForm.specialization
-                                    .split(',')
-                                    .map((s) => s.trim())
-                                    .filter(Boolean)
                                   await recruiterService.update(rec.id, {
                                     name: editingForm.name,
-                                    specialization: specArray,
+                                    specialization: editingForm.specialization || [],
                                   })
                                   setEditingRecruiterId(null)
                                   fetchData()

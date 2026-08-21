@@ -580,42 +580,6 @@ const RecruiterDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen page-shell">
-        {/* Header with Logout */}
-        <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                Recruiter Dashboard
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-                Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
-              </p>
-            </div>
-
-            {/* Clickable Center Brand Logo */}
-            <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
-              <img
-                src="/aston-logo-transparent.png"
-                alt="Aston Recruitment"
-                className="h-8 w-8 object-contain"
-              />
-              <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
-                Aston Recruitment
-              </span>
-            </Link>
-
-            <div className="flex items-center gap-4 z-10">
-              <ThemeToggle />
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Pulse Skeleton Content Area */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -635,41 +599,15 @@ const RecruiterDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen page-shell">
-      {/* Header with Logout */}
-      <div className="bg-white dark:bg-[#2b2f3a] border border-gray-200 dark:border-slate-800 shadow-sm sticky top-4 z-40 mx-4 rounded-[20px] relative">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              Recruiter Dashboard
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400">
-              Logged in User: <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
-            </p>
-          </div>
-
-          {/* Clickable Center Brand Logo */}
-          <Link to="/" className="hidden md:flex items-center gap-2.5 absolute left-1/2 transform -translate-x-1/2 hover:opacity-90 transition-opacity">
-            <img
-              src="/aston-logo-transparent.png"
-              alt="Aston Recruitment"
-              className="h-8 w-8 object-contain"
-            />
-            <span className="font-bold text-sm lg:text-base tracking-tight" style={{ color: '#8c6a23' }}>
-              Aston Recruitment
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-4 z-10">
-            <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3.5 sm:py-2 sm:px-4 rounded-lg transition-colors text-xs sm:text-sm"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
+    <div className="min-h-screen page-shell pb-12">
+      {/* Dashboard Top Title Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 flex flex-col justify-between items-start gap-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white font-serif">
+          Aston Expert Dashboard
+        </h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400">
+          Welcome back, <span className="font-semibold text-slate-850 dark:text-slate-200">{user?.name || user?.email}</span>
+        </p>
       </div>
 
 
@@ -678,15 +616,15 @@ const RecruiterDashboard = () => {
         <div className="w-full mx-auto px-4 py-8 animate-slide-up">
           <div className="flex justify-between items-center bg-slate-900 text-white p-6 rounded-2xl shadow-xl mb-6">
             <div>
-              <h2 className="text-2xl font-bold">Admin Sandbox: Recruiter Portals view</h2>
-              <p className="text-xs text-slate-400">Viewing and managing recruiters registered in the system</p>
+              <h2 className="text-2xl font-bold">Admin Sandbox: Expert Portals view</h2>
+              <p className="text-xs text-slate-400">Viewing and managing experts registered in the system</p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCreateRecruiter(!showCreateRecruiter)}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg"
               >
-                {showCreateRecruiter ? 'Cancel' : 'Create New Recruiter'}
+                {showCreateRecruiter ? 'Cancel' : 'Create New Expert'}
               </button>
               <button
                 onClick={() => navigate('/admin/dashboard')}
@@ -699,7 +637,7 @@ const RecruiterDashboard = () => {
 
           {showCreateRecruiter && (
             <form onSubmit={handleCreateRecruiter} className="glass-card p-6 mb-6 text-left border border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-4 duration-300">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Create New Recruiter</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Create New Expert</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-group">
                   <label className="form-label">Name</label>
@@ -819,7 +757,7 @@ const RecruiterDashboard = () => {
                 </div>
               </div>
               <button type="submit" className="btn-primary mt-4">
-                Create Recruiter
+                Create Expert
               </button>
             </form>
           )}

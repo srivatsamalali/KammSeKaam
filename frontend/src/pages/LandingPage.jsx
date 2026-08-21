@@ -56,11 +56,7 @@ const LandingPage = () => {
   }
 
   useEffect(() => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    localStorage.removeItem('user_preference')
-    localStorage.removeItem('user_preference_timestamp')
-    window.dispatchEvent(new Event('local-storage-pref'))
+    // Keep active session intact when visiting homepage. Only clear on explicit logout.
 
     // Automatic preference modal popup suppressed per user request
     /*
@@ -85,45 +81,47 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-[#fafbfc] text-slate-800 font-sans scroll-smooth">
       
-      {/* Hero Section */}
-      <section 
-        id="home" 
-        className="relative bg-cover bg-center py-32 md:py-48 text-left transition-all duration-700 ease-out animate-fade-in rounded-b-[32px] overflow-hidden shadow-2xl"
-        style={{ 
-          backgroundImage: "linear-gradient(to right, rgba(9,15,25,0.85) 30%, rgba(9,15,25,0.3)), url('/hero banner.png?v=1')" 
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6 sm:px-12 relative z-10 space-y-6">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white font-serif leading-tight max-w-3xl animate-slide-up">
-            QUALITY PEOPLE. <br/>
-            <span className="text-[#b88f3f]">BETTER FUTURES.</span>
-          </h1>
-          <p className="text-slate-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium">
-            We don’t just fill positions. We find people who make a difference. <br/>
-            Better talent. Better decisions. Better hires.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button 
-              onClick={() => window.dispatchEvent(new Event('aston-open-client-modal'))}
-              className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95 shadow-lg"
-            >
-              <span>HIRE TALENT</span>
-              <span className="group-hover:translate-x-1.5 transition-transform">→</span>
-            </button>
-            <a 
-              href="#process" 
-              className="border border-white/50 hover:border-white hover:bg-white/10 text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95"
-            >
-              <span>EXPLORE OUR PROCESS</span>
-              <span className="group-hover:translate-x-1.5 transition-transform">→</span>
-            </a>
+      {/* Hero Section Wrapper matching lower section bg */}
+      <div className="bg-white dark:bg-[#353b48]">
+        <section 
+          id="home" 
+          className="relative bg-cover bg-center py-32 md:py-48 text-left transition-all duration-700 ease-out animate-fade-in rounded-b-[32px] overflow-hidden shadow-2xl"
+          style={{ 
+            backgroundImage: "linear-gradient(to right, rgba(9,15,25,0.85) 30%, rgba(9,15,25,0.3)), url('/hero banner.png?v=1')" 
+          }}
+        >
+          <div className="max-w-7xl mx-auto px-6 sm:px-12 relative z-10 space-y-6">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white font-serif leading-tight max-w-3xl animate-slide-up">
+              QUALITY PEOPLE. <br/>
+              <span className="text-[#b88f3f]">BETTER FUTURES.</span>
+            </h1>
+            <p className="text-slate-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium">
+              We don’t just fill positions. We find people who make a difference. <br/>
+              Better talent. Better decisions. Better hires.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button 
+                onClick={() => window.dispatchEvent(new Event('aston-open-client-modal'))}
+                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95 shadow-lg"
+              >
+                <span>HIRE TALENT</span>
+                <span className="group-hover:translate-x-1.5 transition-transform">→</span>
+              </button>
+              <a 
+                href="#process" 
+                className="border border-white/50 hover:border-white hover:bg-white/10 text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95"
+              >
+                <span>EXPLORE OUR PROCESS</span>
+                <span className="group-hover:translate-x-1.5 transition-transform">→</span>
+              </a>
+            </div>
+            <div className="flex items-center gap-2.5 pt-6 text-slate-300 text-sm font-semibold">
+              <span className="text-[#b88f3f] text-lg">✓</span>
+              <span>Aston Verified™ Talent</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2.5 pt-6 text-slate-300 text-sm font-semibold">
-            <span className="text-[#b88f3f] text-lg">✓</span>
-            <span>Aston Verified™ Talent</span>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Our Proven Hiring Process */}
       <section id="process" className="py-20 bg-white border-b border-slate-200/60 scroll-mt-20">

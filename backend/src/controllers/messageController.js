@@ -1,5 +1,6 @@
 const { Message, Application, Candidate, Recruiter, User, Notification } = require('../models')
 const { sendPushNotification } = require('../utils/pushService')
+const { Op } = require('sequelize')
 
 const getMessages = async (req, res) => {
   try {
@@ -9,6 +10,21 @@ const getMessages = async (req, res) => {
       include: [{ model: User, attributes: ['id', 'email', 'role'] }],
       order: [['createdAt', 'ASC']],
     })
+
+    // Mark messages sent by others as read
+    if (req.user && req.user.id) {
+      await Message.update(
+        { isRead: true },
+        {
+          where: {
+            applicationId,
+            senderId: { [Op.ne]: req.user.id },
+            isRead: false
+          }
+        }
+      )
+    }
+
     res.json(messages)
   } catch (error) {
     console.error('Get messages error:', error)
@@ -41,6 +57,7 @@ const sendMessage = async (req, res) => {
       applicationId,
       senderId,
       message: message.trim(),
+      isRead: false
     })
 
     // Find recipient
@@ -75,6 +92,45 @@ const sendMessage = async (req, res) => {
       } catch (err) {
         console.error('Failed to notify message recipient:', err)
       }
+
+      // Schedule unread notification email check after 60 seconds (1 minute)
+      setTimeout(async () => {
+        try {
+          const freshMessage = await Message.findByPk(newMessage.id)
+          if (freshMessage && !freshMessage.isRead) {
+            const recipientUser = await User.findByPk(recipientUserId)
+            if (recipientUser) {
+              const { sendUnreadMessageEmail } = require('../utils/emailService')
+              
+              // Direct Link resolution
+              let directLink = 'http://localhost:5173'
+              if (recipientUser.role === 'CANDIDATE') {
+                directLink = 'http://localhost:5173/candidate/dashboard'
+              } else if (recipientUser.role === 'RECRUITER' || recipientUser.role === 'ADMIN') {
+                directLink = 'http://localhost:5173/recruiter/dashboard'
+              }
+              
+              const recipientName = recipientUser.role === 'CANDIDATE' 
+                ? (application.Candidate?.name || '') 
+                : (application.Recruiter?.name || '')
+
+              const messagePreview = message.length > 100 
+                ? message.substring(0, 100) + '...' 
+                : message
+
+              await sendUnreadMessageEmail(
+                recipientUser.email,
+                recipientName,
+                senderName,
+                messagePreview,
+                directLink
+              )
+            }
+          }
+        } catch (timerErr) {
+          console.error('Error in unread message notification timer:', timerErr)
+        }
+      }, 60000)
     }
 
     // Attach sender User details for frontend convenience

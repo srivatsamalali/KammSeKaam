@@ -67,8 +67,8 @@ const PublicHeader = () => {
   }, [])
 
   const [darkMode, setDarkMode] = useState(() => {
-    const isDark = localStorage.getItem('theme') === 'dark' || 
-                   (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const stored = localStorage.getItem('theme');
+    const isDark = stored ? (stored === 'dark') : true; // Default to dark mode strictly
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
@@ -89,8 +89,7 @@ const PublicHeader = () => {
     }
   }
 
-  const isDashboard = window.location.pathname.includes('/dashboard') || window.location.pathname.includes('/meeting')
-  if (isDashboard) return null
+
 
   let activeIndex = 0
   let totalTabs = 1
@@ -129,127 +128,139 @@ const PublicHeader = () => {
 
             {/* Desktop Navigation Links with Dropdowns */}
             <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-white select-none">
-              
-              {/* Clients Dropdown */}
-              <div 
-                className="relative py-3.5 cursor-pointer"
-                onMouseEnter={() => setActiveDropdown('clients')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <div 
-                  onClick={() => setClientModalOpen(true)}
-                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
-                >
-                  <span>For Clients</span>
-                  <span className="text-[9px] opacity-80">▼</span>
-                </div>
-                {activeDropdown === 'clients' && (
-                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+              {!user && (
+                <>
+                  {/* Clients Dropdown */}
+                  <div 
+                    className="relative py-3.5 cursor-pointer"
+                    onMouseEnter={() => setActiveDropdown('clients')}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
                     <div 
-                      onClick={() => setClientModalOpen(true)} 
-                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                      onClick={() => setClientModalOpen(true)}
+                      className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
-                      💼 Register Company Request
+                      <span>For Clients</span>
+                      <span className="text-[9px] opacity-80">▼</span>
                     </div>
-                    <Link 
-                      to="/recruiter/login" 
-                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
-                    >
-                      🛡️ Expert Portal Login
-                    </Link>
+                    {activeDropdown === 'clients' && (
+                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                        <div 
+                          onClick={() => setClientModalOpen(true)} 
+                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                        >
+                          💼 Register Company Request
+                        </div>
+                        <Link 
+                          to="/recruiter/login" 
+                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                        >
+                          🛡️ Expert Portal Login
+                        </Link>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Candidates Dropdown */}
-              <div 
-                className="relative py-3.5 cursor-pointer"
-                onMouseEnter={() => setActiveDropdown('candidates')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <div 
-                  onClick={() => navigate('/candidate/login')}
-                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
-                >
-                  <span>For Candidates</span>
-                  <span className="text-[9px] opacity-80">▼</span>
-                </div>
-                {activeDropdown === 'candidates' && (
-                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
-                    <Link 
-                      to="/candidate/login" 
-                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                  {/* Candidates Dropdown */}
+                  <div 
+                    className="relative py-3.5 cursor-pointer"
+                    onMouseEnter={() => setActiveDropdown('candidates')}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <div 
+                      onClick={() => navigate('/candidate/login')}
+                      className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
-                      🔑 Candidate Login
-                    </Link>
-                    <Link 
-                      to="/candidate/register" 
-                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                      <span>For Candidates</span>
+                      <span className="text-[9px] opacity-80">▼</span>
+                    </div>
+                    {activeDropdown === 'candidates' && (
+                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                        <Link 
+                          to="/candidate/login" 
+                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                        >
+                          🔑 Candidate Login
+                        </Link>
+                        <Link 
+                          to="/candidate/register" 
+                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                        >
+                          ✍️ Candidate Registration
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Aston Experts Dropdown */}
+                  <div 
+                    className="relative py-3.5 cursor-pointer"
+                    onMouseEnter={() => setActiveDropdown('experts')}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <div 
+                      className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
-                      ✍️ Candidate Registration
-                    </Link>
+                      <span>Aston Experts</span>
+                      <span className="text-[9px] opacity-80">▼</span>
+                    </div>
+                    {activeDropdown === 'experts' && (
+                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                        <Link 
+                          to="/recruiter/login" 
+                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                        >
+                          🛡️ Expert Portal Login
+                        </Link>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Aston Experts Dropdown */}
-              <div 
-                className="relative py-3.5 cursor-pointer"
-                onMouseEnter={() => setActiveDropdown('experts')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <div 
-                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
-                >
-                  <span>Aston Experts</span>
-                  <span className="text-[9px] opacity-80">▼</span>
-                </div>
-                {activeDropdown === 'experts' && (
-                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
-                    <Link 
-                      to="/recruiter/login" 
-                      className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                  {/* About Us Dropdown */}
+                  <div 
+                    className="relative py-3.5 cursor-pointer"
+                    onMouseEnter={() => setActiveDropdown('about')}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <div 
+                      className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
-                      🛡️ Expert Portal Login
-                    </Link>
+                      <span>About Us</span>
+                      <span className="text-[9px] opacity-80">▼</span>
+                    </div>
+                    {activeDropdown === 'about' && (
+                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                        <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">👥 Who We Are</a>
+                        <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">✍️ Founder Note</a>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* About Us Dropdown */}
-              <div 
-                className="relative py-3.5 cursor-pointer"
-                onMouseEnter={() => setActiveDropdown('about')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <div 
-                  className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
-                >
-                  <span>About Us</span>
-                  <span className="text-[9px] opacity-80">▼</span>
-                </div>
-                {activeDropdown === 'about' && (
-                  <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
-                    <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">👥 Who We Are</a>
-                    <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">✍️ Founder Note</a>
-                  </div>
-                )}
-              </div>
-
-              <a 
-                href="https://www.linkedin.com/company/aston-recruitment-india/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="hover:text-[#b88f3f] transition-colors flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                </svg>
-              </a>
+                  <a 
+                    href="https://www.linkedin.com/company/aston-recruitment-india/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="hover:text-[#b88f3f] transition-colors flex items-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                  </a>
+                </>
+              )}
             </div>
 
             {/* Desktop Action Buttons / User Dropdown */}
             <div className="hidden md:flex items-center gap-4">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl border border-slate-700/60 bg-slate-900/40 text-slate-300 hover:text-white hover:bg-slate-900/80 transition-colors focus:outline-hidden"
+                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+
               {user ? (
                 <div 
                   className="relative py-3.5 cursor-pointer z-[9999]"
@@ -296,6 +307,14 @@ const PublicHeader = () => {
 
             {/* Mobile Actions Menu toggle */}
             <div className="flex md:hidden items-center gap-3">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-1.5 rounded-lg border border-slate-700/60 bg-slate-900/40 text-xs text-slate-300 hover:text-white transition-colors focus:outline-hidden"
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+
               {user ? (
                 <div className="flex items-center gap-2">
                   <Link 
