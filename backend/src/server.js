@@ -117,11 +117,31 @@ const ensureAdminUser = async () => {
   }
 }
 
+const runMigrations = async () => {
+  try {
+    console.log('Running automatic schema check/migration...')
+    // Check if column isRead exists in Messages table
+    const [results] = await sequelize.query("SHOW COLUMNS FROM `Messages` LIKE 'isRead'")
+    if (results.length === 0) {
+      console.log("Column 'isRead' not found in table 'Messages'. Adding it...")
+      await sequelize.query('ALTER TABLE `Messages` ADD COLUMN `isRead` TINYINT(1) DEFAULT 0')
+      console.log("Column 'isRead' added successfully!")
+    } else {
+      console.log("Column 'isRead' already exists in table 'Messages'.")
+    }
+  } catch (err) {
+    console.error('Error running automatic schema check/migration:', err)
+  }
+}
+
 const startServer = async () => {
   try {
     // Sync database - use force: false to prevent recreating tables
     await sequelize.sync()
     console.log('Database synced')
+
+    // Run automatic migrations for schema updates
+    await runMigrations()
 
     // Ensure default admin exists
     await ensureAdminUser()
