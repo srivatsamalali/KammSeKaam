@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { authService } from '../services/api'
 import JobLoader from '../components/JobLoader'
 import { triggerMessageNotification } from '../utils/notification'
@@ -231,32 +231,34 @@ const ForgotPassword = () => {
   }
 
   return (
-    <div className="min-h-screen page-shell">
-      <div className="max-w-md mx-auto pt-20 px-4 sm:px-6">
-        <div className="glass-card p-10">
+    <div className="auth-page">
+      {/* Ambient Golden Aurora Glow Orbs */}
+      <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-[#b88f3f]/20 rounded-full blur-3xl aurora-orb-1 z-0" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl aurora-orb-2 z-0" />
+
+      <div className="auth-page-content">
+        <div className="max-w-md w-full relative z-10 mx-auto">
+          <div className="auth-card">
           {/* Step Indicator */}
-          <div className="flex justify-center gap-2 mb-8">
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 1 ? 'bg-sky-700' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 2 ? 'bg-sky-700' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 3 ? 'bg-sky-700' : 'bg-gray-300'
-              }`}
-            ></div>
+          <div className="flex justify-center gap-2.5 mb-8">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  step === s
+                    ? 'w-8 bg-[#b88f3f] shadow-[0_0_8px_rgba(184,143,63,0.8)]'
+                    : step > s
+                    ? 'w-4 bg-emerald-500'
+                    : 'w-4 bg-slate-700'
+                }`}
+              />
+            ))}
           </div>
 
           {/* Step 1: Email */}
           {step === 1 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-6">
                 Forgot Password
               </h2>
 
@@ -307,32 +309,34 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`btn-primary w-full ${loading ? 'btn-loading-fill' : ''}`}
+                  className={`btn-primary btn-shimmer w-full bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold py-3.5 rounded-xl transition-all uppercase tracking-wider text-xs shadow-lg cursor-pointer ${loading ? 'btn-loading-fill' : ''}`}
                 >
-                  Send OTP
+                  Send OTP →
                 </button>
               </form>
 
-              <p className="text-center text-gray-600 mt-4">
-                Remember your password?{' '}
-                <a
-                  href="/candidate/login"
-                  className="text-blue-600 font-semibold hover:underline"
-                >
-                  Login
-                </a>
-              </p>
+              <div className="mt-6 pt-5 border-t border-slate-800 text-center">
+                <p className="text-xs text-slate-400">
+                  Remember your password?{' '}
+                  <Link
+                    to="/candidate/login"
+                    className="text-[#b88f3f] font-bold hover:text-[#d4ab59] transition-colors ml-1"
+                  >
+                    Login →
+                  </Link>
+                </p>
+              </div>
             </>
           )}
 
           {/* Step 2: OTP Verification */}
           {step === 2 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-2">
                 Verify OTP
               </h2>
-              <p className="text-center text-gray-600 mb-6">
-                Enter the 6-digit OTP sent to {email}
+              <p className="text-center text-slate-400 text-xs mb-6">
+                Enter the 6-digit OTP sent to <span className="text-[#b88f3f] font-semibold">{email}</span>
               </p>
 
               {errors.form && <div className="alert-error">{errors.form}</div>}
@@ -369,14 +373,14 @@ const ForgotPassword = () => {
 
               <div className="mt-4 text-center">
                 {otpTimer > 0 ? (
-                  <p className="text-gray-600">
-                    Resend OTP in {otpTimer}s
+                  <p className="text-slate-400 text-xs">
+                    Resend OTP in <span className="text-[#b88f3f] font-bold">{otpTimer}s</span>
                   </p>
                 ) : (
                   <button
                     onClick={handleResendOtp}
                     disabled={loading}
-                    className="text-blue-600 hover:underline font-semibold"
+                    className="text-[#b88f3f] hover:text-[#d4ab59] hover:underline font-bold text-xs cursor-pointer"
                   >
                     Resend OTP
                   </button>
@@ -385,9 +389,9 @@ const ForgotPassword = () => {
 
               <button
                 onClick={() => setStep(1)}
-                className="text-gray-600 hover:text-gray-800 text-sm mt-4 w-full text-center"
+                className="text-slate-400 hover:text-slate-200 text-xs mt-4 w-full text-center cursor-pointer"
               >
-                Back
+                ← Back
               </button>
             </>
           )}
@@ -395,7 +399,7 @@ const ForgotPassword = () => {
           {/* Step 3: Reset Password */}
           {step === 3 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-6">
                 Set New Password
               </h2>
 
@@ -542,8 +546,23 @@ const ForgotPassword = () => {
               </button>
             </>
           )}
+          </div>
         </div>
       </div>
+
+      {/* Anchored Footer */}
+      <footer className="auth-footer">
+        <div>
+          © {new Date().getFullYear()} Aston Recruitment Solutions Ltd. All rights reserved.
+        </div>
+        <div className="flex gap-4">
+          <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
+          <span>•</span>
+          <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>
+          <span>•</span>
+          <span className="text-[#b88f3f]">🔒 256-Bit SSL Encrypted</span>
+        </div>
+      </footer>
       {loading && <JobLoader text={step === 3 ? 'Resetting Password...' : 'Processing...'} />}
     </div>
   )

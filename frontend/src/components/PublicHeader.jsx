@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { messageService, clientRequestService } from '../services/api'
 import { triggerMessageNotification, playSoftChime } from '../utils/notification'
+import { triggerGoldConfetti } from '../utils/confetti'
 
 const PublicHeader = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -41,19 +42,22 @@ const PublicHeader = () => {
   const [activeDropdown, setActiveDropdown] = useState(null)
 
   useEffect(() => {
-    const handleOpenModal = () => setClientModalOpen(true)
+    const handleOpenModal = () => {
+      setClientModalOpen(true)
+      setMobileMenuOpen(false)
+    }
     window.addEventListener('aston-open-client-modal', handleOpenModal)
     return () => window.removeEventListener('aston-open-client-modal', handleOpenModal)
   }, [])
 
   const handleSendClientEmail = async (e) => {
     e.preventDefault()
-    if (!clientForm.company.trim()) {
-      alert('Company Name is required')
+    if (!clientForm.name.trim() || !clientForm.from.trim()) {
+      alert('Name and Email are required')
       return
     }
-    if (!clientForm.from.trim()) {
-      alert('Work Email is required')
+    if (!clientForm.company.trim()) {
+      alert('Company Name is required')
       return
     }
     if (!clientForm.body.trim()) {
@@ -71,6 +75,7 @@ const PublicHeader = () => {
         subject: clientForm.subject,
         requirements: clientForm.body,
       })
+      triggerGoldConfetti()
       triggerMessageNotification('System', 'Hiring request submitted successfully! Aston Recruitment will review and contact you shortly.')
       setClientModalOpen(false)
       setClientForm({
@@ -320,32 +325,12 @@ const PublicHeader = () => {
                       </div>
                     )}
                   </div>
-
-                  <a 
-                    href="https://www.linkedin.com/company/aston-recruitment-india/" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="hover:text-[#b88f3f] transition-colors flex items-center"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                    </svg>
-                  </a>
                 </>
               )}
             </div>
 
             {/* Desktop Action Buttons / User Dropdown */}
-            <div className="hidden md:flex items-center gap-4">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2.5 rounded-xl border border-slate-700/60 bg-slate-900/40 text-slate-300 hover:text-white hover:bg-slate-900/80 transition-colors focus:outline-hidden cursor-pointer"
-                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              >
-                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
-              </button>
-
+            <div className="hidden md:flex items-center gap-3.5">
               {user ? (
                 <div 
                   className="relative py-3.5 cursor-pointer z-[9999]"
@@ -393,6 +378,28 @@ const PublicHeader = () => {
                   Candidate Registration
                 </Link>
               )}
+
+              {/* LinkedIn Icon */}
+              <a 
+                href="https://www.linkedin.com/company/aston-recruitment-india/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="p-2.5 rounded-xl border border-slate-700/60 bg-slate-900/40 text-slate-300 hover:text-[#b88f3f] hover:bg-slate-900/80 transition-colors flex items-center justify-center cursor-pointer"
+                title="Aston Recruitment on LinkedIn"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl border border-slate-700/60 bg-slate-900/40 text-slate-300 hover:text-white hover:bg-slate-900/80 transition-colors focus:outline-hidden cursor-pointer"
+                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
+              </button>
             </div>
 
             {/* Mobile Actions Menu toggle */}

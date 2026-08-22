@@ -104,124 +104,190 @@ const CandidateLogin = () => {
   }
 
   return (
-    <div className="w-full flex flex-col gap-6">
-      {/* Marquee Info Banner */}
-      <div className="w-full bg-amber-500/10 border border-amber-500/25 rounded-2xl py-3 px-4 overflow-hidden dark:bg-amber-950/20 dark:border-amber-900/30 shadow-sm animate-slide-up">
-        <marquee className="text-xs font-bold text-amber-850 dark:text-amber-400 tracking-wide">
-          🚀 Welcome to Aston Recruitment Portal • Active Openings: Senior React Developer, Python Backend Engineer, Node.js Architect, Devops Consultant • Get hired 10x faster with AI profile suitability matching • Next interview batch scheduling begins Monday!
-        </marquee>
-      </div>
+    <div className="auth-page">
+      {/* Ambient Golden Aurora Glow Orbs */}
+      <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-[#b88f3f]/20 rounded-full blur-3xl aurora-orb-1 z-0" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl aurora-orb-2 z-0" />
 
-      <div className="min-h-[calc(100vh-140px)] flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 bg-slate-50/30 dark:bg-slate-950/10 gap-8 rounded-3xl">
-        {/* Left side branding banner */}
-        <div className="hidden md:flex flex-col max-w-lg text-left space-y-4">
-          <h1 className="text-4xl font-extrabold text-slate-950 dark:text-white leading-tight">
-            Aston Recruitment
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed">
-            Candidate Portal. Track your applications progress in real-time, update qualifications details, and join interactive video meeting rooms.
-          </p>
-        </div>
+      <div className="auth-page-content">
+        <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
+          {/* Left Side Branding */}
+          <div className="hidden md:flex flex-col text-left space-y-6 pr-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#b88f3f] text-xs font-bold uppercase tracking-wider backdrop-blur-md w-fit">
+              <span>Aston Candidate Portal</span>
+            </div>
 
-        {/* Right side form */}
-        <div className="w-full max-w-md">
-          <div className="glass-card p-10 shadow-xl border border-slate-100/50 dark:border-slate-800/40">
-            <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
-              Candidate Login
-            </h2>
+            <h1 className="text-4xl lg:text-5xl font-black text-white font-serif leading-tight">
+              QUALITY PEOPLE. <br />
+              <span className="gold-text-shimmer">BETTER FUTURES.</span>
+            </h1>
 
-            {errors.form && <div className="alert-error">{errors.form}</div>}
+            <p className="text-slate-300 text-base leading-relaxed">
+              Welcome to your executive career dashboard. Track applications in real-time, update qualifications, and connect with domain experts.
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="form-group text-left">
-                <label className="form-label">Email or Phone</label>
-                <input
-                  type="text"
-                  name="identifier"
-                  value={formData.identifier}
-                  onChange={handleChange}
-                  className="form-input"
-                  placeholder="Enter email or phone"
-                  required
-                />
-                {emailSuggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
-                    {emailSuggestions.map((sug, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          setFormData((prev) => ({ ...prev, identifier: sug }))
-                          setEmailSuggestions([])
-                        }}
-                        className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
-                      >
-                        {sug}
-                      </button>
-                    ))}
-                  </div>
-                )}
+            <div className="space-y-3 pt-2 text-sm font-semibold text-slate-300">
+              <div className="flex items-center gap-2.5">
+                <span className="text-[#b88f3f] text-lg">✓</span>
+                <span>100% Aston Verified™ Opportunities</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[#b88f3f] text-lg">✓</span>
+                <span>Direct connection with vetted hiring clients</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[#b88f3f] text-lg">✓</span>
+                <span>End-to-end interview & feedback transparency</span>
+              </div>
+            </div>
+
+            {/* Micro stats banner */}
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800/80">
+              <div>
+                <div className="text-lg font-bold text-[#b88f3f] font-serif">100%</div>
+                <div className="text-[11px] text-slate-400">Manual Screening</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#b88f3f] font-serif">15+</div>
+                <div className="text-[11px] text-slate-400">Partner Clients</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#b88f3f] font-serif">48h</div>
+                <div className="text-[11px] text-slate-400">Review SLA</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side Form Card */}
+          <div className="w-full max-w-md mx-auto">
+            <div className="auth-card">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-serif">
+                  Candidate Login
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Enter your credentials to access your dashboard
+                </p>
               </div>
 
-              <div className="form-group flex items-end gap-3 w-full">
-                <div className="flex-1 text-left">
-                  <label className="form-label">Password</label>
+              {errors.form && (
+                <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold text-left">
+                  ⚠️ {errors.form}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                <div className="form-group">
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Email or Phone Number
+                  </label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
+                    type="text"
+                    name="identifier"
+                    value={formData.identifier}
                     onChange={handleChange}
-                    className="form-input"
-                    placeholder="Enter password"
+                    className="w-full px-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-hidden focus:border-[#b88f3f] focus:ring-2 focus:ring-[#b88f3f]/30 transition-all"
+                    placeholder="name@example.com or 10-digit mobile"
                     required
                   />
+                  {emailSuggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {emailSuggestions.map((sug, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, identifier: sug }))
+                            setEmailSuggestions([])
+                          }}
+                          className="px-2 py-1 text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700 cursor-pointer"
+                        >
+                          {sug}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <MonkeyPasswordToggle
-                  showPassword={showPassword}
-                  onClick={() => setShowPassword(!showPassword)}
-                />
-              </div>
 
-              <div className="flex justify-between items-center text-xs">
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring-3 focus:ring-blue-200 focus:ring-opacity-50"
-                  />
-                  <span className="text-gray-650 dark:text-gray-400">Remember Me</span>
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-blue-600 font-semibold hover:underline"
+                <div className="form-group">
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    Password
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-hidden focus:border-[#b88f3f] focus:ring-2 focus:ring-[#b88f3f]/30 transition-all"
+                        placeholder="Enter your password"
+                        required
+                      />
+                    </div>
+                    <MonkeyPasswordToggle
+                      showPassword={showPassword}
+                      onClick={() => setShowPassword(!showPassword)}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-xs pt-1">
+                  <label className="auth-checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="rememberMe"
+                      checked={formData.rememberMe}
+                      onChange={handleChange}
+                    />
+                    <span>Remember Me</span>
+                  </label>
+                  <Link
+                    to="/forgot-password"
+                    className="text-[#b88f3f] font-bold hover:text-[#d4ab59] transition-colors"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-primary btn-shimmer w-full mt-4 bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-amber-500/15 transition-all text-center tracking-wider text-xs uppercase cursor-pointer"
                 >
-                  Forgot Password?
-                </Link>
+                  {loading ? 'LOGGING IN...' : 'LOGIN TO PORTAL →'}
+                </button>
+              </form>
+
+              <div className="mt-6 pt-5 border-t border-slate-800 text-center">
+                <p className="text-xs text-slate-400">
+                  Don't have an account?{' '}
+                  <Link
+                    to="/candidate/register"
+                    className="text-[#b88f3f] font-bold hover:text-[#d4ab59] transition-colors ml-1"
+                  >
+                    Register Now →
+                  </Link>
+                </p>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full btn-primary font-bold py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
-              >
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
-
-            <p className="text-center text-gray-600 mt-4">
-              Don't have an account?{' '}
-              <Link
-                to="/candidate/register"
-                className="text-blue-600 font-semibold hover:underline"
-              >
-                Register
-              </Link>
-            </p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Anchored Footer */}
+      <footer className="auth-footer">
+        <div>
+          © {new Date().getFullYear()} Aston Recruitment Solutions Ltd. All rights reserved.
+        </div>
+        <div className="flex gap-4">
+          <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
+          <span>•</span>
+          <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>
+          <span>•</span>
+          <span className="text-[#b88f3f]">🔒 256-Bit SSL Encrypted</span>
+        </div>
+      </footer>
     </div>
   )
 }

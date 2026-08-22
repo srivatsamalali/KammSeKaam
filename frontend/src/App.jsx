@@ -36,7 +36,7 @@ function AnimatedRoutes() {
   const location = useLocation()
 
   return (
-    <div key={location.pathname} className="page-transition">
+    <div key={location.pathname} className="page-transition flex-1 flex flex-col w-full">
       <Routes location={location}>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
@@ -95,16 +95,16 @@ function App() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen w-full bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300">
-        <div className="w-full">
-          <BrowserRouter>
-            <ScrollToTop />
-            <PublicHeader />
-            <IdleTimeoutHandler />
+      <div className="min-h-screen flex flex-col w-full bg-[#070c14] text-white transition-colors duration-300">
+        <BrowserRouter>
+          <ScrollToTop />
+          <PublicHeader />
+          <IdleTimeoutHandler />
+          <main className="flex-1 flex flex-col w-full">
             <AnimatedRoutes />
-            <ChatBot />
-          </BrowserRouter>
-        </div>
+          </main>
+          <ChatBot />
+        </BrowserRouter>
       </div>
 
       {/* Global Frosted Liquid Glass Alert Modal */}

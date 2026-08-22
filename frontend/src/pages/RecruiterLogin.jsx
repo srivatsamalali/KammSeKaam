@@ -197,112 +197,162 @@ const RecruiterLogin = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 bg-slate-50/30 dark:bg-slate-950/10 gap-8">
-      {/* Left side branding banner */}
-      <div className="hidden md:flex flex-col max-w-lg text-left space-y-4">
-        <h1 className="text-4xl font-extrabold text-slate-950 dark:text-white leading-tight">
-          Aston Recruitment
-        </h1>
-        <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed">
-          Recruiter Portal. Manage assigned candidates, coordinate interviews, rate skill scores, refer files to clients, and chat in real-time.
-        </p>
-      </div>
+    <div className="auth-page">
+      {/* Ambient Golden Aurora Glow Orbs */}
+      <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-[#b88f3f]/20 rounded-full blur-3xl aurora-orb-1 z-0" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl aurora-orb-2 z-0" />
 
-      {/* Right side form */}
-      <div className="w-full max-w-md">
-        <div className="glass-card p-10 shadow-xl border border-slate-100/50 dark:border-slate-800/40">
-          <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
-            Recruiter Login
-          </h2>
-
-          {errors.form && <div className="alert-error">{errors.form}</div>}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-group text-left">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="form-input"
-                required
-              />
-              {emailSuggestions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2 animate-in fade-in duration-200">
-                  {emailSuggestions.map((sug, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setFormData((prev) => ({ ...prev, email: sug }))
-                        setEmailSuggestions([])
-                      }}
-                      className="px-2 py-1 text-[10px] font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-650 dark:text-slate-350 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-sm"
-                    >
-                      {sug}
-                    </button>
-                  ))}
-                </div>
-              )}
+      <div className="auth-page-content">
+        <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
+          {/* Left Side Branding */}
+          <div className="hidden md:flex flex-col text-left space-y-6 pr-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#b88f3f] text-xs font-bold uppercase tracking-wider backdrop-blur-md w-fit">
+              <span>Aston Expert Workspace</span>
             </div>
 
-            <div className="form-group flex items-end gap-3 w-full">
-              <div className="flex-1 text-left">
-                <div className="flex justify-between items-center mb-1">
-                  <label className="form-label mb-0">Password</label>
+          <h1 className="text-4xl lg:text-5xl font-black text-white font-serif leading-tight">
+            DOMAIN EXPERTS. <br />
+            <span className="gold-text-shimmer">EVALUATION SUITE.</span>
+          </h1>
+
+          <p className="text-slate-300 text-base leading-relaxed">
+            Conduct expert technical interviews, submit scorecards, refer top talent to clients, and collaborate with admin teams in real-time.
+          </p>
+
+          <div className="space-y-3 pt-2 text-sm font-semibold text-slate-300">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[#b88f3f] text-lg">✓</span>
+              <span>Structured 3-part evaluation rubric & scoring</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-[#b88f3f] text-lg">✓</span>
+              <span>Live video meeting rooms with encrypted audio/video</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-[#b88f3f] text-lg">✓</span>
+              <span>Direct client referral pipeline management</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side Form */}
+        <div className="w-full max-w-md mx-auto">
+          <div className="auth-card">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-serif">
+                Expert Login
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Access your recruitment & interview dashboard
+              </p>
+            </div>
+
+            {errors.form && (
+              <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold text-left">
+                ⚠️ {errors.form}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4 text-left">
+              <div className="form-group">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Official Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-hidden focus:border-[#b88f3f] focus:ring-2 focus:ring-[#b88f3f]/30 transition-all"
+                  placeholder="expert@astonrecruitment.in"
+                  required
+                />
+                {emailSuggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {emailSuggestions.map((sug, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({ ...prev, email: sug }))
+                          setEmailSuggestions([])
+                        }}
+                        className="px-2 py-1 text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors border border-slate-700 cursor-pointer"
+                      >
+                        {sug}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Password
+                  </label>
                   <button
                     type="button"
                     onClick={() => {
                       setResetEmail(formData.email)
                       setShowResetModal(true)
                     }}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                    className="text-xs font-bold text-[#b88f3f] hover:text-[#d4ab59] transition-colors cursor-pointer"
                   >
                     Forgot Password?
                   </button>
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-hidden focus:border-[#b88f3f] focus:ring-2 focus:ring-[#b88f3f]/30 transition-all"
+                      placeholder="Enter your password"
+                      required
+                    />
+                  </div>
+                  <MonkeyPasswordToggle 
+                    showPassword={showPassword} 
+                    onClick={() => setShowPassword(!showPassword)} 
+                  />
+                </div>
               </div>
-              <MonkeyPasswordToggle 
-                showPassword={showPassword} 
-                onClick={() => setShowPassword(!showPassword)} 
-              />
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`btn-primary btn-shimmer w-full mt-4 bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold py-3.5 rounded-xl transition-all shadow-lg uppercase tracking-wider text-xs cursor-pointer ${loading ? 'btn-loading-fill' : ''}`}
+              >
+                {loading ? 'LOGGING IN...' : 'LOGIN TO WORKSPACE →'}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-5 border-t border-slate-800 text-center">
+              <p className="text-xs text-slate-500">
+                Recruiter & Expert credentials are provisioned by Administrator
+              </p>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={`btn-primary w-full ${loading ? 'btn-loading-fill' : ''}`}
-            >
-              Login
-            </button>
-          </form>
-
-          <div className="mt-6 pt-4 border-t border-slate-200 text-center space-y-3">
-            <button
-              type="button"
-              onClick={() => {
-                setResetEmail(formData.email)
-                setShowResetModal(true)
-              }}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl border border-slate-300 transition-colors"
-            >
-              🔑 Reset Password
-            </button>
-            <p className="text-xs text-gray-500">
-              Recruiter accounts are managed by Administrator
-            </p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Anchored Footer */}
+      <footer className="auth-footer">
+        <div>
+          © {new Date().getFullYear()} Aston Recruitment Solutions Ltd. All rights reserved.
+        </div>
+        <div className="flex gap-4">
+          <span className="hover:text-slate-400 cursor-pointer">Expert Guidelines</span>
+          <span>•</span>
+          <span className="hover:text-slate-400 cursor-pointer">Security Protocol</span>
+          <span>•</span>
+          <span className="text-[#b88f3f]">🔒 256-Bit Encrypted Workspace</span>
+        </div>
+      </footer>
 
       {/* Recruiter Password Reset Modal */}
       {showResetModal && (

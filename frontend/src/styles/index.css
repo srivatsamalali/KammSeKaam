@@ -132,8 +132,9 @@ body {
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(180deg, #fdfbf7 0%, #f7f2e4 40%, #ffffff 100%);
-  color: #0f172a;
+  background-color: #070c14;
+  color: #ffffff;
+  min-height: 100vh;
 }
 
 .page-shell {
@@ -344,27 +345,23 @@ body {
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-label {
   display: block;
-  color: #334155;
-  font-weight: 600;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
 
-.form-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  outline: none;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition:
-    box-shadow 0.12s ease,
-    transform 0.12s ease;
+.dark .form-label,
+.form-dark .form-label,
+.dark label {
+  color: #cbd5e1;
 }
 
 .form-input,
@@ -372,23 +369,197 @@ body {
 textarea {
   width: 100%;
   padding: 0.75rem 1rem;
-  border-radius: 18px;
+  border-radius: 12px;
   outline: none;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  font-size: 0.875rem;
   transition:
     box-shadow 0.18s ease,
-    transform 0.18s ease,
-    border-color 0.18s ease;
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.dark .form-input,
+.dark .form-select,
+.dark textarea,
+.form-dark .form-input,
+.form-dark .form-select,
+.form-dark textarea,
+.bg-slate-900 input,
+.bg-slate-900 select,
+.bg-slate-900 textarea {
+  background: rgba(2, 6, 23, 0.75);
+  color: #f8fafc;
+  border-color: rgba(71, 85, 105, 0.6);
 }
 
 .form-input:focus,
 .form-select:focus,
 textarea:focus {
-  box-shadow: 0 10px 25px rgba(56, 189, 248, 0.16);
-  transform: translateY(-1px);
-  border-color: rgba(37, 99, 235, 0.4);
+  border-color: #b88f3f;
+  box-shadow: 0 0 0 3px rgba(184, 143, 63, 0.25);
+}
+
+.dark .form-input:focus,
+.dark .form-select:focus,
+.dark textarea:focus {
+  border-color: #b88f3f;
+  box-shadow: 0 0 0 3px rgba(184, 143, 63, 0.35);
+}
+
+/* ==========================================================================
+   DEDICATED AUTH PAGE & FORM STYLES (ALWAYS HIGH CONTRAST & LUXURY DARK)
+   ========================================================================== */
+.auth-page {
+  min-height: calc(100vh - 76px);
+  width: 100%;
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #070c14 !important;
+  color: #ffffff !important;
+  padding: 2rem 1.5rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-page-content {
+  width: 100%;
+  flex: 1 1 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: 1rem 0;
+}
+
+.auth-footer {
+  width: 100%;
+  max-width: 72rem;
+  padding-top: 1rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(51, 65, 85, 0.4);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  position: relative;
+  z-index: 10;
+}
+
+.auth-card {
+  width: 100%;
+  background: rgba(12, 19, 34, 0.96) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+  border-radius: 1.5rem !important;
+  padding: 2.25rem 2rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85) !important;
+  position: relative;
+  z-index: 10;
+  color: #ffffff !important;
+}
+
+@media (min-width: 640px) {
+  .auth-card {
+    padding: 2.5rem 2.5rem !important;
+  }
+}
+
+.auth-card h2,
+.auth-page h1,
+.auth-page h2,
+.auth-page h3 {
+  color: #ffffff !important;
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+.auth-card .form-label,
+.auth-page .form-label {
+  color: #e2e8f0 !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.auth-card .form-input,
+.auth-page .form-input,
+.auth-card input:not([type="checkbox"]):not([type="radio"]),
+.auth-card select,
+.auth-card textarea {
+  width: 100%;
+  background: rgba(2, 6, 23, 0.85) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(71, 85, 105, 0.8) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 0.875rem !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.auth-card input[type="checkbox"],
+.auth-page input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(184, 143, 63, 0.8) !important;
+  background-color: rgba(2, 6, 23, 0.9) !important;
+  accent-color: #b88f3f !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.auth-checkbox-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
+}
+
+.auth-checkbox-label:hover {
+  color: #e2e8f0 !important;
+}
+
+.auth-card input::placeholder,
+.auth-page input::placeholder {
+  color: #64748b !important;
+}
+
+.auth-card input:focus,
+.auth-card select:focus,
+.auth-card textarea:focus {
+  border-color: #b88f3f !important;
+  box-shadow: 0 0 0 3px rgba(184, 143, 63, 0.35) !important;
+}
+
+.auth-card select option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
 }
 
 .btn,
@@ -508,16 +679,18 @@ button:disabled,
 }
 
 .page-transition {
-  opacity: 0;
-  animation: pageFadeIn 0.3s ease-out forwards;
+  animation: luxuryPageEntry 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
 }
 
-@keyframes pageFadeIn {
-  from {
+@keyframes luxuryPageEntry {
+  0% {
     opacity: 0;
+    transform: translateY(10px) scale(0.995);
   }
-  to {
+  100% {
     opacity: 1;
+    transform: translateY(0px) scale(1);
   }
 }
 
@@ -1085,6 +1258,218 @@ a {
   100% {
     width: 100%;
   }
+}
+
+/* ==========================================================================
+   LUXURY ANIMATIONS & EXECUTIVE VISUALS SYSTEM
+   ========================================================================== */
+
+/* 1. Golden Aurora Ambient Glow Orbs */
+@keyframes aurora-float-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.1);
+  }
+  66% {
+    transform: translate(-25px, 20px) scale(0.95);
+  }
+}
+
+@keyframes aurora-float-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-35px, 35px) scale(1.15);
+  }
+  66% {
+    transform: translate(40px, -25px) scale(0.9);
+  }
+}
+
+@keyframes aurora-pulse {
+  0%, 100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+.aurora-orb-1 {
+  animation: aurora-float-1 14s infinite ease-in-out, aurora-pulse 8s infinite ease-in-out;
+}
+
+.aurora-orb-2 {
+  animation: aurora-float-2 18s infinite ease-in-out, aurora-pulse 10s infinite ease-in-out;
+}
+
+/* 2. Metallic Gold Button Shimmer Sweep */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  transition: none;
+}
+
+.btn-shimmer:hover::after {
+  left: 130%;
+  transition: left 0.85s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* 3. Executive Marquee Ticker Track */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-container {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+
+.marquee-track {
+  display: flex;
+  gap: 2rem;
+  flex-shrink: 0;
+  min-width: 100%;
+  animation: marquee-scroll 32s linear infinite;
+}
+
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* 4. Glass Skeleton Shimmer Loader */
+@keyframes skeleton-pulse {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-glass {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.12) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+/* 5. Flowing Metallic Gold Text Gradient */
+@keyframes gold-text-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gold-text-shimmer {
+  background: linear-gradient(
+    -75deg,
+    #d4ab59 0%,
+    #fef08a 25%,
+    #b88f3f 50%,
+    #fde047 75%,
+    #d4ab59 100%
+  );
+  background-size: 300% auto;
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  animation: gold-text-flow 6s linear infinite;
+  display: inline-block;
+}
+
+/* 6. Floating Glass Orbiters & Badges */
+@keyframes float-bob-1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1.5deg);
+  }
+}
+
+@keyframes float-bob-2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1.5deg);
+  }
+}
+
+.animate-float-1 {
+  animation: float-bob-1 6s infinite ease-in-out;
+}
+
+.animate-float-2 {
+  animation: float-bob-2 8s infinite ease-in-out;
+}
+
+/* 7. Ambient Cursor Glow */
+.cursor-spotlight {
+  pointer-events: none;
+  position: fixed;
+  z-index: 40;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle 250px at center,
+    rgba(184, 143, 63, 0.07),
+    transparent 80%
+  );
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease, transform 0.05s linear;
 }
 
 /* Mobile viewport optimization overrides */

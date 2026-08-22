@@ -20,26 +20,23 @@ import {
   Settings,
   Factory,
   Stethoscope,
-  FileText
+  FileText,
+  Award,
+  Sparkles
 } from 'lucide-react'
 import ViewOpenRolesModal from '../components/ViewOpenRolesModal'
+import TiltCard from '../components/TiltCard'
+import AnimatedCounter from '../components/AnimatedCounter'
+import ExecutiveTicker from '../components/ExecutiveTicker'
+import ConstellationCanvas from '../components/ConstellationCanvas'
+import RoleTypewriter from '../components/RoleTypewriter'
+import FloatingBadge from '../components/FloatingBadge'
+import CursorSpotlight from '../components/CursorSpotlight'
 
 const LandingPage = () => {
   const [showPreferenceModal, setShowPreferenceModal] = useState(false)
   const [openRolesModalOpen, setOpenRolesModalOpen] = useState(false)
   const [flippedCardIndex, setFlippedCardIndex] = useState(null)
-
-  useEffect(() => {
-    // Keep active session intact when visiting homepage. Only clear on explicit logout.
-
-    // Automatic preference modal popup suppressed per user request
-    /*
-    const timer = setTimeout(() => {
-      setShowPreferenceModal(true)
-    }, 600)
-    return () => clearTimeout(timer)
-    */
-  }, [])
 
   const industries = [
     { name: 'Technology & IT', icon: <FileCode className="w-8 h-8 text-[#b88f3f]" />, img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60', desc: 'Sourcing top-tier developers, systems architects, and engineering leaders for high-growth tech platforms.' },
@@ -53,37 +50,72 @@ const LandingPage = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] text-slate-800 font-sans scroll-smooth">
-      
-      {/* Hero Section Wrapper matching lower section bg */}
-      <div className="bg-white dark:bg-[#353b48]">
+    <div className="min-h-screen bg-[#fafbfc] text-slate-800 font-sans scroll-smooth relative">
+      {/* Ambient Mouse Cursor Spotlight */}
+      <CursorSpotlight />
+
+      {/* Hero Section Wrapper */}
+      <div className="bg-white dark:bg-[#070c14]">
         <section 
           id="home" 
-          className="relative bg-cover bg-center py-32 md:py-48 text-left transition-all duration-700 ease-out animate-fade-in rounded-b-[32px] overflow-hidden shadow-2xl"
+          className="relative bg-cover bg-center py-32 md:py-44 text-left transition-all duration-700 ease-out animate-fade-in rounded-b-[32px] overflow-hidden shadow-2xl"
           style={{ 
-            backgroundImage: "linear-gradient(to right, rgba(9,15,25,0.85) 30%, rgba(9,15,25,0.3)), url('/hero banner.png?v=1')" 
+            backgroundImage: "linear-gradient(to right, rgba(7,12,20,0.92) 25%, rgba(7,12,20,0.45)), url('/hero banner.png?v=1')" 
           }}
         >
+          {/* Ambient Golden Aurora Glow Orbs */}
+          <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-[#b88f3f]/25 rounded-full blur-3xl aurora-orb-1 z-0" />
+          <div className="pointer-events-none absolute top-1/2 right-0 w-[450px] h-[450px] bg-amber-500/15 rounded-full blur-[110px] aurora-orb-2 z-0" />
+
+          {/* Interactive Constellation Canvas */}
+          <ConstellationCanvas particleCount={40} className="z-0" />
+
+          {/* Floating Badges */}
+          <FloatingBadge
+            icon={<Award className="w-4 h-4" />}
+            title="Aston Verified™ Talent"
+            subtitle="Top 1% Evaluated Profiles"
+            variant="1"
+            className="absolute top-28 right-16 hidden lg:flex"
+          />
+          <FloatingBadge
+            icon={<ShieldCheck className="w-4 h-4" />}
+            title="72h Average Shortlist"
+            subtitle="Zero-Noise Executive Search"
+            variant="2"
+            className="absolute bottom-24 right-24 hidden lg:flex"
+          />
+
           <div className="max-w-7xl mx-auto px-6 sm:px-12 relative z-10 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#b88f3f] text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Executive Talent Advisory & Search</span>
+            </div>
+
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white font-serif leading-tight max-w-3xl animate-slide-up">
               QUALITY PEOPLE. <br/>
-              <span className="text-[#b88f3f]">BETTER FUTURES.</span>
+              <span className="gold-text-shimmer">BETTER FUTURES.</span>
             </h1>
-            <p className="text-slate-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium">
-              We don’t just fill positions. We find people who make a difference. <br/>
-              Better talent. Better decisions. Better hires.
-            </p>
+
+            <div className="text-slate-300 text-base sm:text-lg max-w-xl leading-relaxed font-medium space-y-1">
+              <p>We don’t just fill positions. We find people who make a difference.</p>
+              <div className="flex items-center gap-2 text-sm text-slate-400 pt-1">
+                <span>Leading recruitment in:</span>
+                <RoleTypewriter className="text-sm font-semibold" />
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button 
                 onClick={() => window.dispatchEvent(new Event('aston-open-client-modal'))}
-                className="btn-custom bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95 shadow-lg"
+                className="btn-custom btn-shimmer bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold px-8 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 group transform active:scale-95 shadow-lg cursor-pointer"
               >
                 <span>HIRE TALENT</span>
                 <span className="group-hover:translate-x-1.5 transition-transform">→</span>
               </button>
               <a 
                 href="#process" 
-                className="border border-white/50 hover:border-white hover:bg-white/10 text-white font-bold px-8 py-3.5 rounded-sm transition-all flex items-center justify-center gap-2 group transform active:scale-95"
+                className="border border-white/40 hover:border-white hover:bg-white/10 text-white font-bold px-8 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 group transform active:scale-95 backdrop-blur-sm"
               >
                 <span>EXPLORE OUR PROCESS</span>
                 <span className="group-hover:translate-x-1.5 transition-transform">→</span>
@@ -95,6 +127,44 @@ const LandingPage = () => {
             </div>
           </div>
         </section>
+
+        {/* Executive Stats Counter Bar (Plain White Background) */}
+        <div className="bg-white dark:bg-[#090f19] border-b border-slate-200/80 dark:border-slate-800/80 py-10 px-6 sm:px-12">
+          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-slate-800/80 text-center">
+            <div className="py-3 px-2">
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#b88f3f] font-serif mb-1">
+                <AnimatedCounter target={25} suffix="+" />
+              </div>
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Curated Placements
+              </p>
+            </div>
+            <div className="py-3 px-2">
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#b88f3f] font-serif mb-1">
+                <AnimatedCounter target={100} suffix="%" />
+              </div>
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Expert Vetted Profiles
+              </p>
+            </div>
+            <div className="py-3 px-2">
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#b88f3f] font-serif mb-1">
+                <AnimatedCounter target={6} suffix="+" />
+              </div>
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Core Domains
+              </p>
+            </div>
+            <div className="py-3 px-2">
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#b88f3f] font-serif mb-1">
+                <AnimatedCounter target={4.9} decimals={1} suffix=" / 5" />
+              </div>
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Client Rating
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Our Proven Hiring Process */}
@@ -198,13 +268,16 @@ const LandingPage = () => {
               { title: 'Human Evaluation', text: 'Every decision is backed by human judgment, experience and accountability.', icon: <Users className="w-8 h-8 text-[#b88f3f]" /> },
               { title: 'Partnership Mindset', text: 'We work like an extension of your team and care about your outcomes.', icon: <Handshake className="w-8 h-8 text-[#b88f3f]" /> }
             ].map((card, idx) => (
-              <div key={idx} className="flex flex-col items-center p-6 bg-slate-50 dark:bg-[#090f19] border border-slate-200/60 dark:border-slate-800 rounded-2xl hover:shadow-lg hover:border-amber-500/20 hover:dark:border-[#b88f3f]/30 transition-all duration-300">
+              <TiltCard 
+                key={idx} 
+                className="flex flex-col items-center p-6 bg-slate-50 dark:bg-[#090f19] border border-slate-200/60 dark:border-slate-800 rounded-2xl hover:shadow-xl hover:border-amber-500/30 hover:dark:border-[#b88f3f]/40 transition-all duration-300"
+              >
                 <div className="mb-4">
                   {card.icon}
                 </div>
                 <h3 className="font-bold text-[#090f19] dark:text-white text-base mb-2 font-serif">{card.title}</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-[220px]">{card.text}</p>
-              </div>
+              </TiltCard>
             ))}
           </div>
         </div>
@@ -214,8 +287,11 @@ const LandingPage = () => {
       <section id="about" className="py-20 scroll-mt-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 sm:px-12">
           
-          <div className="bg-[#090f19] rounded-2xl p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-10 border border-slate-800">
-            <div className="w-48 h-48 rounded-xl overflow-hidden border border-slate-700/60 shadow-lg flex-shrink-0">
+          <div className="bg-[#090f19] rounded-2xl p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-10 border border-slate-800 relative overflow-hidden">
+            {/* Ambient gold glow in founder card */}
+            <div className="pointer-events-none absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl z-0" />
+
+            <div className="w-48 h-48 rounded-xl overflow-hidden border border-slate-700/60 shadow-lg flex-shrink-0 relative z-10">
               <img 
                 src="/WhatsApp Image 2026-08-21 at 12.42.08.jpeg" 
                 alt="Rahul Bharatiya" 
@@ -223,7 +299,7 @@ const LandingPage = () => {
               />
             </div>
             
-            <div className="space-y-6 text-left">
+            <div className="space-y-6 text-left relative z-10">
               <h3 className="text-xs font-bold tracking-[0.2em] text-[#b88f3f] uppercase">A NOTE FROM THE FOUNDER</h3>
               
               <blockquote className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed italic relative">
@@ -258,12 +334,12 @@ const LandingPage = () => {
               Register your profile and let us match you with opportunities that are right for you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Link to="/candidate/register" className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-3.5 rounded-sm transition-all text-center tracking-wider shadow-sm transform active:scale-95">
+              <Link to="/candidate/register" className="btn-shimmer bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-6 py-3.5 rounded-xl transition-all text-center tracking-wider shadow-sm transform active:scale-95">
                 CANDIDATE REGISTRATION →
               </Link>
               <button 
                 onClick={() => setOpenRolesModalOpen(true)}
-                className="border border-slate-300 hover:border-slate-500 text-slate-700 font-bold text-xs px-6 py-3.5 rounded-sm transition-all text-center tracking-wider transform active:scale-95"
+                className="border border-slate-300 hover:border-slate-500 text-slate-700 font-bold text-xs px-6 py-3.5 rounded-xl transition-all text-center tracking-wider transform active:scale-95 cursor-pointer"
               >
                 VIEW OPEN ROLES →
               </button>
@@ -285,7 +361,7 @@ const LandingPage = () => {
               <button 
                 type="button"
                 onClick={() => window.dispatchEvent(new Event('aston-open-client-modal'))}
-                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-8 py-3.5 rounded-sm transition-all inline-block tracking-wider shadow-sm transform active:scale-95 cursor-pointer"
+                className="btn-shimmer bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-8 py-3.5 rounded-xl transition-all inline-block tracking-wider shadow-sm transform active:scale-95 cursor-pointer"
               >
                 TELL US WHO YOU'RE HIRING →
               </button>

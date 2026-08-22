@@ -11,7 +11,11 @@ import {
   clientRequestService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
-import { showToast } from '../utils/notification';
+import { showToast } from '../utils/notification'
+import TiltCard from '../components/TiltCard'
+import AnimatedCounter from '../components/AnimatedCounter'
+import HiringPipelineStepper from '../components/HiringPipelineStepper'
+import SkeletonLoader from '../components/SkeletonLoader'
 
 const DashboardCharts = ({ stats, recruiters, applications }) => {
   if (!stats) return null;
@@ -307,34 +311,6 @@ const DashboardCharts = ({ stats, recruiters, applications }) => {
     </div>
   );
 };
-const AnimatedCounter = ({ value }) => {
-  const [displayValue, setDisplayValue] = useState(0)
-
-  useEffect(() => {
-    let start = 0
-    const end = parseInt(value, 10) || 0
-    if (end === 0) {
-      setDisplayValue(0)
-      return
-    }
-    const duration = 1000 // 1.0s animation duration
-    const stepTime = Math.max(Math.floor(duration / end), 15)
-
-    const timer = setInterval(() => {
-      start += Math.ceil(end / (duration / stepTime))
-      if (start >= end) {
-        setDisplayValue(end)
-        clearInterval(timer)
-      } else {
-        setDisplayValue(start)
-      }
-    }, stepTime)
-
-    return () => clearInterval(timer)
-  }, [value])
-
-  return <span className="text-slate-800 dark:text-slate-100">{displayValue}</span>
-}
 
 const AdminDashboard = () => {
   const { user, login, logout } = useAuth()
@@ -1051,38 +1027,38 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Stats Cards */}
+        {/* Stats Cards with 3D Tilt & Animated CountUps */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <div className="glass-card p-6 border-l-4 border-blue-500 shadow-sm hover:shadow-md transition-shadow">
+          <TiltCard className="glass-card p-6 border-l-4 border-blue-500 shadow-sm hover:shadow-lg transition-all rounded-2xl">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Candidates</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              {stats?.totalCandidates ?? 0}
+              <AnimatedCounter target={stats?.totalCandidates ?? 0} />
             </p>
-          </div>
-          <div className="glass-card p-6 border-l-4 border-indigo-500 shadow-sm hover:shadow-md transition-shadow">
+          </TiltCard>
+          <TiltCard className="glass-card p-6 border-l-4 border-indigo-500 shadow-sm hover:shadow-lg transition-all rounded-2xl">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Recruiters</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              {stats?.totalRecruiters ?? 0}
+              <AnimatedCounter target={stats?.totalRecruiters ?? 0} />
             </p>
-          </div>
-          <div className="glass-card p-6 border-l-4 border-amber-500 shadow-sm hover:shadow-md transition-shadow">
+          </TiltCard>
+          <TiltCard className="glass-card p-6 border-l-4 border-amber-500 shadow-sm hover:shadow-lg transition-all rounded-2xl">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Applications</p>
             <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              {stats?.totalApplications ?? 0}
+              <AnimatedCounter target={stats?.totalApplications ?? 0} />
             </p>
-          </div>
-          <div className="glass-card p-6 border-l-4 border-emerald-500 shadow-sm hover:shadow-md transition-shadow">
+          </TiltCard>
+          <TiltCard className="glass-card p-6 border-l-4 border-emerald-500 shadow-sm hover:shadow-lg transition-all rounded-2xl">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Selected</p>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              {stats?.selectedCandidates ?? 0}
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 text-emerald-600 dark:text-emerald-400">
+              <AnimatedCounter target={stats?.selectedCandidates ?? 0} />
             </p>
-          </div>
-          <div className="glass-card p-6 border-l-4 border-rose-500 shadow-sm hover:shadow-md transition-shadow">
+          </TiltCard>
+          <TiltCard className="glass-card p-6 border-l-4 border-rose-500 shadow-sm hover:shadow-lg transition-all rounded-2xl">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rejected</p>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-              {stats?.rejectedCandidates ?? 0}
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 text-rose-600 dark:text-rose-400">
+              <AnimatedCounter target={stats?.rejectedCandidates ?? 0} />
             </p>
-          </div>
+          </TiltCard>
         </div>
 
         {/* Analytics SVG Charts */}
@@ -1822,6 +1798,11 @@ const AdminDashboard = () => {
                           )}
                         </div>
                       )}
+
+                      {/* Visual Pipeline Stepper */}
+                      <div className="mt-3 bg-slate-50/70 dark:bg-slate-950/40 rounded-xl p-2 border border-slate-100 dark:border-slate-800">
+                        <HiringPipelineStepper currentStatus={app.status} compact={false} />
+                      </div>
                     </div>
                     <div className="text-left sm:text-right mt-3 sm:mt-0 flex flex-col items-start sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-3 sm:pt-0">
                       <span

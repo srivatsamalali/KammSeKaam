@@ -1,114 +1,46 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 
-const MonkeyPasswordToggle = ({ showPassword, onClick }) => {
-  const containerRef = useRef(null)
-  const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 })
-
-  useEffect(() => {
-    // Only track if eyes are open (showPassword is false)
-    if (showPassword) return
-
-    const handleMouseMove = (e) => {
-      if (!containerRef.current) return
-      const rect = containerRef.current.getBoundingClientRect()
-      // Center of container
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-
-      // Vector from center to cursor
-      const dx = e.clientX - centerX
-      const dy = e.clientY - centerY
-      const distance = Math.sqrt(dx * dx + dy * dy) || 1
-
-      // Limit pupil translation to max 3.5 units
-      const maxLimit = 3.5
-      const limit = Math.min(distance * 0.1, maxLimit)
-      const offset = {
-        x: (dx / distance) * limit,
-        y: (dy / distance) * limit
-      }
-      setPupilOffset(offset)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [showPassword])
-
+const MonkeyPasswordToggle = ({ showPassword, onClick, className = '' }) => {
   return (
-    <div 
-      ref={containerRef}
+    <button
+      type="button"
       onClick={onClick}
-      className="relative w-11 h-11 shrink-0 cursor-pointer group bg-slate-50 dark:bg-slate-800/40 rounded-full border border-slate-200/50 dark:border-slate-800/60 p-1.5 shadow-inner hover:scale-105 transition-all duration-300 flex items-center justify-center select-none"
+      className={`h-[46px] w-[46px] rounded-xl bg-slate-950/80 hover:bg-slate-900 text-slate-400 hover:text-[#b88f3f] border border-slate-700/80 hover:border-[#b88f3f]/50 transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 shadow-sm ${className}`}
       title={showPassword ? 'Hide password' : 'Show password'}
+      aria-label={showPassword ? 'Hide password' : 'Show password'}
     >
-      <svg 
-        viewBox="0 0 100 100" 
-        className="w-full h-full drop-shadow-sm"
-      >
-        {/* Ears */}
-        <circle cx="20" cy="50" r="14" fill="#a0522d" />
-        <circle cx="20" cy="50" r="8" fill="#ffdab9" />
-        
-        <circle cx="80" cy="50" r="14" fill="#a0522d" />
-        <circle cx="80" cy="50" r="8" fill="#ffdab9" />
-
-        {/* Head Base */}
-        <circle cx="50" cy="50" r="38" fill="#a0522d" />
-        
-        {/* Face Area */}
-        <ellipse cx="50" cy="56" rx="30" ry="26" fill="#ffdab9" />
-        
-        {/* Eyes (Open if showPassword is FALSE, Closed if showPassword is TRUE) */}
-        {!showPassword ? (
-          <>
-            {/* Eyes Open */}
-            <ellipse cx="38" cy="46" rx="6" ry="8" fill="#ffffff" stroke="#a0522d" strokeWidth="1" />
-            <ellipse cx="62" cy="46" rx="6" ry="8" fill="#ffffff" stroke="#a0522d" strokeWidth="1" />
-            {/* Pupil with cursor-tracking coordinates offset */}
-            <circle cx={38 + pupilOffset.x} cy={46 + pupilOffset.y} r="3.5" fill="#333333" />
-            <circle cx={62 + pupilOffset.x} cy={46 + pupilOffset.y} r="3.5" fill="#333333" />
-          </>
-        ) : (
-          <>
-            {/* Eyes Covered/Closed */}
-            <path d="M 32 46 Q 38 41 44 46" stroke="#8b4513" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-            <path d="M 56 46 Q 62 41 68 46" stroke="#8b4513" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-          </>
-        )}
-
-        {/* Nose & Mouth */}
-        <ellipse cx="50" cy="62" rx="5" ry="3.5" fill="#8b4513" />
-        {!showPassword ? (
-          /* Open smile */
-          <path d="M 42 70 Q 50 78 58 70" stroke="#8b4513" strokeWidth="3" fill="none" strokeLinecap="round" />
-        ) : (
-          /* Shy smile */
-          <path d="M 44 71 Q 50 74 56 71" stroke="#8b4513" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        )}
-
-        {/* Hands overlaying/covering eyes */}
-        <g className="transition-all duration-500 ease-in-out">
-          <circle 
-            cx={!showPassword ? "22" : "34"} 
-            cy={!showPassword ? "82" : "48"} 
-            r="12" 
-            fill="#a0522d" 
-            stroke="#8b4513" 
-            strokeWidth="2" 
-            className="transition-all duration-500 ease-in-out"
-          />
-          <circle 
-            cx={!showPassword ? "78" : "66"} 
-            cy={!showPassword ? "82" : "48"} 
-            r="12" 
-            fill="#a0522d" 
-            stroke="#8b4513" 
-            strokeWidth="2" 
-            className="transition-all duration-500 ease-in-out"
-          />
-        </g>
-      </svg>
-    </div>
+      {showPassword ? (
+        /* Eye Off / Slashed Eye */
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-5 h-5"
+        >
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+          <line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+      ) : (
+        /* Eye Open */
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-5 h-5"
+        >
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      )}
+    </button>
   )
 }
 

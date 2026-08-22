@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService, candidateService } from '../services/api'
 import MonkeyPasswordToggle from '../components/MonkeyPasswordToggle'
@@ -478,37 +478,34 @@ const CandidateRegister = () => {
   }
 
   return (
-    <div className="min-h-screen page-shell">
-      <div className="max-w-md mx-auto pt-20 px-4 sm:px-6">
-        <div className="glass-card p-10">
+    <div className="auth-page">
+      {/* Ambient Golden Aurora Glow Orbs */}
+      <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-[#b88f3f]/20 rounded-full blur-3xl aurora-orb-1 z-0" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl aurora-orb-2 z-0" />
+
+      <div className="auth-page-content">
+        <div className="max-w-lg w-full relative z-10 mx-auto">
+          <div className="auth-card">
           {/* Step Indicator */}
-          <div className="flex justify-center gap-2 mb-8">
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 1 ? 'bg-amber-600' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 2 ? 'bg-amber-600' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 3 ? 'bg-amber-600' : 'bg-gray-300'
-              }`}
-            ></div>
-            <div
-              className={`h-2 w-2 rounded-full ${
-                step >= 4 ? 'bg-amber-600' : 'bg-gray-300'
-              }`}
-            ></div>
+          <div className="flex justify-center gap-2.5 mb-8">
+            {[1, 2, 3, 4].map((s) => (
+              <div
+                key={s}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  step === s
+                    ? 'w-8 bg-[#b88f3f] shadow-[0_0_8px_rgba(184,143,63,0.8)]'
+                    : step > s
+                    ? 'w-4 bg-emerald-500'
+                    : 'w-4 bg-slate-700'
+                }`}
+              />
+            ))}
           </div>
 
           {/* Step 1: Phone Verification */}
           {step === 1 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-6">
                 Verify Phone Number
               </h2>
 
@@ -582,32 +579,34 @@ const CandidateRegister = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary w-full"
+                  className="btn-primary btn-shimmer w-full bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold py-3.5 rounded-xl transition-all uppercase tracking-wider text-xs shadow-lg cursor-pointer"
                 >
-                  {loading ? 'Sending OTP...' : 'Send OTP'}
+                  {loading ? 'Sending OTP...' : 'Send OTP →'}
                 </button>
               </form>
 
-              <p className="text-center text-gray-600 mt-4">
-                Already have an account?{' '}
-                <a
-                  href="/candidate/login"
-                  className="text-amber-700 font-semibold hover:underline"
-                >
-                  Login
-                </a>
-              </p>
+              <div className="mt-6 pt-5 border-t border-slate-800 text-center">
+                <p className="text-xs text-slate-400">
+                  Already have an account?{' '}
+                  <Link
+                    to="/candidate/login"
+                    className="text-[#b88f3f] font-bold hover:text-[#d4ab59] transition-colors ml-1"
+                  >
+                    Login →
+                  </Link>
+                </p>
+              </div>
             </>
           )}
 
           {/* Step 2: OTP Verification */}
           {step === 2 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-2">
                 Verify OTP
               </h2>
-              <p className="text-center text-gray-600 mb-6">
-                Enter the 6-digit OTP sent to {email}
+              <p className="text-center text-slate-400 text-xs mb-6">
+                Enter the 6-digit OTP sent to <span className="text-[#b88f3f] font-semibold">{email}</span>
               </p>
 
               {errors.form && <div className="alert-error">{errors.form}</div>}
@@ -644,14 +643,14 @@ const CandidateRegister = () => {
 
               <div className="mt-4 text-center">
                 {otpTimer > 0 ? (
-                  <p className="text-gray-600">
-                    Resend OTP in {otpTimer}s
+                  <p className="text-slate-400 text-xs">
+                    Resend OTP in <span className="text-[#b88f3f] font-bold">{otpTimer}s</span>
                   </p>
                 ) : (
                   <button
                     onClick={handleResendOtp}
                     disabled={loading}
-                    className="text-amber-700 hover:underline font-semibold"
+                    className="text-[#b88f3f] hover:text-[#d4ab59] hover:underline font-bold text-xs cursor-pointer"
                   >
                     Resend OTP
                   </button>
@@ -664,9 +663,9 @@ const CandidateRegister = () => {
                   setOtp('')
                   setOtpSent(false)
                 }}
-                className="text-gray-600 hover:text-gray-800 text-sm mt-4 w-full text-center"
+                className="text-slate-400 hover:text-slate-200 text-xs mt-4 w-full text-center cursor-pointer"
               >
-                Back
+                ← Back to Phone
               </button>
             </>
           )}
@@ -674,7 +673,7 @@ const CandidateRegister = () => {
           {/* Step 3: Registration Form */}
           {step === 3 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-6">
                 Account Details
               </h2>
 
@@ -830,42 +829,41 @@ const CandidateRegister = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    if (!formData.name.trim()) {
-                      setErrors({ form: 'Full name is required' })
-                      return
-                    }
-                    if (!formData.password || !formData.confirmPassword) {
-                      setErrors({ form: 'Password fields are required' })
+                    if (!formData.password || formData.password.length < 6) {
+                      setErrors({ form: 'Password must be at least 6 characters' })
                       return
                     }
                     if (formData.password !== formData.confirmPassword) {
                       setErrors({ form: 'Passwords do not match' })
                       return
                     }
+                    setErrors({})
                     setStep(4)
                   }}
-                  className="btn-primary w-full"
+                  className="btn-primary btn-shimmer w-full bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold py-3.5 rounded-xl transition-all uppercase tracking-wider text-xs shadow-lg cursor-pointer"
                 >
-                  Next: Add Details
+                  Next: Add Details →
                 </button>
               </div>
 
-              <p className="text-center text-gray-600 mt-4">
-                Already have an account?{' '}
-                <a
-                  href="/candidate/login"
-                  className="text-amber-700 font-semibold hover:underline"
-                >
-                  Login
-                </a>
-              </p>
+              <div className="mt-6 pt-5 border-t border-slate-800 text-center">
+                <p className="text-xs text-slate-400">
+                  Already have an account?{' '}
+                  <Link
+                    to="/candidate/login"
+                    className="text-[#b88f3f] font-bold hover:text-[#d4ab59] transition-colors ml-1"
+                  >
+                    Login →
+                  </Link>
+                </p>
+              </div>
             </>
           )}
 
           {/* Step 4: Additional Profile Details Onboarding */}
           {step === 4 && (
             <>
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-white font-serif mb-6">
                 Onboarding Details
               </h2>
 
@@ -1029,16 +1027,16 @@ const CandidateRegister = () => {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="btn-secondary flex-1 py-2 font-bold"
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors border border-slate-700 cursor-pointer text-xs uppercase"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`btn-primary flex-1 py-2 font-bold ${loading ? 'btn-loading-fill' : ''}`}
+                    className={`btn-primary btn-shimmer flex-1 py-3 bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold rounded-xl transition-all shadow-lg text-xs uppercase cursor-pointer ${loading ? 'btn-loading-fill' : ''}`}
                   >
-                    Register
+                    Complete Registration →
                   </button>
                 </div>
               </form>
@@ -1047,6 +1045,21 @@ const CandidateRegister = () => {
 
         </div>
       </div>
+    </div>
+
+      {/* Anchored Footer */}
+      <footer className="auth-footer">
+        <div>
+          © {new Date().getFullYear()} Aston Recruitment Solutions Ltd. All rights reserved.
+        </div>
+        <div className="flex gap-4">
+          <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
+          <span>•</span>
+          <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>
+          <span>•</span>
+          <span className="text-[#b88f3f]">🔒 Verified Secure Portal</span>
+        </div>
+      </footer>
     </div>
   )
 }
