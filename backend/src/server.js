@@ -187,6 +187,15 @@ const runMigrations = async () => {
         console.error('Error updating unique_candidate constraint:', err.message)
       }
     }
+
+    // 4. Ensure ClientRequests table exists
+    try {
+      const { ClientRequest } = require('./models')
+      await ClientRequest.sync()
+      console.log('ClientRequests table verified/synced.')
+    } catch (tblErr) {
+      console.error('Error syncing ClientRequests table:', tblErr.message)
+    }
   } catch (err) {
     console.error('Error running automatic schema check/migration:', err)
   }

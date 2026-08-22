@@ -282,9 +282,13 @@ const LandingPage = () => {
               Tell us about the role. We'll find the right people, so you can build what's next.
             </p>
             <div className="pt-2">
-              <Link to="/recruiter/login" className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-8 py-3.5 rounded-sm transition-all inline-block tracking-wider shadow-sm transform active:scale-95">
+              <button 
+                type="button"
+                onClick={() => window.dispatchEvent(new Event('aston-open-client-modal'))}
+                className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white font-bold text-xs px-8 py-3.5 rounded-sm transition-all inline-block tracking-wider shadow-sm transform active:scale-95 cursor-pointer"
+              >
                 TELL US WHO YOU'RE HIRING →
-              </Link>
+              </button>
             </div>
           </div>
 

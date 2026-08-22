@@ -8,6 +8,7 @@ import {
   applicationService,
   clientService,
   jobService,
+  clientRequestService,
 } from '../services/api'
 import ThemeToggle from '../components/ThemeToggle'
 import { showToast } from '../utils/notification';
@@ -393,6 +394,7 @@ const AdminDashboard = () => {
     { id: 'candidates', label: 'Candidates' },
     { id: 'applications', label: 'Applications' },
     { id: 'clients', label: 'Clients' },
+    { id: 'client_requests', label: 'Client Requests' },
     { id: 'jobs', label: 'Open Roles' }
   ]
 
@@ -670,6 +672,11 @@ const AdminDashboard = () => {
   const [jobs, setJobs] = useState([])
   const [showCreateJob, setShowCreateJob] = useState(false)
   const [editingJobId, setEditingJobId] = useState(null)
+  const [expandedJobIds, setExpandedJobIds] = useState({})
+  const [jobViewMode, setJobViewMode] = useState('table') // 'table' | 'tiles'
+  const [jobSearchQuery, setJobSearchQuery] = useState('')
+  const [jobDepartmentFilter, setJobDepartmentFilter] = useState('ALL')
+  const [jobLocationFilter, setJobLocationFilter] = useState('ALL')
   const [jobForm, setJobForm] = useState({
     title: '',
     department: 'Technology & IT',
@@ -680,6 +687,16 @@ const AdminDashboard = () => {
     salary: '',
     applyUrl: '',
   })
+  const [clientRequests, setClientRequests] = useState([])
+  const [clientReqFilter, setClientReqFilter] = useState('ALL')
+  const [updatingReqId, setUpdatingReqId] = useState(null)
+
+  const toggleJobExpand = (jobId) => {
+    setExpandedJobIds((prev) => ({
+      ...prev,
+      [jobId]: !prev[jobId],
+    }))
+  }
   const [recruiterEmailSuggestions, setRecruiterEmailSuggestions] = useState([])
   const [recruiterSelectedCountryCode, setRecruiterSelectedCountryCode] = useState('+91')
   const [clientEmailSuggestions, setClientEmailSuggestions] = useState([])
@@ -746,6 +763,13 @@ const AdminDashboard = () => {
         setJobs(jobRes.data || jobRes)
       } catch (e) {
         console.error('Error fetching jobs:', e)
+      }
+      // fetch client requests
+      try {
+        const reqsRes = await clientRequestService.getAll()
+        setClientRequests(reqsRes.data || [])
+      } catch (e) {
+        console.error('Error fetching client requests:', e)
       }
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -1139,7 +1163,14 @@ const AdminDashboard = () => {
                 boxShadow: 'none'
               }}
             >
-              {tab.label}
+              <span className="inline-flex items-center gap-1.5">
+                {tab.label}
+                {tab.id === 'client_requests' && clientRequests.filter(r => r.status === 'PENDING').length > 0 && (
+                  <span className="bg-amber-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full shadow-xs animate-pulse">
+                    {clientRequests.filter(r => r.status === 'PENDING').length}
+                  </span>
+                )}
+              </span>
             </button>
           ))}
         </div>
@@ -2026,14 +2057,48 @@ const AdminDashboard = () => {
         {/* Jobs/Open Roles Tab */}
         {activeTab === 'jobs' && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Open Opportunities</h3>
-              <button
-                onClick={() => setShowCreateJob(!showCreateJob)}
-                className="btn-primary"
-              >
-                {showCreateJob ? 'Close Role Form' : '⚡ Add Open Role'}
-              </button>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Open Opportunities</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Manage active openings across departments. Candidates can view and apply to these roles directly.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* View Switcher: Table vs Tiles */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/70 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                  <button
+                    type="button"
+                    onClick={() => setJobViewMode('table')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      jobViewMode === 'table'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-550 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span>📋 Table</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setJobViewMode('tiles')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      jobViewMode === 'tiles'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-550 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span>🗂️ Tiles</span>
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowCreateJob(!showCreateJob)}
+                  className="btn-primary flex items-center gap-1.5"
+                >
+                  {showCreateJob ? 'Close Role Form' : '⚡ Add Open Role'}
+                </button>
+              </div>
             </div>
 
             {showCreateJob && (
@@ -2168,59 +2233,644 @@ const AdminDashboard = () => {
               </form>
             )}
 
-            <div className="space-y-4">
-              {jobs.length === 0 ? (
-                <p className="text-gray-600">No open roles registered yet.</p>
-              ) : (
-                jobs.map((job) => (
-                  <div key={job.id} className="card flex justify-between items-center p-5 bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                          {job.department}
-                        </span>
-                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          📍 {job.location}
-                        </span>
-                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          💼 {job.experience}
-                        </span>
-                        <span className="bg-slate-100 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          💰 {job.salary || 'Market Standards'}
-                        </span>
-                        {job.applyUrl && (
-                          <span className="bg-blue-50 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full truncate max-w-[200px]">
-                            🔗 Link: {job.applyUrl}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-lg font-bold text-gray-900 truncate">{job.title}</h4>
-                      {/* PRESERVES WHITE SPACE AND FORMATTING */}
-                      <p className="text-sm text-slate-655 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        {job.description}
-                      </p>
-                      {job.requirements && (
-                        <p className="text-xs text-slate-500">
-                          <span className="font-semibold">Skills Stack: </span>{job.requirements}
-                        </p>
+            {/* Search & Filter Controls */}
+            <div className="card p-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs mb-5">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                {/* Search Input */}
+                <div className="sm:col-span-6 relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 text-sm">
+                    🔍
+                  </span>
+                  <input
+                    type="text"
+                    value={jobSearchQuery}
+                    onChange={(e) => setJobSearchQuery(e.target.value)}
+                    placeholder="Search roles by title, skill, location, or JD keywords..."
+                    className="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-8 py-2.5 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-hidden focus:border-[#b88f3f]"
+                  />
+                  {jobSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setJobSearchQuery('')}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Department Filter */}
+                <div className="sm:col-span-3">
+                  <select
+                    value={jobDepartmentFilter}
+                    onChange={(e) => setJobDepartmentFilter(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:border-[#b88f3f]"
+                  >
+                    <option value="ALL">All Departments</option>
+                    <option value="Technology & IT">Technology & IT</option>
+                    <option value="GCCs">GCCs</option>
+                    <option value="Banking & Financial Services">Banking & Financial Services</option>
+                    <option value="Sales & Marketing">Sales & Marketing</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Corporate Functions">Corporate Functions</option>
+                  </select>
+                </div>
+
+                {/* Location Filter */}
+                <div className="sm:col-span-3 flex items-center gap-2">
+                  <select
+                    value={jobLocationFilter}
+                    onChange={(e) => setJobLocationFilter(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-hidden focus:border-[#b88f3f]"
+                  >
+                    <option value="ALL">All Locations</option>
+                    {Array.from(new Set(jobs.map((j) => j.location).filter(Boolean))).map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+
+                  {(jobSearchQuery || jobDepartmentFilter !== 'ALL' || jobLocationFilter !== 'ALL') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setJobSearchQuery('')
+                        setJobDepartmentFilter('ALL')
+                        setJobLocationFilter('ALL')
+                      }}
+                      title="Reset filters"
+                      className="px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold shrink-0 cursor-pointer transition-colors"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Status bar */}
+              {(jobSearchQuery || jobDepartmentFilter !== 'ALL' || jobLocationFilter !== 'ALL') && (
+                <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex justify-between items-center">
+                  <span>
+                    Showing <strong className="text-slate-800 dark:text-slate-200">
+                      {jobs.filter((job) => {
+                        const matchesSearch =
+                          !jobSearchQuery.trim() ||
+                          job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                          job.department?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                          job.location?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                          job.requirements?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                          job.description?.toLowerCase().includes(jobSearchQuery.toLowerCase())
+                        const matchesDept = jobDepartmentFilter === 'ALL' || job.department === jobDepartmentFilter
+                        const matchesLoc = jobLocationFilter === 'ALL' || job.location?.toLowerCase() === jobLocationFilter.toLowerCase()
+                        return matchesSearch && matchesDept && matchesLoc
+                      }).length}
+                    </strong> of {jobs.length} registered roles
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Table View Format */}
+            {jobViewMode === 'table' ? (
+              <div className="card p-0 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 dark:bg-slate-850/70 border-b border-slate-200/60 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-3 px-4">Role & Department</th>
+                        <th className="py-3 px-4">Location</th>
+                        <th className="py-3 px-4">Experience</th>
+                        <th className="py-3 px-4">Salary</th>
+                        <th className="py-3 px-4">Skills Stack</th>
+                        <th className="py-3 px-4 text-center">JD</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                      {jobs
+                        .filter((job) => {
+                          const matchesSearch =
+                            !jobSearchQuery.trim() ||
+                            job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                            job.department?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                            job.location?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                            job.requirements?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                            job.description?.toLowerCase().includes(jobSearchQuery.toLowerCase())
+                          const matchesDept = jobDepartmentFilter === 'ALL' || job.department === jobDepartmentFilter
+                          const matchesLoc = jobLocationFilter === 'ALL' || job.location?.toLowerCase() === jobLocationFilter.toLowerCase()
+                          return matchesSearch && matchesDept && matchesLoc
+                        })
+                        .length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-slate-500">
+                            No open roles matching the filter criteria.
+                          </td>
+                        </tr>
+                      ) : (
+                        jobs
+                          .filter((job) => {
+                            const matchesSearch =
+                              !jobSearchQuery.trim() ||
+                              job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                              job.department?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                              job.location?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                              job.requirements?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                              job.description?.toLowerCase().includes(jobSearchQuery.toLowerCase())
+                            const matchesDept = jobDepartmentFilter === 'ALL' || job.department === jobDepartmentFilter
+                            const matchesLoc = jobLocationFilter === 'ALL' || job.location?.toLowerCase() === jobLocationFilter.toLowerCase()
+                            return matchesSearch && matchesDept && matchesLoc
+                          })
+                          .map((job) => {
+                          const isExpanded = !!expandedJobIds[job.id]
+                          return (
+                            <React.Fragment key={job.id}>
+                              <tr className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                                <td className="py-3.5 px-4">
+                                  <span className="font-bold text-slate-900 dark:text-white block text-sm">
+                                    {job.title}
+                                  </span>
+                                  <span className="inline-block bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider mt-0.5">
+                                    {job.department}
+                                  </span>
+                                  {job.applyUrl && (
+                                    <a
+                                      href={job.applyUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="block text-[11px] text-blue-600 dark:text-blue-400 hover:underline mt-1 truncate max-w-[220px]"
+                                    >
+                                      🔗 Link: {job.applyUrl}
+                                    </a>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-medium">
+                                  📍 {job.location}
+                                </td>
+                                <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-medium">
+                                  💼 {job.experience}
+                                </td>
+                                <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-medium">
+                                  {job.salary ? `💰 ${job.salary}` : '—'}
+                                </td>
+                                <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 max-w-[180px] truncate">
+                                  {job.requirements || '—'}
+                                </td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleJobExpand(job.id)}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                      isExpanded
+                                        ? 'bg-[#b88f3f] text-white shadow-xs'
+                                        : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                                    }`}
+                                  >
+                                    {isExpanded ? '▲ Hide' : '📄 View JD'}
+                                  </button>
+                                </td>
+                                <td className="py-3.5 px-4 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEditJob(job)}
+                                      className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteJob(job.id)}
+                                      className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                              {isExpanded && (
+                                <tr className="bg-slate-50/90 dark:bg-slate-950/70">
+                                  <td colSpan={7} className="p-4 border-b border-slate-200/60 dark:border-slate-800">
+                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-xs">
+                                      <div className="flex justify-between items-center mb-2">
+                                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                          Full Job Description (JD) — {job.title}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleJobExpand(job.id)}
+                                          className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                                        >
+                                          Close ✕
+                                        </button>
+                                      </div>
+                                      <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
+                                        {job.description}
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          )
+                        })
                       )}
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-center gap-2 shrink-0 ml-4">
-                      <button
-                        onClick={() => handleEditJob(job)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteJob(job.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              /* Grid Tiles Format */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {jobs
+                  .filter((job) => {
+                    const matchesSearch =
+                      !jobSearchQuery.trim() ||
+                      job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                      job.department?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                      job.location?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                      job.requirements?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                      job.description?.toLowerCase().includes(jobSearchQuery.toLowerCase())
+                    const matchesDept = jobDepartmentFilter === 'ALL' || job.department === jobDepartmentFilter
+                    const matchesLoc = jobLocationFilter === 'ALL' || job.location?.toLowerCase() === jobLocationFilter.toLowerCase()
+                    return matchesSearch && matchesDept && matchesLoc
+                  })
+                  .length === 0 ? (
+                  <div className="col-span-full card p-12 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
+                    <p className="font-semibold text-sm">No open roles matching the filter criteria.</p>
                   </div>
-                ))
+                ) : (
+                  jobs
+                    .filter((job) => {
+                      const matchesSearch =
+                        !jobSearchQuery.trim() ||
+                        job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                        job.department?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                        job.location?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                        job.requirements?.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+                        job.description?.toLowerCase().includes(jobSearchQuery.toLowerCase())
+                      const matchesDept = jobDepartmentFilter === 'ALL' || job.department === jobDepartmentFilter
+                      const matchesLoc = jobLocationFilter === 'ALL' || job.location?.toLowerCase() === jobLocationFilter.toLowerCase()
+                      return matchesSearch && matchesDept && matchesLoc
+                    })
+                    .map((job) => {
+                    const isExpanded = !!expandedJobIds[job.id]
+                    return (
+                      <div 
+                        key={job.id} 
+                        className={`card p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between ${
+                          isExpanded ? 'ring-1 ring-[#b88f3f]/50' : ''
+                        }`}
+                      >
+                        <div>
+                          {/* Top Meta Badges */}
+                          <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
+                            <span className="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider">
+                              {job.department}
+                            </span>
+                            <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                              📍 {job.location}
+                            </span>
+                            <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                              💼 {job.experience}
+                            </span>
+                            {job.salary && (
+                              <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                                💰 {job.salary}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Job Title */}
+                          <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-snug">
+                            {job.title}
+                          </h4>
+
+                          {/* Skills Stack */}
+                          {job.requirements && (
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 flex items-start gap-1">
+                              <span className="font-semibold text-slate-700 dark:text-slate-300 shrink-0">Skills:</span>
+                              <span className="truncate">{job.requirements}</span>
+                            </div>
+                          )}
+
+                          {/* External Apply Link if any */}
+                          {job.applyUrl && (
+                            <div className="mb-3">
+                              <a 
+                                href={job.applyUrl} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline truncate max-w-full"
+                              >
+                                🔗 Form Link: {job.applyUrl}
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Expanded Job Description (JD) */}
+                          {isExpanded && (
+                            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-200">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                                Job Description (JD)
+                              </span>
+                              <div className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed bg-slate-50 dark:bg-slate-950/50 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800 max-h-72 overflow-y-auto">
+                                {job.description}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80">
+                          <button
+                            type="button"
+                            onClick={() => toggleJobExpand(job.id)}
+                            className="text-xs font-bold text-[#b88f3f] hover:text-[#9c7830] dark:text-[#d4ab59] flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded-lg hover:bg-amber-500/10 transition-colors"
+                          >
+                            <span>{isExpanded ? '▲ Hide JD' : '▼ View JD'}</span>
+                          </button>
+
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleEditJob(job)}
+                              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteJob(job.id)}
+                              className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Client Requests Tab */}
+        {activeTab === 'client_requests' && (
+          <div>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                  <span>Client Hiring Requests</span>
+                  {clientRequests.filter(r => r.status === 'PENDING').length > 0 && (
+                    <span className="bg-amber-500/15 text-amber-700 dark:bg-amber-500/25 dark:text-amber-400 text-xs font-extrabold px-2.5 py-0.5 rounded-full border border-amber-500/30 animate-pulse">
+                      {clientRequests.filter(r => r.status === 'PENDING').length} Pending
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Review and accept or reject hiring requirements submitted by client companies directly via the portal.
+                </p>
+              </div>
+
+              {/* Status Filter Pills */}
+              <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                {['ALL', 'PENDING', 'ACCEPTED', 'REJECTED'].map((filter) => {
+                  const count = filter === 'ALL' 
+                    ? clientRequests.length 
+                    : clientRequests.filter(r => r.status === filter).length
+                  return (
+                    <button
+                      key={filter}
+                      type="button"
+                      onClick={() => setClientReqFilter(filter)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        clientReqFilter === filter
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-550 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      {filter.charAt(0) + filter.slice(1).toLowerCase()} ({count})
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* List of Requests */}
+            <div className="space-y-4">
+              {clientRequests.filter(r => clientReqFilter === 'ALL' || r.status === clientReqFilter).length === 0 ? (
+                <div className="card p-12 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
+                  <div className="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">
+                    💼
+                  </div>
+                  <p className="font-semibold text-sm">No client requests found in this view.</p>
+                  <p className="text-xs mt-1 text-slate-400">When client companies submit hiring requirements, they will appear here instantly.</p>
+                </div>
+              ) : (
+                clientRequests
+                  .filter(r => clientReqFilter === 'ALL' || r.status === clientReqFilter)
+                  .map((req) => (
+                    <div 
+                      key={req.id} 
+                      className={`card p-6 bg-white dark:bg-slate-900 border transition-all ${
+                        req.status === 'PENDING' 
+                          ? 'border-amber-500/40 shadow-xs hover:border-amber-500/70' 
+                          : req.status === 'ACCEPTED'
+                          ? 'border-emerald-500/30 dark:border-emerald-500/20'
+                          : 'border-slate-200 dark:border-slate-800 opacity-80'
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                        <div className="space-y-3 flex-1 min-w-0">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span className="font-extrabold text-base text-slate-900 dark:text-white">
+                              {req.company}
+                            </span>
+                            {req.status === 'PENDING' && (
+                              <span className="bg-amber-500/15 text-amber-700 dark:text-amber-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                                Pending Review
+                              </span>
+                            )}
+                            {req.status === 'ACCEPTED' && (
+                              <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                                ✓ Accepted Partner
+                              </span>
+                            )}
+                            {req.status === 'REJECTED' && (
+                              <span className="bg-rose-500/15 text-rose-700 dark:text-rose-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-rose-500/30 flex items-center gap-1">
+                                ✕ Rejected
+                              </span>
+                            )}
+                            <span className="text-xs text-slate-400 ml-auto sm:ml-0">
+                              🕒 {new Date(req.createdAt).toLocaleString()}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-850/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-xs">
+                            <div>
+                              <span className="text-slate-400 block font-medium">Contact Person</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{req.name || 'Hiring Manager'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-400 block font-medium">Work Email</span>
+                              <a href={`mailto:${req.email}`} className="font-semibold text-[#b88f3f] hover:underline truncate block">
+                                {req.email}
+                              </a>
+                            </div>
+                            <div>
+                              <span className="text-slate-400 block font-medium">Phone</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{req.phone || 'Not provided'}</span>
+                            </div>
+                          </div>
+
+                          {req.subject && (
+                            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              <span className="text-slate-400 font-normal">Subject: </span>
+                              {req.subject}
+                            </p>
+                          )}
+
+                          <div className="bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                              Hiring Requirements
+                            </span>
+                            <p className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                              {req.requirements}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-2 w-full lg:w-auto shrink-0 pt-2 lg:pt-0">
+                          {req.status === 'PENDING' && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={updatingReqId === req.id}
+                                onClick={async () => {
+                                  try {
+                                    setUpdatingReqId(req.id)
+                                    await clientRequestService.updateStatus(req.id, { status: 'ACCEPTED' })
+                                    showToast(`Client request from ${req.company} accepted and added to Clients registry!`, 'success')
+                                    fetchData()
+                                  } catch (err) {
+                                    console.error('Accept client request error:', err)
+                                    showToast(err.response?.data?.message || 'Failed to accept client request', 'error')
+                                  } finally {
+                                    setUpdatingReqId(null)
+                                  }
+                                }}
+                                className="flex-1 lg:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <span>✓ Accept & Register Client</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={updatingReqId === req.id}
+                                onClick={async () => {
+                                  try {
+                                    setUpdatingReqId(req.id)
+                                    await clientRequestService.updateStatus(req.id, { status: 'REJECTED' })
+                                    showToast(`Client request from ${req.company} rejected.`, 'info')
+                                    fetchData()
+                                  } catch (err) {
+                                    console.error('Reject client request error:', err)
+                                    showToast(err.response?.data?.message || 'Failed to reject client request', 'error')
+                                  } finally {
+                                    setUpdatingReqId(null)
+                                  }
+                                }}
+                                className="flex-1 lg:flex-none bg-rose-600/10 hover:bg-rose-600/20 text-rose-700 dark:text-rose-400 font-bold text-xs px-4 py-2.5 rounded-xl border border-rose-500/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <span>✕ Reject</span>
+                              </button>
+                            </>
+                          )}
+
+                          {req.status === 'ACCEPTED' && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setActiveTab('clients')}
+                                className="flex-1 lg:flex-none bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs px-3.5 py-2 rounded-lg transition-colors cursor-pointer"
+                              >
+                                👥 View in Clients Tab
+                              </button>
+                              <button
+                                type="button"
+                                disabled={updatingReqId === req.id}
+                                onClick={async () => {
+                                  try {
+                                    setUpdatingReqId(req.id)
+                                    await clientRequestService.updateStatus(req.id, { status: 'REJECTED' })
+                                    showToast('Status updated to Rejected', 'info')
+                                    fetchData()
+                                  } catch (err) {
+                                    showToast(err.response?.data?.message || 'Failed to update', 'error')
+                                  } finally {
+                                    setUpdatingReqId(null)
+                                  }
+                                }}
+                                className="flex-1 lg:flex-none text-slate-400 hover:text-rose-600 text-xs font-semibold px-2 py-1 transition-colors cursor-pointer"
+                              >
+                                Change to Rejected
+                              </button>
+                            </>
+                          )}
+
+                          {req.status === 'REJECTED' && (
+                            <button
+                              type="button"
+                              disabled={updatingReqId === req.id}
+                              onClick={async () => {
+                                try {
+                                  setUpdatingReqId(req.id)
+                                  await clientRequestService.updateStatus(req.id, { status: 'ACCEPTED' })
+                                  showToast(`Reconsidered and accepted ${req.company}!`, 'success')
+                                  fetchData()
+                                } catch (err) {
+                                  showToast(err.response?.data?.message || 'Failed to accept', 'error')
+                                } finally {
+                                  setUpdatingReqId(null)
+                                }
+                              }}
+                              className="flex-1 lg:flex-none bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 dark:text-emerald-400 font-bold text-xs px-3.5 py-2 rounded-lg border border-emerald-500/30 transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                              ↺ Reconsider & Accept
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setConfirmModal({
+                                isOpen: true,
+                                message: `Are you sure you want to permanently delete the hiring request from ${req.company}?`,
+                                onConfirm: async () => {
+                                  try {
+                                    await clientRequestService.delete(req.id)
+                                    showToast('Client request deleted', 'success')
+                                    fetchData()
+                                  } catch (err) {
+                                    showToast(err.response?.data?.message || 'Failed to delete', 'error')
+                                  }
+                                }
+                              })
+                            }}
+                            className="text-slate-400 hover:text-red-500 text-xs font-semibold px-2 py-1 transition-colors cursor-pointer"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
               )}
             </div>
           </div>

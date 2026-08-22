@@ -1,8 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { 
+  Building2, 
+  ShieldCheck, 
+  LogIn, 
+  UserPlus, 
+  Users, 
+  FileText, 
+  LayoutDashboard, 
+  LogOut, 
+  User as UserIcon, 
+  Sun, 
+  Moon, 
+  ChevronDown 
+} from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { messageService } from '../services/api'
+import { messageService, clientRequestService } from '../services/api'
 import { triggerMessageNotification, playSoftChime } from '../utils/notification'
 
 const PublicHeader = () => {
@@ -14,11 +28,14 @@ const PublicHeader = () => {
 
   const [clientModalOpen, setClientModalOpen] = useState(false)
   const [clientForm, setClientForm] = useState({
+    name: '',
     from: '',
+    phone: '',
     company: '',
     subject: '',
     body: ''
   })
+  const [submittingClient, setSubmittingClient] = useState(false)
 
   // State to handle hovered nav menus
   const [activeDropdown, setActiveDropdown] = useState(null)
@@ -29,19 +46,47 @@ const PublicHeader = () => {
     return () => window.removeEventListener('aston-open-client-modal', handleOpenModal)
   }, [])
 
-  const handleSendClientEmail = (e) => {
+  const handleSendClientEmail = async (e) => {
     e.preventDefault()
     if (!clientForm.company.trim()) {
       alert('Company Name is required')
       return
     }
-    triggerMessageNotification('System', 'Registration request sent successfully to Aston Recruitment!')
-    setClientModalOpen(false)
-    setClientForm({
-      from: 'sender@companymail.com',
-      company: '',
-      body: ''
-    })
+    if (!clientForm.from.trim()) {
+      alert('Work Email is required')
+      return
+    }
+    if (!clientForm.body.trim()) {
+      alert('Hiring Requirements are required')
+      return
+    }
+
+    try {
+      setSubmittingClient(true)
+      await clientRequestService.submit({
+        name: clientForm.name,
+        company: clientForm.company,
+        email: clientForm.from,
+        phone: clientForm.phone,
+        subject: clientForm.subject,
+        requirements: clientForm.body,
+      })
+      triggerMessageNotification('System', 'Hiring request submitted successfully! Aston Recruitment will review and contact you shortly.')
+      setClientModalOpen(false)
+      setClientForm({
+        name: '',
+        from: '',
+        phone: '',
+        company: '',
+        subject: '',
+        body: ''
+      })
+    } catch (err) {
+      console.error('Submit client request error:', err)
+      alert(err.response?.data?.message || 'Failed to submit hiring request. Please try again.')
+    } finally {
+      setSubmittingClient(false)
+    }
   }
 
   const getInitialPref = () => {
@@ -91,30 +136,59 @@ const PublicHeader = () => {
 
 
 
-  let activeIndex = 0
-  let totalTabs = 1
+  // Polling for incoming messages to trigger sound/banner
+  useEffect(() => {
+    if (!user) return
 
-  if (userPref === 'candidate') {
-    totalTabs = 2
-    if (location.pathname.startsWith('/candidate')) {
-      activeIndex = 1
+    const checkNewMessages = async () => {
+      try {
+        const res = await messageService.getConversations()
+        const convos = res.data || []
+        
+        let hasNew = false
+        convos.forEach(c => {
+          if (c.lastMessage) {
+            const lastId = c.lastMessage.id
+            const prevId = lastCheckedRef.current[c.id]
+            
+            // If message exists, sender is someone else, and it wasn't seen in this session yet
+            if (prevId && prevId !== lastId && c.lastMessage.senderId !== user.id) {
+              hasNew = true
+              triggerMessageNotification(c.partner?.name || 'Recruiter/Candidate', c.lastMessage.content)
+            }
+            lastCheckedRef.current[c.id] = lastId
+          }
+        })
+      } catch (err) {
+        // Silently catch background poll error
+      }
     }
-  } else if (userPref === 'hiring') {
-    totalTabs = 3
-    if (location.pathname.startsWith('/recruiter')) {
-      activeIndex = 1
-    } else if (location.pathname.startsWith('/admin')) {
-      activeIndex = 2
-    }
+
+    const interval = setInterval(checkNewMessages, 7000)
+    return () => clearInterval(interval)
+  }, [user])
+
+  // Get active bottom nav index for iOS Liquid Glass sliding pill
+  const getBottomNavIndex = () => {
+    const p = location.pathname
+    if (p === '/') return 0
+    if (p.includes('/about')) return 1
+    if (p.includes('/login') || p.includes('/register')) return 2
+    if (p.includes('/dashboard') || p.includes('/chat')) return 3
+    return 0
   }
+
+  const activeIndex = getBottomNavIndex()
+  const totalTabs = 4
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-[#090f19] border-b border-slate-800/60 px-6 sm:px-12 py-2.5 shadow-2xl transition-all duration-300">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-            {/* Logo & Brand */}
-            <Link to="/" className="flex items-center gap-2.5 hover:opacity-95 transition-opacity no-underline" style={{ textDecoration: 'none' }}>
+      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 font-sans border-b border-white/10" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)', backdropFilter: 'blur(20px)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-24">
+            
+            {/* Brand / Logo */}
+            <Link to="/" className="flex items-center gap-3 select-none no-underline" style={{ textDecoration: 'none' }}>
               <img
                 src="/aston-logo-transparent.png"
                 alt="Aston Logo"
@@ -141,21 +215,23 @@ const PublicHeader = () => {
                       className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
                       <span>For Clients</span>
-                      <span className="text-[9px] opacity-80">▼</span>
+                      <ChevronDown className="w-3 h-3 opacity-70 transition-transform duration-200" />
                     </div>
                     {activeDropdown === 'clients' && (
-                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                      <div className="absolute top-full left-0 w-64 backdrop-blur-lg border border-slate-800 rounded-2xl p-2.5 shadow-2xl z-50 text-left space-y-1 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
                         <div 
                           onClick={() => setClientModalOpen(true)} 
-                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                          className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 cursor-pointer flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60"
                         >
-                          💼 Register Company Request
+                          <Building2 className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Register Company Request</span>
                         </div>
                         <Link 
                           to="/recruiter/login" 
-                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                          className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60"
                         >
-                          🛡️ Expert Portal Login
+                          <ShieldCheck className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Expert Portal Login</span>
                         </Link>
                       </div>
                     )}
@@ -172,21 +248,23 @@ const PublicHeader = () => {
                       className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
                       <span>For Candidates</span>
-                      <span className="text-[9px] opacity-80">▼</span>
+                      <ChevronDown className="w-3 h-3 opacity-70 transition-transform duration-200" />
                     </div>
                     {activeDropdown === 'candidates' && (
-                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                      <div className="absolute top-full left-0 w-64 backdrop-blur-lg border border-slate-800 rounded-2xl p-2.5 shadow-2xl z-50 text-left space-y-1 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
                         <Link 
                           to="/candidate/login" 
-                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                          className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60"
                         >
-                          🔑 Candidate Login
+                          <LogIn className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Candidate Login</span>
                         </Link>
                         <Link 
                           to="/candidate/register" 
-                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                          className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60"
                         >
-                          ✍️ Candidate Registration
+                          <UserPlus className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Candidate Registration</span>
                         </Link>
                       </div>
                     )}
@@ -202,15 +280,16 @@ const PublicHeader = () => {
                       className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
                       <span>Aston Experts</span>
-                      <span className="text-[9px] opacity-80">▼</span>
+                      <ChevronDown className="w-3 h-3 opacity-70 transition-transform duration-200" />
                     </div>
                     {activeDropdown === 'experts' && (
-                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                      <div className="absolute top-full left-0 w-64 backdrop-blur-lg border border-slate-800 rounded-2xl p-2.5 shadow-2xl z-50 text-left space-y-1 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
                         <Link 
                           to="/recruiter/login" 
-                          className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40"
+                          className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60"
                         >
-                          🛡️ Expert Portal Login
+                          <ShieldCheck className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Expert Portal Login</span>
                         </Link>
                       </div>
                     )}
@@ -226,12 +305,18 @@ const PublicHeader = () => {
                       className="hover:text-[#b88f3f] transition-colors flex items-center gap-1.5 focus:outline-hidden"
                     >
                       <span>About Us</span>
-                      <span className="text-[9px] opacity-80">▼</span>
+                      <ChevronDown className="w-3 h-3 opacity-70 transition-transform duration-200" />
                     </div>
                     {activeDropdown === 'about' && (
-                      <div className="absolute top-full left-0 w-60 backdrop-blur-lg border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 text-left space-y-3 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
-                        <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">👥 Who We Are</a>
-                        <a href="/#about" className="block text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-800/40">✍️ Founder Note</a>
+                      <div className="absolute top-full left-0 w-64 backdrop-blur-lg border border-slate-800 rounded-2xl p-2.5 shadow-2xl z-50 text-left space-y-1 animate-in fade-in slide-in-from-top-2 duration-300" style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}>
+                        <a href="/#about" className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60">
+                          <Users className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Who We Are</span>
+                        </a>
+                        <a href="/#about" className="text-xs hover:text-[#b88f3f] text-slate-200 font-bold transition-all duration-200 flex items-center gap-2.5 py-2.5 px-3 rounded-xl hover:bg-slate-800/60">
+                          <FileText className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                          <span>Founder Note</span>
+                        </a>
                       </div>
                     )}
                   </div>
@@ -255,10 +340,10 @@ const PublicHeader = () => {
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-xl border border-slate-700/60 bg-slate-900/40 text-slate-300 hover:text-white hover:bg-slate-900/80 transition-colors focus:outline-hidden"
+                className="p-2.5 rounded-xl border border-slate-700/60 bg-slate-900/40 text-slate-300 hover:text-white hover:bg-slate-900/80 transition-colors focus:outline-hidden cursor-pointer"
                 title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
-                {darkMode ? '☀️' : '🌙'}
+                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
               </button>
 
               {user ? (
@@ -268,12 +353,13 @@ const PublicHeader = () => {
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <div className="flex items-center gap-2 px-4 py-2 border border-slate-700/60 rounded-xl bg-slate-900/40 hover:bg-slate-900/80 transition-colors">
-                    <span className="text-xs font-semibold text-white">👤 {user.name || user.email}</span>
-                    <span className="text-[9px] text-[#b88f3f]">▼</span>
+                    <UserIcon className="w-3.5 h-3.5 text-[#b88f3f]" />
+                    <span className="text-xs font-semibold text-white">{user.name || user.email}</span>
+                    <ChevronDown className="w-3 h-3 text-[#b88f3f]" />
                   </div>
                   {activeDropdown === 'user' && (
                     <div 
-                      className="absolute right-0 top-full w-48 backdrop-blur-lg border border-slate-800 rounded-xl p-3 shadow-2xl z-[9999] text-left space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-300"
+                      className="absolute right-0 top-full w-48 backdrop-blur-lg border border-slate-800 rounded-xl p-2 shadow-2xl z-[9999] text-left space-y-1 animate-in fade-in slide-in-from-top-2 duration-300"
                       style={{ backgroundColor: 'rgba(12, 19, 34, 0.98)' }}
                     >
                       <Link 
@@ -282,15 +368,19 @@ const PublicHeader = () => {
                           user.role === 'RECRUITER' ? '/recruiter/dashboard' :
                           '/candidate/dashboard'
                         }
-                        className="block text-xs text-slate-200 font-bold hover:text-[#b88f3f] py-1.5 px-2.5 rounded-lg hover:bg-slate-800/40 transition-all duration-200"
+                        className="w-full flex items-center justify-start gap-2.5 text-xs text-slate-200 font-bold hover:text-[#b88f3f] py-2 px-3 rounded-lg hover:bg-slate-800/60 transition-all duration-200 text-left"
                       >
-                        📊 Dashboard
+                        <LayoutDashboard className="w-4 h-4 text-[#b88f3f] shrink-0" />
+                        <span>Dashboard</span>
                       </Link>
                       <button
+                        type="button"
                         onClick={logout}
-                        className="w-full text-left block text-xs text-red-400 font-bold hover:text-red-300 py-1.5 px-2.5 rounded-lg hover:bg-red-500/10 transition-all duration-200"
+                        className="w-full flex items-center justify-start gap-2.5 text-xs text-rose-400 font-bold hover:text-rose-300 py-2 px-3 rounded-lg hover:bg-rose-500/15 transition-all duration-200 cursor-pointer text-left"
+                        style={{ backgroundColor: 'transparent', border: 'none', boxShadow: 'none', justifyContent: 'flex-start' }}
                       >
-                        🚪 Logout
+                        <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
+                        <span>Logout</span>
                       </button>
                     </div>
                   )}
@@ -310,9 +400,9 @@ const PublicHeader = () => {
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className="p-1.5 rounded-lg border border-slate-700/60 bg-slate-900/40 text-xs text-slate-300 hover:text-white transition-colors focus:outline-hidden"
+                className="p-2 rounded-lg border border-slate-700/60 bg-slate-900/40 text-xs text-slate-300 hover:text-white transition-colors focus:outline-hidden"
               >
-                {darkMode ? '☀️' : '🌙'}
+                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-300" />}
               </button>
 
               {user ? (
@@ -328,8 +418,9 @@ const PublicHeader = () => {
                     Dashboard
                   </Link>
                   <button 
+                    type="button"
                     onClick={logout}
-                    className="bg-red-550/10 text-red-400 border border-red-500/20 font-semibold text-xs px-3 py-1.5 rounded-md"
+                    className="bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold text-xs px-3 py-1.5 rounded-md hover:bg-rose-500/20 transition-colors cursor-pointer"
                   >
                     Logout
                   </button>
@@ -340,10 +431,9 @@ const PublicHeader = () => {
                 </Link>
               )}
             </div>
-
           </div>
         </div>
-      </nav>
+      </header>
 
       {/* Premium Clients Registration Email Modal */}
       {clientModalOpen && (
@@ -362,58 +452,77 @@ const PublicHeader = () => {
               Send a request to register your company. Aston Recruitment will contact you shortly.
             </p>
             <form onSubmit={handleSendClientEmail} className="space-y-4 text-left">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">From</label>
-                <input 
-                  type="email" 
-                  placeholder="sender@companymail.com"
-                  value={clientForm.from}
-                  onChange={(e) => setClientForm(prev => ({ ...prev, from: e.target.value }))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
-                  required
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Contact Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. John Doe"
+                    value={clientForm.name}
+                    onChange={(e) => setClientForm(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Company Name *</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Acme Corp"
+                    value={clientForm.company}
+                    onChange={(e) => setClientForm(prev => ({ ...prev, company: e.target.value }))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">To</label>
-                <input 
-                  type="email" 
-                  placeholder="contact@astonrecruitment.in" 
-                  className="w-full bg-slate-950/50 border border-slate-850 rounded-lg px-3 py-2 text-xs text-slate-550 cursor-not-allowed"
-                  disabled
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Work Email *</label>
+                  <input 
+                    type="email" 
+                    placeholder="contact@company.com"
+                    value={clientForm.from}
+                    onChange={(e) => setClientForm(prev => ({ ...prev, from: e.target.value }))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    placeholder="+91 9876543210"
+                    value={clientForm.phone}
+                    onChange={(e) => setClientForm(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Company Name</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Acme Corp"
-                  value={clientForm.company}
-                  onChange={(e) => setClientForm(prev => ({ ...prev, company: e.target.value }))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
-                  required
-                />
-              </div>
+
               <div>
                 <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Subject</label>
                 <input 
                   type="text" 
-                  placeholder={`Register yourself as ${clientForm.company || '[Company]'}`}
+                  placeholder={`Hiring requirement for ${clientForm.company || 'our team'}`}
                   value={clientForm.subject}
                   onChange={(e) => setClientForm(prev => ({ ...prev, subject: e.target.value }))}
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
                 />
               </div>
+
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Body</label>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hiring Requirements & Roles *</label>
                 <textarea 
                   rows={4}
-                  placeholder="Describe your hiring requirements..."
+                  placeholder="Describe your hiring requirements, desired skills, experience levels, and timeline..."
                   value={clientForm.body}
                   onChange={(e) => setClientForm(prev => ({ ...prev, body: e.target.value }))}
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-[#b88f3f] transition-colors"
                   required
                 />
               </div>
+
               <div className="flex justify-end gap-3 pt-2">
                 <button 
                   type="button" 
@@ -424,9 +533,10 @@ const PublicHeader = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white px-5 py-2 text-xs font-bold rounded-lg transition-colors shadow-lg"
+                  disabled={submittingClient}
+                  className="bg-[#b88f3f] hover:bg-[#a67d2f] text-white px-5 py-2 text-xs font-bold rounded-lg transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2"
                 >
-                  Send Request
+                  {submittingClient ? 'Submitting...' : 'Send Request'}
                 </button>
               </div>
             </form>

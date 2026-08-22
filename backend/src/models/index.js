@@ -7,6 +7,7 @@ const PushSubscription = require('./PushSubscription')
 const Message = require('./Message')
 const Client = require('./Client')
 const Job = require('./Job')
+const ClientRequest = require('./ClientRequest')
 
 // Define associations
 User.hasOne(Candidate, { foreignKey: 'userId', onDelete: 'CASCADE' })
@@ -53,4 +54,5 @@ module.exports = {
   Message,
   Client,
   Job,
+  ClientRequest,
 }

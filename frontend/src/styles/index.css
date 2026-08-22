@@ -97,10 +97,11 @@ body {
   color: #94a3b8 !important;
 }
 
-.dark button:not(.btn-primary):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.px-3):not(.btn-custom) {
-  background: #242933 !important;
-  color: #e2e8f0 !important;
-  border-color: #454d5b !important;
+/* Specific dropdown item styles ensuring no unwanted white backgrounds */
+.header-dropdown-item {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Reset default button styling inside tab lists to be flat text links */
@@ -206,8 +207,8 @@ body {
   box-shadow: 0 4px 8px rgba(2, 6, 23, 0.04);
 }
 
-/* default button style for elements without explicit btn classes */
-button:not(.btn-primary):not(.btn-secondary):not(.btn-custom) {
+/* default button style for elements with explicit btn-default class */
+.btn-default {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   padding: 0.45rem 0.75rem;
@@ -390,7 +391,7 @@ textarea:focus {
   border-color: rgba(37, 99, 235, 0.4);
 }
 
-button,
+.btn,
 .btn-primary,
 .btn-secondary,
 .btn-success,

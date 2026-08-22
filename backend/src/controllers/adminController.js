@@ -1,6 +1,7 @@
-const { Recruiter, Candidate, Application, User, Notification, Client, Job } = require('../models')
+const { Recruiter, Candidate, Application, User, Notification, Client, Job, ClientRequest } = require('../models')
 const { sendPushNotification } = require('../utils/pushService')
 const { generateToken } = require('../utils/tokenService')
+const { sendNewClientRequestEmailToAdmin, sendClientRequestDecisionEmail } = require('../utils/emailService')
 
 const syncCandidatesAndApplications = async () => {
   try {
@@ -361,6 +362,142 @@ const deleteJob = async (req, res) => {
   }
 }
 
+// Client Request Management
+const submitClientRequest = async (req, res) => {
+  try {
+    const { name, company, email, phone, subject, requirements } = req.body
+
+    if (!company || !email || !requirements) {
+      return res.status(400).json({ message: 'Company name, contact email, and hiring requirements are required.' })
+    }
+
+    const newRequest = await ClientRequest.create({
+      name: name || 'Hiring Contact',
+      company,
+      email,
+      phone: phone || null,
+      subject: subject || `Hiring Request from ${company}`,
+      requirements,
+      status: 'PENDING',
+    })
+
+    // Notify all Admin users in portal
+    const admins = await User.findAll({ where: { role: 'ADMIN' } })
+    for (const admin of admins) {
+      try {
+        await Notification.create({
+          userId: admin.id,
+          type: 'CLIENT_REQUEST',
+          message: `New client hiring request from ${company} (${email})`,
+        })
+      } catch (notifErr) {
+        console.error('Error creating admin notification for client request:', notifErr)
+      }
+    }
+
+    // Send email alert to admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in'
+    sendNewClientRequestEmailToAdmin(
+      adminEmail,
+      company,
+      name,
+      email,
+      phone,
+      subject,
+      requirements
+    ).catch(err => console.error('Error in sendNewClientRequestEmailToAdmin async:', err))
+
+    res.status(201).json({
+      message: 'Your hiring request has been submitted successfully to Aston Recruitment.',
+      request: newRequest,
+    })
+  } catch (error) {
+    console.error('Submit client request error:', error)
+    res.status(500).json({ message: 'Error submitting hiring request', error: error.message })
+  }
+}
+
+const getClientRequests = async (req, res) => {
+  try {
+    const requests = await ClientRequest.findAll({
+      order: [['createdAt', 'DESC']],
+    })
+    res.json(requests)
+  } catch (error) {
+    console.error('Get client requests error:', error)
+    res.status(500).json({ message: 'Error retrieving client requests', error: error.message })
+  }
+}
+
+const updateClientRequestStatus = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { status, adminNotes } = req.body
+
+    if (!['PENDING', 'ACCEPTED', 'REJECTED'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' })
+    }
+
+    const clientReq = await ClientRequest.findByPk(id)
+    if (!clientReq) {
+      return res.status(404).json({ message: 'Client request not found' })
+    }
+
+    clientReq.status = status
+    if (adminNotes !== undefined) {
+      clientReq.adminNotes = adminNotes
+    }
+    await clientReq.save()
+
+    // If accepted, ensure an entry exists in the Clients table so admin can assign candidates immediately
+    if (status === 'ACCEPTED') {
+      try {
+        const existingClient = await Client.findOne({
+          where: { email: clientReq.email }
+        })
+        if (!existingClient) {
+          await Client.create({
+            name: clientReq.name || clientReq.company,
+            company: clientReq.company,
+            email: clientReq.email,
+            phone: clientReq.phone || '',
+          })
+          console.log(`Auto-created Client registry entry for accepted company: ${clientReq.company}`)
+        }
+      } catch (clientCreateErr) {
+        console.error('Error auto-creating client from accepted request:', clientCreateErr)
+      }
+    }
+
+    // Send decision email to client
+    sendClientRequestDecisionEmail(clientReq.email, clientReq.company, status)
+      .catch(err => console.error('Error sending client decision email async:', err))
+
+    res.json({
+      message: `Client request marked as ${status}`,
+      request: clientReq,
+    })
+  } catch (error) {
+    console.error('Update client request status error:', error)
+    res.status(500).json({ message: 'Error updating client request status', error: error.message })
+  }
+}
+
+const deleteClientRequest = async (req, res) => {
+  try {
+    const { id } = req.params
+    const clientReq = await ClientRequest.findByPk(id)
+    if (!clientReq) {
+      return res.status(404).json({ message: 'Client request not found' })
+    }
+    await clientReq.destroy()
+    res.json({ message: 'Client request deleted successfully' })
+  } catch (error) {
+    console.error('Delete client request error:', error)
+    res.status(500).json({ message: 'Error deleting client request', error: error.message })
+  }
+}
+
 module.exports = {
   getDashboardStats,
   getReports,
@@ -376,4 +513,8 @@ module.exports = {
   createJob,
   updateJob,
   deleteJob,
+  submitClientRequest,
+  getClientRequests,
+  updateClientRequestStatus,
+  deleteClientRequest,
 }

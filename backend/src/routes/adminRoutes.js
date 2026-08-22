@@ -15,9 +15,19 @@ const {
   createJob,
   updateJob,
   deleteJob,
+  submitClientRequest,
+  getClientRequests,
+  updateClientRequestStatus,
+  deleteClientRequest,
 } = require('../controllers/adminController')
 
 const router = express.Router()
+
+// Client Request routes
+router.post('/client-requests', submitClientRequest) // Public endpoint for clients to submit hiring requests
+router.get('/client-requests', authenticateToken, authorizeRole('ADMIN'), getClientRequests)
+router.put('/client-requests/:id/status', authenticateToken, authorizeRole('ADMIN'), updateClientRequestStatus)
+router.delete('/client-requests/:id', authenticateToken, authorizeRole('ADMIN'), deleteClientRequest)
 
 router.get(
   '/dashboard',

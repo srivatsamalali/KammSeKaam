@@ -95,4 +95,11 @@ export const jobService = {
   delete: (id) => api.delete(`/admin/jobs/${id}`),
 }
 
+export const clientRequestService = {
+  submit: (data) => api.post('/admin/client-requests', data),
+  getAll: () => api.get('/admin/client-requests'),
+  updateStatus: (id, data) => api.put(`/admin/client-requests/${id}/status`, data),
+  delete: (id) => api.delete(`/admin/client-requests/${id}`),
+}
+
 export default api

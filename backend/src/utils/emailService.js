@@ -484,6 +484,100 @@ const sendJobApplicationEmailToAdmin = async (adminEmail, candidateName, candida
   }
 }
 
+const sendNewClientRequestEmailToAdmin = async (adminEmail, company, name, email, phone, subject, requirements) => {
+  try {
+    if (!isSmtpConfigured()) {
+      console.log('📧 [DEV MODE] SMTP not configured. New client request notification skipped.')
+      return
+    }
+
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
+      to: adminEmail,
+      subject: `💼 New Client Hiring Request: ${company} (${name || 'Hiring Manager'})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: #0f172a; padding: 24px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">Aston Recruitment</h1>
+            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 14px;">Admin Alert System</p>
+          </div>
+          <div style="padding: 24px;">
+            <h2 style="color: #0f172a; margin-top: 0;">New Client Request Received</h2>
+            <p style="color: #334155; font-size: 15px;">A new company has submitted a hiring advisory request via the portal.</p>
+            
+            <div style="background-color: #f8fafc; border-left: 4px solid #b88f3f; padding: 16px; border-radius: 4px; margin: 20px 0;">
+               <h3 style="margin-top: 0; color: #b88f3f; font-size: 16px;">Company Details:</h3>
+               <p style="margin: 8px 0; color: #334155;"><strong>Company:</strong> ${company}</p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Contact Person:</strong> ${name || 'N/A'}</p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #b88f3f;">${email}</a></p>
+               <p style="margin: 8px 0; color: #334155;"><strong>Phone:</strong> ${phone || 'N/A'}</p>
+               ${subject ? `<p style="margin: 8px 0; color: #334155;"><strong>Subject:</strong> ${subject}</p>` : ''}
+            </div>
+
+            <div style="background-color: #f1f5f9; padding: 16px; border-radius: 4px; margin: 20px 0;">
+              <h4 style="margin-top: 0; color: #334155; font-size: 14px;">Hiring Requirements:</h4>
+              <p style="margin: 0; color: #475569; font-size: 13px; line-height: 1.6; white-space: pre-wrap;">${requirements}</p>
+            </div>
+
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">Log in to the Admin Dashboard under the <strong>Client Requests</strong> tab to accept or reject this request.</p>
+            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+          </div>
+        </div>
+      `
+    }
+
+    await transporter.sendMail(mailOptions)
+    console.log(`New client request alert sent successfully to admin: ${adminEmail}`)
+  } catch (error) {
+    console.error('Error sending client request email to admin:', error)
+  }
+}
+
+const sendClientRequestDecisionEmail = async (clientEmail, company, status) => {
+  try {
+    if (!isSmtpConfigured()) {
+      console.log(`📧 [DEV MODE] SMTP not configured. Client request ${status} email skipped for:`, clientEmail)
+      return
+    }
+
+    const isAccepted = status === 'ACCEPTED'
+    const subject = isAccepted 
+      ? `🎉 Welcome to Aston Recruitment - Partnership Accepted (${company})`
+      : `Update on your Aston Recruitment Request (${company})`
+
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL || 'Contact@astonrecruitment.in',
+      to: clientEmail,
+      subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+          <div style="background-color: ${isAccepted ? '#b88f3f' : '#334155'}; padding: 24px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">Aston Recruitment</h1>
+            <p style="margin: 4px 0 0 0; color: ${isAccepted ? '#fef3c7' : '#94a3b8'}; font-size: 14px;">Talent Advisory & Client Services</p>
+          </div>
+          <div style="padding: 24px;">
+            <h2 style="color: #0f172a; margin-top: 0;">${isAccepted ? 'Request Accepted' : 'Request Update'}</h2>
+            <p style="color: #334155; font-size: 15px;">Dear Team at <strong>${company}</strong>,</p>
+            ${isAccepted ? `
+              <p style="color: #334155; font-size: 15px;">Thank you for choosing Aston Recruitment! We have reviewed your requirements and approved your company profile for talent matching.</p>
+              <p style="color: #334155; font-size: 15px;">Our recruitment lead will reach out to you directly to initiate candidate shortlisting tailored to your tech stack and experience criteria.</p>
+            ` : `
+              <p style="color: #334155; font-size: 15px;">Thank you for your interest in Aston Recruitment. At this time, we are unable to process your hiring request due to our current capacity constraints or sector alignment.</p>
+            `}
+            <p style="color: #475569; font-size: 14px; margin-top: 24px;">If you have any questions, please reach out to us at <a href="mailto:Contact@astonrecruitment.in" style="color: #b88f3f;">Contact@astonrecruitment.in</a>.</p>
+            <p style="color: #0f172a; font-weight: bold; margin-top: 24px;">Best regards,<br/>Aston Recruitment Team</p>
+          </div>
+        </div>
+      `
+    }
+
+    await transporter.sendMail(mailOptions)
+    console.log(`Client request decision email sent successfully to ${clientEmail}`)
+  } catch (error) {
+    console.error('Error sending client request decision email:', error)
+  }
+}
+
 module.exports = {
   sendInterviewScheduledEmail,
   sendResetPasswordEmail,
@@ -493,5 +587,7 @@ module.exports = {
   sendRejectionEmail,
   sendSentToClientEmailToClient,
   sendSentToClientEmailToCandidate,
-  sendJobApplicationEmailToAdmin
+  sendJobApplicationEmailToAdmin,
+  sendNewClientRequestEmailToAdmin,
+  sendClientRequestDecisionEmail,
 }
